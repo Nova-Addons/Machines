@@ -7,12 +7,14 @@ import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import de.studiocode.invui.virtualinventory.event.PlayerUpdateReason
-import org.bukkit.Bukkit
+import net.minecraft.world.SimpleContainer
+import net.minecraft.world.item.crafting.RecipeType
+import net.minecraft.world.item.crafting.SmeltingRecipe
 import org.bukkit.Location
 import org.bukkit.NamespacedKey
+import org.bukkit.World
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ExperienceOrb
-import org.bukkit.inventory.FurnaceRecipe
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
@@ -32,19 +34,14 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
-import xyz.xenondevs.nova.util.BlockSide
-import xyz.xenondevs.nova.util.intValue
+import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import java.util.*
 
-private val RECIPES: List<FurnaceRecipe> by lazy {
-    val recipes = ArrayList<FurnaceRecipe>()
-    Bukkit.getServer().recipeIterator().forEachRemaining { if (it is FurnaceRecipe) recipes += it }
-    return@lazy recipes
+private fun getRecipe(input: ItemStack, world: World): SmeltingRecipe? {
+    return minecraftServer.recipeManager.getAllRecipesFor(RecipeType.SMELTING)
+        .first { it.matches(SimpleContainer(input.nmsStack), world.serverLevel) }
 }
-
-private fun getRecipe(input: ItemStack) =
-    RECIPES.firstOrNull { it.input.isSimilar(input) || it.inputChoice.test(input) }
 
 private val MAX_ENERGY = NovaConfig[ELECTRIC_FURNACE].getLong("capacity")!!
 private val ENERGY_PER_TICK = NovaConfig[ELECTRIC_FURNACE].getLong("energy_per_tick")!!
@@ -71,7 +68,8 @@ class ElectricFurnace(
         outputInventory to NetworkConnectionType.EXTRACT
     ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
-    private var currentRecipe: FurnaceRecipe? = retrieveOrNull<NamespacedKey>("currentRecipe")?.let { Bukkit.getRecipe(it) as FurnaceRecipe? }
+    private var currentRecipe: SmeltingRecipe? = retrieveOrNull<NamespacedKey>("currentRecipe")
+        ?.let { minecraftServer.recipeManager.byKey(it.resourceLocation).orElse(null) as SmeltingRecipe? }
     private var timeCooked = retrieveData("timeCooked") { 0 }
     private var experience = retrieveData("exp") { 0f }
     
@@ -91,7 +89,7 @@ class ElectricFurnace(
     
     override fun saveData() {
         super.saveData()
-        storeData("currentRecipe", currentRecipe?.key)
+        storeData("currentRecipe", currentRecipe?.id?.namespacedKey)
         storeData("timeCooked", timeCooked)
         storeData("experience", experience)
     }
@@ -103,7 +101,7 @@ class ElectricFurnace(
     private fun handleInputInventoryUpdate(event: ItemUpdateEvent) {
         if (event.newItemStack != null) {
             val itemStack = event.newItemStack
-            if (getRecipe(itemStack) == null) event.isCancelled = true
+            if (getRecipe(itemStack, world) == null) event.isCancelled = true
         }
     }
     
@@ -140,8 +138,8 @@ class ElectricFurnace(
             if (currentRecipe == null) {
                 val item = inputInventory.getItemStack(0)
                 if (item != null) {
-                    val recipe = getRecipe(item)
-                    if (recipe != null && outputInventory.canHold(recipe.result)) {
+                    val recipe = getRecipe(item, world)
+                    if (recipe != null && outputInventory.canHold(recipe.resultItem.bukkitStack)) {
                         currentRecipe = recipe
                         inputInventory.addItemAmount(null, 0, -1)
                         
@@ -156,7 +154,7 @@ class ElectricFurnace(
                 timeCooked += cookSpeed
                 
                 if (timeCooked >= currentRecipe.cookingTime) {
-                    outputInventory.addItem(SELF_UPDATE_REASON, currentRecipe.result)
+                    outputInventory.addItem(SELF_UPDATE_REASON, currentRecipe.resultItem.bukkitStack)
                     experience += currentRecipe.experience
                     timeCooked = 0
                     this.currentRecipe = null
