@@ -1,0 +1,25 @@
+package xyz.xenondevs.nova.machines
+
+import xyz.xenondevs.nova.addon.Addon
+import xyz.xenondevs.nova.machines.registry.Blocks
+import xyz.xenondevs.nova.machines.registry.Items
+import xyz.xenondevs.nova.machines.registry.RecipeTypes
+import java.util.logging.Logger
+
+lateinit var LOGGER: Logger
+lateinit var MACHINES: Machines
+
+class Machines : Addon() {
+    
+    override fun onEnable() {
+        MACHINES = this
+        LOGGER = logger
+        
+        Blocks.init()
+        Items.init()
+        RecipeTypes.init()
+    }
+    
+    override fun onDisable() = Unit
+    
+}

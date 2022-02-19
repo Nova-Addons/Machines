@@ -1,0 +1,7 @@
+{
+  "id": "machines",
+  "name": "Machines",
+  "version": "${project.version}",
+  "main": "xyz.xenondevs.nova.machines.Machines",
+  "authors": ["StudioCode", "ByteZ1337"]
+}
