@@ -40,14 +40,15 @@ object Items {
     val STAR_DUST = registerDefaultItem(MACHINES, "star_dust")
     
     // Crafting components
-    val NETHERITE_DRILL = registerDefaultItem(MACHINES, "netherite_drill")
     val STAR_SHARDS = registerDefaultItem(MACHINES, "star_shards")
     val BASIC_MACHINE_FRAME = registerDefaultItem(MACHINES, "basic_machine_frame")
     val ADVANCED_MACHINE_FRAME = registerDefaultItem(MACHINES, "advanced_machine_frame")
     val ELITE_MACHINE_FRAME = registerDefaultItem(MACHINES, "elite_machine_frame")
     val ULTIMATE_MACHINE_FRAME = registerDefaultItem(MACHINES, "ultimate_machine_frame")
     val CREATIVE_MACHINE_FRAME = registerDefaultItem(MACHINES, "creative_machine_frame")
+    val NETHERITE_DRILL = registerDefaultItem(MACHINES, "netherite_drill")
     val SCAFFOLDING = registerDefaultItem(MACHINES, "scaffolding")
+    val SOLAR_CELL = registerDefaultItem(MACHINES, "solar_cell")
     
     fun init() = Unit
     

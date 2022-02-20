@@ -3,6 +3,8 @@ package xyz.xenondevs.nova.machines.gui
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.ui.item.ProgressItem
 
+class EnergyProgressItem : ProgressItem(GUIMaterials.ENERGY_PROGRESS, 16)
+
 class ProgressArrowItem : ProgressItem(GUIMaterials.ARROW_PROGRESS, 16)
 
 class PressProgressItem : ProgressItem(GUIMaterials.PRESS_PROGRESS, 8)

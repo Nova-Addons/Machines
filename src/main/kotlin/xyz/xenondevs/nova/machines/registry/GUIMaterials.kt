@@ -36,6 +36,7 @@ object GUIMaterials {
     val SAPLING_PLACEHOLDER = registerItem(MACHINES, "gui_sapling_placeholder")
     
     val ARROW_PROGRESS = registerItem(MACHINES, "gui_arrow_progress")
+    val ENERGY_PROGRESS = registerItem(MACHINES, "gui_energy_progress")
     val PULVERIZER_PROGRESS = registerItem(MACHINES, "gui_pulverizer_progress")
     val PRESS_PROGRESS = registerItem(MACHINES, "gui_press_progress")
     val TP_BREW_PROGRESS = registerItem(MACHINES, "gui_brew_progress")

@@ -31,6 +31,11 @@
       "gui/progress/arrow/%s": [0, 16]
     }
   },
+  "gui_energy_progress": {
+    "item": {
+      "gui/progress/energy/%s": [0, 16]
+    }
+  },
   "gui_pulverizer_progress": {
     "item": {
       "gui/progress/pulverizer/%s": [0, 14]
@@ -109,6 +114,7 @@
   "elite_machine_frame": "block/machine_frame/elite",
   "ultimate_machine_frame": "block/machine_frame/ultimate",
   "creative_machine_frame": "block/machine_frame/creative",
+  "solar_cell": "item/solar_cell",
   "netherite_drill": "block/netherite_drill",
   "auto_fisher": "block/auto_fisher",
   "fertilizer": "block/fertilizer",
@@ -132,8 +138,32 @@
   "freezer": "block/freezer",
   "fluid_infuser": "block/fluid_infuser",
   "sprinkler": "block/sprinkler",
+  "solar_panel": "block/solar_panel",
+  "lightning_exchanger": "block/lightning_exchanger",
+  "infinite_water_source": "block/infinite_water_source",
+  "furnace_generator": {
+    "item": "block/furnace_generator_off",
+    "block": [
+      "block/furnace_generator_off",
+      "block/furnace_generator_on"
+    ]
+  },
+  "wind_turbine": {
+    "item": "item/wind_turbine",
+    "block": [
+      "block/wind_turbine/bottom",
+      "block/wind_turbine/top",
+      "block/wind_turbine/rotor_middle",
+      "block/wind_turbine/rotor_blade"
+    ]
+  },
+  "lava_generator": {
+    "block": [
+      "block/lava_generator_off",
+      "block/lava_generator_on"
+    ]
+  },
   "electric_furnace": {
-    "item": "block/electric_furnace_off",
     "block": [
       "block/electric_furnace_off",
       "block/electric_furnace_on"
@@ -148,11 +178,13 @@
     ]
   },
   "cobblestone_generator_water_levels": {
+    "block_type": "translucent",
     "block": {
       "block/fluid_levels/cobblestone_generator/water/%s": [0, 99]
     }
   },
   "cobblestone_generator_lava_levels": {
+    "block_type": "translucent",
     "block": {
       "block/fluid_levels/cobblestone_generator/lava/%s": [0, 99]
     }

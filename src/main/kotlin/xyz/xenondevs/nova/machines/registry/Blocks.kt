@@ -1,21 +1,18 @@
 package xyz.xenondevs.nova.machines.registry
 
-import org.bukkit.Material.BARRIER
-import org.bukkit.Material.COBBLESTONE
+import org.bukkit.Material.*
 import xyz.xenondevs.nova.machines.MACHINES
 import xyz.xenondevs.nova.machines.tileentity.agriculture.*
-import xyz.xenondevs.nova.machines.tileentity.energy.Charger
-import xyz.xenondevs.nova.machines.tileentity.energy.WirelessCharger
+import xyz.xenondevs.nova.machines.tileentity.energy.*
 import xyz.xenondevs.nova.machines.tileentity.mob.Breeder
 import xyz.xenondevs.nova.machines.tileentity.mob.MobDuplicator
 import xyz.xenondevs.nova.machines.tileentity.mob.MobKiller
 import xyz.xenondevs.nova.machines.tileentity.processing.*
 import xyz.xenondevs.nova.machines.tileentity.processing.brewing.ElectricBrewingStand
 import xyz.xenondevs.nova.machines.tileentity.world.*
-import xyz.xenondevs.nova.material.NovaMaterialRegistry
-import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerDefaultTileEntity
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerEnergyTileEntity
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerItem
+import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerTileEntity
 import xyz.xenondevs.nova.tileentity.network.energy.holder.EnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 
@@ -37,14 +34,20 @@ object Blocks {
     val PULVERIZER = registerEnergyTileEntity(MACHINES, "pulverizer", ::Pulverizer, COBBLESTONE)
     val BLOCK_BREAKER = registerEnergyTileEntity(MACHINES, "block_breaker", ::BlockBreaker, COBBLESTONE)
     val BLOCK_PLACER = registerEnergyTileEntity(MACHINES, "block_placer", ::BlockPlacer, COBBLESTONE)
-    val STAR_COLLECTOR = registerDefaultTileEntity(MACHINES, "star_collector", ::StarCollector, BARRIER)
+    val STAR_COLLECTOR = registerEnergyTileEntity(MACHINES, "star_collector", ::StarCollector, BARRIER)
     val CHUNK_LOADER = registerEnergyTileEntity(MACHINES, "chunk_loader", ::ChunkLoader, COBBLESTONE)
-    val QUARRY = registerEnergyTileEntity(MACHINES, "quarry", ::Quarry, COBBLESTONE)
-    val ELECTRIC_BREWING_STAND = registerDefaultTileEntity(MACHINES, "electric_brewing_stand", ::ElectricBrewingStand, BARRIER, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
-    val PUMP = registerDefaultTileEntity(MACHINES, "pump", ::Pump, BARRIER, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
-    val FREEZER = registerDefaultTileEntity(MACHINES, "freezer", ::Freezer, COBBLESTONE, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
-    val FLUID_INFUSER = registerDefaultTileEntity(MACHINES, "fluid_infuser", ::FluidInfuser, COBBLESTONE, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
-    val SPRINKLER = registerDefaultTileEntity(MACHINES, "sprinkler", ::Sprinkler, BARRIER, listOf(NovaFluidHolder::modifyItemBuilder))
+    val QUARRY = registerEnergyTileEntity(MACHINES, "quarry", ::Quarry, COBBLESTONE, Quarry::canPlace)
+    val ELECTRIC_BREWING_STAND = registerTileEntity(MACHINES, "electric_brewing_stand", ::ElectricBrewingStand, BARRIER, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
+    val PUMP = registerTileEntity(MACHINES, "pump", ::Pump, BARRIER, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
+    val FREEZER = registerTileEntity(MACHINES, "freezer", ::Freezer, COBBLESTONE, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
+    val FLUID_INFUSER = registerTileEntity(MACHINES, "fluid_infuser", ::FluidInfuser, COBBLESTONE, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
+    val SPRINKLER = registerTileEntity(MACHINES, "sprinkler", ::Sprinkler, BARRIER, listOf(NovaFluidHolder::modifyItemBuilder))
+    val SOLAR_PANEL = registerEnergyTileEntity(MACHINES, "solar_panel", ::SolarPanel, BARRIER)
+    val LIGHTNING_EXCHANGER = registerEnergyTileEntity(MACHINES, "lightning_exchanger", ::LightningExchanger, BARRIER)
+    val WIND_TURBINE = registerEnergyTileEntity(MACHINES, "wind_turbine", ::WindTurbine, BARRIER, WindTurbine::canPlace)
+    val FURNACE_GENERATOR = registerEnergyTileEntity(MACHINES, "furnace_generator", ::FurnaceGenerator, COBBLESTONE)
+    val LAVA_GENERATOR = registerTileEntity(MACHINES, "lava_generator", ::LavaGenerator, COBBLESTONE, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
+    val INFINITE_WATER_SOURCE = registerTileEntity(MACHINES, "infinite_water_source", ::InfiniteWaterSource, SANDSTONE)
     
     // Tree Miniatures
     val OAK_TREE_MINIATURE = registerItem(MACHINES, "oak_tree_miniature")

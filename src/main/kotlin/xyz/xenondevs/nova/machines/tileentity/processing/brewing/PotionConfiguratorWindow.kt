@@ -28,8 +28,8 @@ import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.ui.config.side.BackItem
 import xyz.xenondevs.nova.ui.item.clickableItem
 import xyz.xenondevs.nova.ui.menu.ColorPickerWindow
+import xyz.xenondevs.nova.ui.menu.ColorPreviewItem
 import xyz.xenondevs.nova.ui.menu.OpenColorPickerWindowItem
-import xyz.xenondevs.nova.ui.menu.PotionColorPreviewItem
 import xyz.xenondevs.nova.ui.overlay.CoreGUITexture
 import xyz.xenondevs.nova.util.data.addLoreLines
 import xyz.xenondevs.nova.util.data.localized
@@ -275,5 +275,14 @@ class PotionConfiguratorWindow(
         }
         
     }
+    
+}
+
+class PotionColorPreviewItem(builder: PotionBuilder, color: Color = Color(0, 0, 0)) : ColorPreviewItem(color) {
+    
+    private val builder: PotionBuilder = builder.clone()
+    
+    override fun getItemProvider(): PotionBuilder =
+        builder.setColor(color)
     
 }
