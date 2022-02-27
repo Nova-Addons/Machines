@@ -76,6 +76,9 @@
   "inventory.machines.trash_can": "Trash Can Inventory",
   "inventory.machines.ingredients": "Ingredients Inventory",
   
+  "menu.machines.items.category.machines": "Machines",
+  "menu.machines.items.category.power": "Power Generation",
+  "menu.machines.items.category.crafting": "Crafting Components",
   "menu.machines.recipe.pulverize": "Pulverizing",
   "menu.machines.recipe.plate": "Plate Pressing",
   "menu.machines.recipe.gear": "Gear Pressing",

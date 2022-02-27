@@ -11,7 +11,7 @@ lateinit var MACHINES: Machines
 
 class Machines : Addon() {
     
-    override fun onEnable() {
+    override fun init() {
         MACHINES = this
         LOGGER = logger
         
@@ -20,6 +20,7 @@ class Machines : Addon() {
         RecipeTypes.init()
     }
     
+    override fun onEnable() = Unit
     override fun onDisable() = Unit
     
 }
