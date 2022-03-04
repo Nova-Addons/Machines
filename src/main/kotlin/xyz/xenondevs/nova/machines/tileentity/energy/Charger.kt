@@ -7,7 +7,7 @@ import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
-import xyz.xenondevs.nova.item.impl.ChargeableItem
+import xyz.xenondevs.nova.item.behavior.Chargeable
 import xyz.xenondevs.nova.machines.registry.Blocks.CHARGER
 import xyz.xenondevs.nova.material.NovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -44,17 +44,17 @@ class Charger(
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER)
     
     private fun handleInventoryUpdate(event: ItemUpdateEvent) {
-        if (event.isAdd && event.newItemStack.novaMaterial?.novaItem !is ChargeableItem) event.isCancelled = true
+        event.isCancelled = event.isAdd && event.newItemStack.novaMaterial?.novaItem?.hasBehavior(Chargeable::class) != true
     }
     
     override fun handleTick() {
         val currentItem = inventory.getUnsafeItemStack(0)
-        val novaItem = currentItem?.novaMaterial?.novaItem
-        if (novaItem is ChargeableItem) {
-            val itemCharge = novaItem.getEnergy(currentItem)
-            if (itemCharge < novaItem.maxEnergy) {
-                val chargeEnergy = minOf(energyHolder.energyConsumption, energyHolder.energy, novaItem.maxEnergy - itemCharge)
-                novaItem.addEnergy(currentItem, chargeEnergy)
+        val chargeable = currentItem?.novaMaterial?.novaItem?.getBehavior(Chargeable::class)
+        if (chargeable != null) {
+            val itemCharge = chargeable.getEnergy(currentItem)
+            if (itemCharge < chargeable.maxEnergy) {
+                val chargeEnergy = minOf(energyHolder.energyConsumption, energyHolder.energy, chargeable.maxEnergy - itemCharge)
+                chargeable.addEnergy(currentItem, chargeEnergy)
                 energyHolder.energy -= chargeEnergy
                 
                 inventory.notifyWindows()

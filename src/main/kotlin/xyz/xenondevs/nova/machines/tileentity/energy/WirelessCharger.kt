@@ -7,7 +7,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
-import xyz.xenondevs.nova.item.impl.ChargeableItem
+import xyz.xenondevs.nova.item.behavior.Chargeable
 import xyz.xenondevs.nova.machines.registry.Blocks.WIRELESS_CHARGER
 import xyz.xenondevs.nova.material.NovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -104,15 +104,15 @@ class WirelessCharger(
     }
     
     private fun chargeItemStack(alreadyTransferred: Long, itemStack: ItemStack?): Long {
-        val novaItem = itemStack?.novaMaterial?.novaItem
+        val chargeable = itemStack?.novaMaterial?.novaItem?.getBehavior(Chargeable::class)
         
-        if (novaItem is ChargeableItem) {
-            val maxEnergy = novaItem.maxEnergy
-            val currentEnergy = novaItem.getEnergy(itemStack)
+        if (chargeable != null) {
+            val maxEnergy = chargeable.maxEnergy
+            val currentEnergy = chargeable.getEnergy(itemStack)
             
             val energyToTransfer = minOf(energyHolder.energyConsumption - alreadyTransferred, maxEnergy - currentEnergy, energyHolder.energy)
             energyHolder.energy -= energyToTransfer
-            novaItem.addEnergy(itemStack, energyToTransfer)
+            chargeable.addEnergy(itemStack, energyToTransfer)
             
             return energyToTransfer
         }
