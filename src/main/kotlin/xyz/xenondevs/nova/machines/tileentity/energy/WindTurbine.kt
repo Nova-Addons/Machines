@@ -22,12 +22,11 @@ import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
-import xyz.xenondevs.nova.util.BlockSide
-import xyz.xenondevs.nova.util.add
-import xyz.xenondevs.nova.util.copy
-import xyz.xenondevs.nova.util.getStraightLine
+import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.concurrent.CombinedBooleanFuture
 import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import kotlin.math.abs
 
 private val MAX_ENERGY = NovaConfig[WIND_TURBINE].getLong("capacity")!!
@@ -110,8 +109,14 @@ class WindTurbine(
     
     companion object {
         
-        fun canPlace(player: Player, item: ItemStack, location: Location) =
-            getMultiHitboxLocations(location).all { it.block.type.isAir && ProtectionManager.canPlace(player, item, it) }
+        fun canPlace(player: Player, item: ItemStack, location: Location): CompletableFuture<Boolean> {
+            return CombinedBooleanFuture(getMultiHitboxLocations(location).map {
+                if (!it.block.type.isReplaceable())
+                    return CompletableFuture.completedFuture(false)
+                
+                ProtectionManager.canPlace(player, item, it)
+            })
+        }
         
         fun getMultiHitboxLocations(location: Location) =
             location.clone().add(0.0, 1.0, 0.0).getStraightLine(Axis.Y, location.blockY + 3)

@@ -105,7 +105,7 @@ class MobKiller(
                 location.world!!.entities
                     .asSequence()
                     .filterIsInstance<Mob>()
-                    .filter { it.location in region && ProtectionManager.canHurtEntity(this, it, null) }
+                    .filter { it.location in region && ProtectionManager.canHurtEntity(this, it, null).get() }
                     .take(killLimit)
                     .forEach { entity ->
                         energyHolder.energy -= energyHolder.specialEnergyConsumption

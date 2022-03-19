@@ -75,7 +75,7 @@ class BlockPlacer(
             && !inventory.isEmpty
             && type.isAir
             && TileEntityManager.getTileEntityAt(placeLocation) == null
-            && ProtectionManager.canPlace(this, inventory.items.firstNotNullOf { it }, placeBlock.location)
+            && ProtectionManager.canPlace(this, inventory.items.firstNotNullOf { it }, placeBlock.location).get()
         ) {
             if (placeBlock()) energyHolder.energy -= energyHolder.energyConsumption
         }

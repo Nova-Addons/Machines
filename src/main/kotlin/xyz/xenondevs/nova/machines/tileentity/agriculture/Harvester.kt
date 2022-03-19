@@ -161,7 +161,7 @@ class Harvester(
                     }
                     
                     val tool = toolInventory?.getItemStack(0)
-                    if (!ProtectionManager.canBreak(this, tool, block.location)) {
+                    if (!ProtectionManager.canBreak(this, tool, block.location).get()) {
                         // skip block if it is protected
                         tryAgain = true
                         continue

@@ -157,7 +157,7 @@ class Pump(
             val newBlock = location.clone().advance(face, 1.0).block
             
             val fluidType = newBlock.sourceFluidType ?: continue
-            if (fluidTank.accepts(fluidType) && newBlock in region && ProtectionManager.canBreak(this, null, newBlock.location)) {
+            if (fluidTank.accepts(fluidType) && newBlock in region && ProtectionManager.canBreak(this, null, newBlock.location).get()) {
                 if (face !in VERTICAL_FACES)
                     sortedFaces.rotateRight()
                 block = newBlock
@@ -173,7 +173,7 @@ class Pump(
             if (r == 0) {
                 val block = location.clone().advance(BlockFace.DOWN).block
                 val fluidType = block.sourceFluidType ?: return@repeat
-                if (fluidTank.accepts(fluidType) && ProtectionManager.canBreak(this, null, block.location))
+                if (fluidTank.accepts(fluidType) && ProtectionManager.canBreak(this, null, block.location).get())
                     return block to fluidType
                 return@repeat
             }
@@ -184,7 +184,7 @@ class Pump(
                             continue
                         val block = location.clone().add(x.toDouble(), y.toDouble(), z.toDouble()).block
                         val fluidType = block.sourceFluidType ?: continue
-                        if (fluidTank.accepts(fluidType) && ProtectionManager.canBreak(this, null, block.location))
+                        if (fluidTank.accepts(fluidType) && ProtectionManager.canBreak(this, null, block.location).get())
                             return block to fluidType
                     }
                 }

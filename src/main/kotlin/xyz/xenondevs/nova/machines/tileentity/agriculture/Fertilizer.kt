@@ -140,7 +140,7 @@ class Fertilizer(
     private fun getRandomPlant(): Block? =
         fertilizeRegion.blocks
             .filter {
-                ProtectionManager.canUseBlock(this, ItemStack(Material.BONE_MEAL), it.location)
+                ProtectionManager.canUseBlock(this, ItemStack(Material.BONE_MEAL), it.location).get()
                     && ((it.blockData is Ageable && !it.isFullyAged()) || (it.blockData !is Ageable && it.type in PlantUtils.PLANTS))
             }
             .randomOrNull()

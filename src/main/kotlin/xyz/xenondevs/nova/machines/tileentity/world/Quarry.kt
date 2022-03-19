@@ -44,11 +44,13 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.concurrent.CombinedBooleanFuture
 import xyz.xenondevs.nova.util.data.addLoreLines
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -182,7 +184,7 @@ class Quarry(
         
         updateEnergyPerTick()
         
-        if (checkPermission && !canBreak(owner, location, positions)) {
+        if (checkPermission && !canBreak(owner, location, positions).get()) {
             if (sizeX == MIN_SIZE && sizeZ == MIN_SIZE) {
                 TileEntityManager.destroyAndDropTileEntity(this, true)
                 return false
@@ -366,7 +368,7 @@ class Quarry(
                     val topLoc = LocationUtils.getTopBlockBetween(world, x, z, maxBreakY, minBreakY)
                     if (topLoc != null
                         && (topLoc.block.type.isBreakable() || TileEntityManager.getTileEntityAt(topLoc) != null)
-                        && ProtectionManager.canBreak(this, null, topLoc)) {
+                        && ProtectionManager.canBreak(this, null, topLoc).get()) {
                         
                         results += topLoc
                     }
@@ -519,7 +521,7 @@ class Quarry(
     
     companion object {
         
-        fun canPlace(player: Player, item: ItemStack, location: Location): Boolean {
+        fun canPlace(player: Player, item: ItemStack, location: Location): CompletableFuture<Boolean> {
             val positions = getMinMaxPositions(
                 location,
                 MIN_SIZE, MIN_SIZE,
@@ -529,27 +531,13 @@ class Quarry(
             
             val minLoc = Location(location.world, positions[0].toDouble(), location.y, positions[1].toDouble())
             val maxLoc = Location(location.world, positions[2].toDouble(), location.y, positions[3].toDouble())
-            
-            minLoc.fullCuboidTo(maxLoc) {
-                if (ProtectionManager.canPlace(player, item, it))
-                    return@fullCuboidTo true
-                else return@canPlace false
-            }
-            
-            return true
+            return CombinedBooleanFuture(minLoc.getFullCuboid(maxLoc).map { ProtectionManager.canPlace(player, item, it) })
         }
         
-        private fun canBreak(owner: OfflinePlayer, location: Location, positions: IntArray): Boolean {
+        private fun canBreak(owner: OfflinePlayer, location: Location, positions: IntArray): CompletableFuture<Boolean> {
             val minLoc = Location(location.world, positions[0].toDouble(), location.y, positions[1].toDouble())
             val maxLoc = Location(location.world, positions[2].toDouble(), location.y, positions[3].toDouble())
-            
-            minLoc.fullCuboidTo(maxLoc) {
-                if (ProtectionManager.canBreak(owner, null, it))
-                    return@fullCuboidTo true
-                else return@canBreak false
-            }
-            
-            return true
+            return CombinedBooleanFuture(minLoc.getFullCuboid(maxLoc).map { ProtectionManager.canBreak(owner, null, it) })
         }
         
         private fun getMinMaxPositions(location: Location, sizeX: Int, sizeZ: Int, back: BlockFace, right: BlockFace): IntArray {

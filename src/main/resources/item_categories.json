@@ -85,7 +85,7 @@
     ]
   },
   "misc": {
-    "icon": "machines:wrench",
+    "icon": "nova:wrench",
     "name": "menu.nova.items.category.misc",
     "priority": 5,
     "items": [

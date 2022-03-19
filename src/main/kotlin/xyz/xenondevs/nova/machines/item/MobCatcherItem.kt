@@ -46,7 +46,7 @@ object MobCatcherItem : NovaItem() {
         override fun handleEntityInteract(player: Player, itemStack: ItemStack, clicked: Entity, event: PlayerInteractAtEntityEvent) {
             if (clicked is Mob
                 && clicked.type !in BLACKLISTED_ENTITY_TYPES
-                && ProtectionManager.canInteractWithEntity(player, clicked, itemStack)
+                && ProtectionManager.canInteractWithEntity(player, clicked, itemStack).get()
                 && getEntityData(itemStack) == null
             ) {
                 
@@ -57,7 +57,7 @@ object MobCatcherItem : NovaItem() {
                     val newCatcher = Items.MOB_CATCHER.createItemStack()
                     absorbEntity(newCatcher, clicked)
                     
-                    player.inventory.getItem(event.hand).amount -= 1
+                    player.inventory.getItem(event.hand)!!.amount -= 1
                     player.inventory.addPrioritized(event.hand, newCatcher)
                     
                     if (event.hand == EquipmentSlot.HAND) player.swingMainHand() else player.swingOffHand()
@@ -77,8 +77,8 @@ object MobCatcherItem : NovaItem() {
                 if (data != null) {
                     val location = player.eyeLocation.getTargetLocation(0.25, 8.0)
                     
-                    if (ProtectionManager.canUseItem(player, itemStack, location)) {
-                        player.inventory.getItem(event.hand!!).amount -= 1
+                    if (ProtectionManager.canUseItem(player, itemStack, location).get()) {
+                        player.inventory.getItem(event.hand!!)!!.amount -= 1
                         player.inventory.addPrioritized(event.hand!!, Items.MOB_CATCHER.createItemStack())
                         
                         
