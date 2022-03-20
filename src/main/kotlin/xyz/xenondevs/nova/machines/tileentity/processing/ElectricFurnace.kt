@@ -20,7 +20,7 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.machines.gui.ProgressArrowItem
 import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_FURNACE
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -50,7 +50,7 @@ private val COOK_SPEED = NovaConfig[ELECTRIC_FURNACE].getInt("cook_speed")!!
 class ElectricFurnace(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand,
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

@@ -4,7 +4,7 @@ import de.studiocode.invui.gui.GUI
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
@@ -19,7 +19,7 @@ import java.util.*
 class InfiniteWaterSource(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand) {

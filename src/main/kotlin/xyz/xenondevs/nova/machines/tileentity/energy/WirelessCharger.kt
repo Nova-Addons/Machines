@@ -9,7 +9,7 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.item.behavior.Chargeable
 import xyz.xenondevs.nova.machines.registry.Blocks.WIRELESS_CHARGER
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
@@ -40,7 +40,7 @@ private val DEFAULT_RANGE = NovaConfig[WIRELESS_CHARGER].getInt("range.default")
 class WirelessCharger(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand,
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

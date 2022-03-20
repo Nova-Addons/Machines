@@ -33,7 +33,7 @@ import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_BREWING_STAND
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.machines.registry.GUITextures
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -70,7 +70,7 @@ private val IGNORE_UPDATE_REASON = object : UpdateReason {}
 class ElectricBrewingStand(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

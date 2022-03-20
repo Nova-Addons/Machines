@@ -17,7 +17,8 @@ import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.machines.gui.LeftRightFluidProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.FREEZER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.ItemNovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -49,7 +50,7 @@ private val MB_PER_TICK = NovaConfig[FREEZER].getLong("mb_per_tick")!!
 class Freezer(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
@@ -161,7 +162,7 @@ class Freezer(
         }
     }
     
-    enum class Mode(val product: ItemStack, val uiItem: NovaMaterial, val maxCostMultiplier: Int) {
+    enum class Mode(val product: ItemStack, val uiItem: ItemNovaMaterial, val maxCostMultiplier: Int) {
         ICE(ItemStack(Material.ICE), GUIMaterials.ICE_MODE_BTN, 1),
         PACKED_ICE(ItemStack(Material.PACKED_ICE), GUIMaterials.PACKED_ICE_MODE_BTN, 9),
         BLUE_ICE(ItemStack(Material.BLUE_ICE), GUIMaterials.BLUE_ICE_MODE_BTN, 81)

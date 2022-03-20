@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.machines.registry.Blocks.LAVA_GENERATOR
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
@@ -35,7 +35,7 @@ private val BURN_RATE = NovaConfig[LAVA_GENERATOR].getDouble("burn_rate")!!
 class LavaGenerator(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

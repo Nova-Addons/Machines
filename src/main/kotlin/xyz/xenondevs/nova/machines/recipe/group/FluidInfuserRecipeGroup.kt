@@ -15,7 +15,6 @@ import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.ui.StaticFluidBar
 import xyz.xenondevs.nova.ui.menu.item.recipes.createRecipeChoiceItem
 import xyz.xenondevs.nova.ui.menu.item.recipes.group.RecipeGroup
-import xyz.xenondevs.nova.ui.overlay.CoreGUITexture
 
 private val FLUID_CAPACITY = NovaConfig[Blocks.FLUID_INFUSER].getLong("fluid_capacity")!!
 

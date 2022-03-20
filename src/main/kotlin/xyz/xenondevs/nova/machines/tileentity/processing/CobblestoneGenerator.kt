@@ -19,7 +19,8 @@ import xyz.xenondevs.nova.machines.gui.LeftRightFluidProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.Blocks.COBBLESTONE_GENERATOR
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.ItemNovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -60,7 +61,7 @@ private val MB_PER_TICK = NovaConfig[COBBLESTONE_GENERATOR].getLong("mb_per_tick
 class CobblestoneGenerator(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
@@ -216,7 +217,7 @@ class CobblestoneGenerator(
         
     }
     
-    enum class Mode(val takeWater: Boolean, val takeLava: Boolean, val product: ItemStack, val uiItem: NovaMaterial) {
+    enum class Mode(val takeWater: Boolean, val takeLava: Boolean, val product: ItemStack, val uiItem: ItemNovaMaterial) {
         COBBLESTONE(false, false, ItemStack(Material.COBBLESTONE), GUIMaterials.COBBLESTONE_MODE_BTN),
         STONE(true, false, ItemStack(Material.STONE), GUIMaterials.STONE_MODE_BTN),
         OBSIDIAN(false, true, ItemStack(Material.OBSIDIAN), GUIMaterials.OBSIDIAN_MODE_BTN)

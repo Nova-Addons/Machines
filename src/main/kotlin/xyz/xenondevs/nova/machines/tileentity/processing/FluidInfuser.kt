@@ -20,7 +20,7 @@ import xyz.xenondevs.nova.machines.recipe.FluidInfuserRecipe
 import xyz.xenondevs.nova.machines.registry.Blocks.FLUID_INFUSER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -68,7 +68,7 @@ private val FLUID_CAPACITY = NovaConfig[FLUID_INFUSER].getLong("fluid_capacity")
 class FluidInfuser(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

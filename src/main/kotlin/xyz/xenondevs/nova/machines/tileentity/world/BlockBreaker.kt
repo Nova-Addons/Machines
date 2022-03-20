@@ -10,7 +10,7 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.BLOCK_BREAKER
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -40,7 +40,7 @@ private val DISABLE_BLOCK_BREAK_EFFECTS = DEFAULT_CONFIG.getBoolean("disable_blo
 class BlockBreaker(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand,
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

@@ -14,7 +14,8 @@ import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.Blocks.TREE_FACTORY
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.ItemNovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -34,7 +35,7 @@ import xyz.xenondevs.particle.ParticleEffect
 import java.awt.Color
 import java.util.*
 
-private class PlantConfiguration(val miniature: NovaMaterial, val loot: ItemStack, val color: Color)
+private class PlantConfiguration(val miniature: ItemNovaMaterial, val loot: ItemStack, val color: Color)
 
 private val PLANTS = mapOf(
     Material.OAK_SAPLING to PlantConfiguration(Blocks.OAK_TREE_MINIATURE, ItemStack(Material.OAK_LOG), Color(43, 82, 39)),
@@ -61,7 +62,7 @@ private const val MAX_GROWTH_STAGE = 199
 class TreeFactory(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

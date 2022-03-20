@@ -8,7 +8,7 @@ import org.bukkit.block.BlockFace
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.machines.registry.Blocks.SOLAR_PANEL
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
@@ -32,7 +32,7 @@ private val ENERGY_PER_TICK = NovaConfig[SOLAR_PANEL].getLong("energy_per_tick")
 class SolarPanel(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand,
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

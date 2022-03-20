@@ -12,7 +12,7 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.WIND_TURBINE
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.Model
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
@@ -36,7 +36,7 @@ private val PLAY_ANIMATION = NovaConfig[WIND_TURBINE].getBoolean("animation")
 class WindTurbine(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand,
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

@@ -8,7 +8,7 @@ import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.integration.customitems.CustomItemServiceManager
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.BLOCK_PLACER
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.*
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
@@ -31,7 +31,7 @@ private val ENERGY_PER_PLACE = NovaConfig[BLOCK_PLACER].getLong("energy_per_plac
 class BlockPlacer(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand,
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
@@ -52,7 +52,7 @@ class BlockPlacer(
             
             val material = item.type
             val novaMaterial = item.novaMaterial
-            if (novaMaterial != null && novaMaterial.isTileEntity) {
+            if (novaMaterial != null && novaMaterial is TileEntityNovaMaterial) {
                 if (TileEntityLimits.canPlaceTileEntity(ownerUUID, world, novaMaterial) == PlaceResult.ALLOW) {
                     runTask { TileEntityManager.placeTileEntity(ownerUUID, placeLocation, armorStand.location.yaw, novaMaterial, null) }
                     novaMaterial.hitboxType?.playPlaceSoundEffect(placeLocation)

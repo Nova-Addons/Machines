@@ -14,7 +14,7 @@ import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.machines.registry.Blocks.LIGHTNING_EXCHANGER
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntityManager
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType.NONE
@@ -40,7 +40,7 @@ private val MAX_BURST = NovaConfig[LIGHTNING_EXCHANGER].getLong("burst.max")!!
 class LightningExchanger(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand,
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

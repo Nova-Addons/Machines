@@ -28,7 +28,7 @@ import xyz.xenondevs.nova.machines.item.MobCatcherItem
 import xyz.xenondevs.nova.machines.registry.Blocks.MOB_DUPLICATOR
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.CoreGUIMaterial
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
@@ -64,7 +64,7 @@ private val NERF_MOBS = NovaConfig[MOB_DUPLICATOR].getBoolean("nerf_mobs")
 class MobDuplicator(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand,
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

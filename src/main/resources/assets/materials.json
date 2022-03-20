@@ -72,8 +72,8 @@
     }
   },
   "scaffolding": {
-    "item": "item/scaffolding",
-    "block": [
+    "item": [
+      "item/scaffolding",
       "block/scaffolding/full_horizontal",
       "block/scaffolding/full_vertical",
       "block/scaffolding/corner_down",

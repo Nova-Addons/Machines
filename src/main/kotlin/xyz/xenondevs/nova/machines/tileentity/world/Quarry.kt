@@ -25,7 +25,7 @@ import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.QUARRY
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.material.CoreGUIMaterial
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.Model
 import xyz.xenondevs.nova.tileentity.MultiModel
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -56,7 +56,11 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
-private val SCAFFOLDING_STACKS = Items.SCAFFOLDING.block!!.let { modelData -> modelData.dataArray.indices.map { modelData.createItemStack(it) } }
+private val SCAFFOLDING_STACKS = Items.SCAFFOLDING.item.let { modelData ->
+    modelData.dataArray.let {
+        it.copyOfRange(1, it.size)
+    }.indices.map { modelData.createItemStack(it) }
+}
 private val FULL_HORIZONTAL = SCAFFOLDING_STACKS[0]
 private val FULL_VERTICAL = SCAFFOLDING_STACKS[1]
 private val CORNER_DOWN = SCAFFOLDING_STACKS[2]
@@ -87,7 +91,7 @@ private val DISABLE_BLOCK_BREAK_EFFECTS = DEFAULT_CONFIG.getBoolean("disable_blo
 class Quarry(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand,
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

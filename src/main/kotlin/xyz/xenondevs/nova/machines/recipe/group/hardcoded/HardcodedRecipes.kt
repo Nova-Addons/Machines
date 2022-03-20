@@ -4,7 +4,6 @@ import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.data.recipe.NovaRecipe
-import xyz.xenondevs.nova.data.recipe.RecipeType
 import xyz.xenondevs.nova.data.recipe.ResultingRecipe
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.machines.registry.RecipeTypes

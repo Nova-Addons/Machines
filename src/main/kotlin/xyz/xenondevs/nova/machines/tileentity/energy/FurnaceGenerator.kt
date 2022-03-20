@@ -9,7 +9,7 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.machines.gui.EnergyProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.FURNACE_GENERATOR
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType.NONE
@@ -40,7 +40,7 @@ private val ACCEPTED_UPGRADE_TYPES = arrayOf(UpgradeType.SPEED, UpgradeType.EFFI
 class FurnaceGenerator(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand,
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {

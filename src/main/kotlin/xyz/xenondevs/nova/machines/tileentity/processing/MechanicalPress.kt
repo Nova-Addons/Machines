@@ -22,7 +22,7 @@ import xyz.xenondevs.nova.machines.gui.PressProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.MECHANICAL_PRESS
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
-import xyz.xenondevs.nova.material.NovaMaterial
+import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -54,7 +54,7 @@ private enum class PressType(val recipeType: RecipeType<out ConversionNovaRecipe
 class MechanicalPress(
     uuid: UUID,
     data: CompoundElement,
-    material: NovaMaterial,
+    material: TileEntityNovaMaterial,
     ownerUUID: UUID,
     armorStand: FakeArmorStand,
 ) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
