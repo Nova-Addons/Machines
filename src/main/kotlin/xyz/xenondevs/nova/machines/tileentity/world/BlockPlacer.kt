@@ -3,13 +3,14 @@ package xyz.xenondevs.nova.machines.tileentity.world
 import de.studiocode.invui.gui.GUI
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
+import org.bukkit.block.BlockFace
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
-import xyz.xenondevs.nova.integration.customitems.CustomItemServiceManager
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.BLOCK_PLACER
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
-import xyz.xenondevs.nova.tileentity.*
+import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
+import xyz.xenondevs.nova.tileentity.TileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
@@ -21,20 +22,18 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
-import xyz.xenondevs.nova.util.*
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
-import java.util.*
+import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.advance
+import xyz.xenondevs.nova.util.isReplaceable
+import xyz.xenondevs.nova.util.place
+import xyz.xenondevs.nova.world.block.BlockManager
+import xyz.xenondevs.nova.world.block.context.BlockPlaceContext
+import xyz.xenondevs.nova.world.pos
 
 private val MAX_ENERGY = NovaConfig[BLOCK_PLACER].getLong("capacity")!!
 private val ENERGY_PER_PLACE = NovaConfig[BLOCK_PLACER].getLong("energy_per_place")!!
 
-class BlockPlacer(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 9) {}
     override val gui = lazy { BlockPlacerGUI() }
@@ -42,40 +41,29 @@ class BlockPlacer(
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_PLACE, 0, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
-    private val fakePlayer = EntityUtils.createFakePlayer(location.clone(), UUID.randomUUID(), "Block Placer $uuid")
-    private val placeLocation = location.clone().advance(getFace(BlockSide.FRONT))
-    private val placeBlock = placeLocation.block
+    private val placePos = location.clone().advance(getFace(BlockSide.FRONT)).pos
+    private val placeBlock = placePos.block
     
     private fun placeBlock(): Boolean {
         for ((index, item) in inventory.items.withIndex()) {
             if (item == null) continue
             
-            val material = item.type
-            val novaMaterial = item.novaMaterial
-            if (novaMaterial != null && novaMaterial is TileEntityNovaMaterial) {
-                if (TileEntityLimits.canPlaceTileEntity(ownerUUID, world, novaMaterial) == PlaceResult.ALLOW) {
-                    runTask { TileEntityManager.placeTileEntity(ownerUUID, placeLocation, armorStand.location.yaw, novaMaterial, null) }
-                    novaMaterial.hitboxType?.playPlaceSoundEffect(placeLocation)
-                } else continue
-            } else if (!CustomItemServiceManager.placeItem(item, placeLocation, true)) {
-                if (material.isBlock && placeBlock.place(fakePlayer, item)) {
-                    material.playPlaceSoundEffect(placeLocation)
-                } else continue
-            }
+            val ctx = BlockPlaceContext(placePos, item, this, location, ownerUUID, placePos.copy(y = placePos.y - 1), BlockFace.UP)
+            if (placePos.block.place(ctx)) {
+                inventory.addItemAmount(SELF_UPDATE_REASON, index, -1)
+            } else continue
             
-            inventory.addItemAmount(SELF_UPDATE_REASON, index, -1)
         }
         
         return false
     }
     
     override fun handleTick() {
-        val type = placeBlock.type
         if (energyHolder.energy >= energyHolder.energyConsumption
             && !inventory.isEmpty
-            && type.isAir
-            && TileEntityManager.getTileEntityAt(placeLocation) == null
-            && ProtectionManager.canPlace(this, inventory.items.firstNotNullOf { it }, placeBlock.location).get()
+            && placeBlock.type.isReplaceable()
+            && BlockManager.getBlock(placePos) == null
+            && ProtectionManager.canPlace(this, inventory.items.firstNotNullOf { it }, placePos.location).get()
         ) {
             if (placeBlock()) energyHolder.energy -= energyHolder.energyConsumption
         }

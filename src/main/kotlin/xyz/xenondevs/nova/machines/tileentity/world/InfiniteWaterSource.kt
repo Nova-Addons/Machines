@@ -3,8 +3,7 @@ package xyz.xenondevs.nova.machines.tileentity.world
 import de.studiocode.invui.gui.GUI
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
@@ -13,16 +12,9 @@ import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import java.util.*
 
-class InfiniteWaterSource(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand) {
+class InfiniteWaterSource(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState) {
     
     override val gui = lazy(::InfiniteWaterSourceGUI)
     

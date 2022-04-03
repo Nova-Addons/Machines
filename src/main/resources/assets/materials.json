@@ -151,8 +151,10 @@
   "wind_turbine": {
     "item": "item/wind_turbine",
     "block": [
-      "block/wind_turbine/bottom",
-      "block/wind_turbine/top",
+      "block/wind_turbine/0",
+      "block/wind_turbine/1",
+      "block/wind_turbine/2",
+      "block/wind_turbine/3",
       "block/wind_turbine/rotor_middle",
       "block/wind_turbine/rotor_blade"
     ]

@@ -9,13 +9,12 @@ import net.md_5.bungee.api.ChatColor
 import net.minecraft.world.entity.EquipmentSlot
 import org.bukkit.Bukkit
 import org.bukkit.util.Vector
-import xyz.xenondevs.nova.data.config.DEFAULT_CONFIG
+import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.STAR_COLLECTOR
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.material.CoreGUIMaterial
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -35,7 +34,6 @@ import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
 import java.awt.Color
-import java.util.*
 
 private val MAX_ENERGY = NovaConfig[STAR_COLLECTOR].getLong("capacity")!!
 private val IDLE_ENERGY_PER_TICK = NovaConfig[STAR_COLLECTOR].getLong("energy_per_tick_idle")!!
@@ -43,17 +41,9 @@ private val COLLECTING_ENERGY_PER_TICK = NovaConfig[STAR_COLLECTOR].getLong("ene
 private val IDLE_TIME = NovaConfig[STAR_COLLECTOR].getInt("idle_time")!!
 private val COLLECTION_TIME = NovaConfig[STAR_COLLECTOR].getInt("collection_time")!!
 
-private val DROP_EXCESS_ON_GROUND = DEFAULT_CONFIG.getBoolean("drop_excess_on_ground")
-
 private const val STAR_PARTICLE_DISTANCE_PER_TICK = 0.75
 
-class StarCollector(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 1, ::handleInventoryUpdate)
     override val gui: Lazy<StarCollectorGUI> = lazy(::StarCollectorGUI)
@@ -75,7 +65,7 @@ class StarCollector(
     private val rod = FakeArmorStand(location.clone().center().apply { y -= 1 }, true) {
         it.isMarker = true
         it.isInvisible = true
-        it.setEquipment(EquipmentSlot.HEAD, material.block!!.createItemStack(1))
+        it.setEquipment(EquipmentSlot.HEAD, material.block.createItemStack(1))
     }
     
     private val particleTask = createParticleTask(listOf(
@@ -103,7 +93,7 @@ class StarCollector(
     
     private fun handleNightTick() {
         if (timeSpentCollecting != -1) {
-            if (!DROP_EXCESS_ON_GROUND && inventory.isFull()) return
+            if (!GlobalValues.DROP_EXCESS_ON_GROUND && inventory.isFull()) return
             if (energyHolder.energy >= energyHolder.specialEnergyConsumption) {
                 energyHolder.energy -= energyHolder.specialEnergyConsumption
                 handleCollectionTick()
@@ -122,10 +112,10 @@ class StarCollector(
             
             val item = Items.STAR_DUST.createItemStack()
             val leftOver = inventory.addItem(SELF_UPDATE_REASON, item)
-            if (DROP_EXCESS_ON_GROUND && leftOver != 0) location.dropItem(item)
+            if (GlobalValues.DROP_EXCESS_ON_GROUND && leftOver != 0) location.dropItem(item)
             
             particleTask.stop()
-            rod.setEquipment(EquipmentSlot.HEAD, material.block!!.createItemStack(1))
+            rod.setEquipment(EquipmentSlot.HEAD, material.block.createItemStack(1))
             rod.updateEquipment()
         } else {
             val percentageCollected = (maxCollectionTime - timeSpentCollecting) / maxCollectionTime.toDouble()
@@ -149,7 +139,7 @@ class StarCollector(
             
             particleTask.start()
             
-            rod.setEquipment(EquipmentSlot.HEAD, material.block!!.createItemStack(2))
+            rod.setEquipment(EquipmentSlot.HEAD, material.block.createItemStack(2))
             rod.updateEquipment()
             
             rodLocation.yaw = rod.location.yaw

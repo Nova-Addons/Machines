@@ -17,10 +17,9 @@ import org.bukkit.entity.EntityType
 import org.bukkit.entity.ExperienceOrb
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.ProgressArrowItem
 import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_FURNACE
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -35,8 +34,6 @@ import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.*
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
-import java.util.*
 
 private fun getRecipe(input: ItemStack, world: World): SmeltingRecipe? {
     return minecraftServer.recipeManager.getAllRecipesFor(RecipeType.SMELTING)
@@ -47,13 +44,7 @@ private val MAX_ENERGY = NovaConfig[ELECTRIC_FURNACE].getLong("capacity")!!
 private val ENERGY_PER_TICK = NovaConfig[ELECTRIC_FURNACE].getLong("energy_per_tick")!!
 private val COOK_SPEED = NovaConfig[ELECTRIC_FURNACE].getInt("cook_speed")!!
 
-class ElectricFurnace(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { ElectricFurnaceGUI() }
     
@@ -76,10 +67,10 @@ class ElectricFurnace(
     private var cookSpeed = 0
     
     private var active: Boolean = false
-        set(value) {
-            if (field != value) {
-                field = value
-                updateHeadStack()
+        set(active) {
+            if (field != active) {
+                field = active
+                blockState.modelProvider.update(active.intValue)
             }
         }
     
@@ -92,10 +83,6 @@ class ElectricFurnace(
         storeData("currentRecipe", currentRecipe?.id?.namespacedKey)
         storeData("timeCooked", timeCooked)
         storeData("experience", experience)
-    }
-    
-    override fun getHeadStack(): ItemStack {
-        return material.block!!.createItemStack(active.intValue)
     }
     
     private fun handleInputInventoryUpdate(event: ItemUpdateEvent) {
@@ -172,7 +159,7 @@ class ElectricFurnace(
     override fun handleRemoved(unload: Boolean) {
         super.handleRemoved(unload)
         if (!unload)
-            spawnExperienceOrb(armorStand.location, experience)
+            spawnExperienceOrb(centerLocation, experience)
     }
     
     inner class ElectricFurnaceGUI : TileEntityGUI() {

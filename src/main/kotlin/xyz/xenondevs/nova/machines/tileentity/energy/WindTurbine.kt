@@ -4,17 +4,16 @@ import de.studiocode.invui.gui.GUI
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import net.minecraft.core.Rotations
-import org.bukkit.Axis
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.WIND_TURBINE
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.Model
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.TileEntity
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -22,10 +21,12 @@ import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.add
 import xyz.xenondevs.nova.util.concurrent.CombinedBooleanFuture
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
-import java.util.*
+import xyz.xenondevs.nova.util.isReplaceable
+import xyz.xenondevs.nova.world.BlockPos
+import xyz.xenondevs.nova.world.pos
 import java.util.concurrent.CompletableFuture
 import kotlin.math.abs
 
@@ -33,13 +34,7 @@ private val MAX_ENERGY = NovaConfig[WIND_TURBINE].getLong("capacity")!!
 private val ENERGY_PER_TICK = NovaConfig[WIND_TURBINE].getLong("energy_per_tick")!!
 private val PLAY_ANIMATION = NovaConfig[WIND_TURBINE].getBoolean("animation")
 
-class WindTurbine(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { WindTurbineGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, ::updateEnergyPerTick, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
@@ -50,7 +45,6 @@ class WindTurbine(
         )
     }
     
-    private val columnModel = createMultiModel()
     private val turbineModel = createMultiModel()
     
     private val altitude = (location.y + abs(world.minHeight)) / (world.maxHeight - 1 + abs(world.minHeight))
@@ -66,31 +60,23 @@ class WindTurbine(
         energyPerTick = (altitude * energyHolder.energyGeneration).toInt()
     }
     
-    override fun handleInitialized(first: Boolean) {
-        super.handleInitialized(first)
-        
-        setAdditionalHitboxes(first, getMultiHitboxLocations(location))
-    }
-    
     private fun spawnModels() {
-        val location = armorStand.location.clone()
-        location.y += 2
-        columnModel.addModels(Model(WIND_TURBINE.block!!.createItemStack(1), location))
-        
+        val location = centerLocation.add(0.0, 2.0, 0.0)
+        location.yaw += 180
         location.y += 1.0 / 32.0
-        turbineModel.addModels(Model(WIND_TURBINE.block!!.createItemStack(2), location))
+        
+        turbineModel.addModels(Model(
+            WIND_TURBINE.block.createItemStack(4),
+            location,
+            Rotations(90f, 0f, 0f)
+        ))
         
         for (blade in 0..2) {
             turbineModel.addModels(Model(
-                WIND_TURBINE.block!!.createItemStack(3),
+                material.block.createItemStack(5),
                 location,
-                Rotations(0f, 0f, blade * 120f)
+                Rotations(90f, 0f, blade * 120f)
             ))
-        }
-        
-        turbineModel.useArmorStands {
-            it.setHeadPose(it.headPose.copy(x = 90f))
-            it.updateEntityData()
         }
     }
     
@@ -110,20 +96,24 @@ class WindTurbine(
     companion object {
         
         fun canPlace(player: Player, item: ItemStack, location: Location): CompletableFuture<Boolean> {
-            return CombinedBooleanFuture(getMultiHitboxLocations(location).map {
+            return CombinedBooleanFuture(loadMultiBlock(location.pos).map {
                 if (!it.block.type.isReplaceable())
                     return CompletableFuture.completedFuture(false)
                 
-                ProtectionManager.canPlace(player, item, it)
+                ProtectionManager.canPlace(player, item, it.location)
             })
         }
         
-        fun getMultiHitboxLocations(location: Location) =
-            location.clone().add(0.0, 1.0, 0.0).getStraightLine(Axis.Y, location.blockY + 3)
+        fun loadMultiBlock(pos: BlockPos): List<BlockPos> =
+            listOf(
+                pos.copy(y = pos.y + 1),
+                pos.copy(y = pos.y + 2),
+                pos.copy(y = pos.y + 3)
+            )
         
     }
     
-    inner class WindTurbineGUI : TileEntityGUI() {
+    inner class WindTurbineGUI : TileEntity.TileEntityGUI() {
         
         override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
             .setStructure("" +

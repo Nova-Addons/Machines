@@ -19,13 +19,12 @@ import org.bukkit.Material
 import org.bukkit.craftbukkit.v1_18_R2.CraftServer
 import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack
 import org.bukkit.enchantments.Enchantment
-import xyz.xenondevs.nova.data.config.DEFAULT_CONFIG
+import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.AUTO_FISHER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.CoreGUIMaterial
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -42,21 +41,13 @@ import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.nova.util.item.ToolUtils
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import java.util.*
 
 private val MAX_ENERGY = NovaConfig[AUTO_FISHER].getLong("capacity")!!
 private val ENERGY_PER_TICK = NovaConfig[AUTO_FISHER].getLong("energy_per_tick")!!
 private val IDLE_TIME = NovaConfig[AUTO_FISHER].getInt("idle_time")!!
-private val DROP_EXCESS_ON_GROUND = DEFAULT_CONFIG.getBoolean("drop_excess_on_ground")
 
-class AutoFisher(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 12, ::handleInventoryUpdate)
     private val fishingRodInventory = getInventory("fishingRod", 1, ::handleFishingRodInventoryUpdate)
@@ -75,7 +66,7 @@ class AutoFisher(
     private val waterBlock = location.clone().subtract(0.0, 1.0, 0.0).block
     private val random = Random(uuid.mostSignificantBits xor System.currentTimeMillis())
     private val level = world.serverLevel
-    private val position = Vec3(armorStand.location.x, location.y - 0.5, armorStand.location.z)
+    private val position = Vec3(centerLocation.x, location.y - 0.5, centerLocation.z)
     private val itemDropLocation = location.clone().add(0.0, 1.0, 0.0)
     private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID.salt(uuid.toString()), "AutoFisher")
     
@@ -90,7 +81,7 @@ class AutoFisher(
     
     override fun handleTick() {
         if (energyHolder.energy >= energyHolder.energyConsumption && !fishingRodInventory.isEmpty && waterBlock.type == Material.WATER) {
-            if (!DROP_EXCESS_ON_GROUND && inventory.isFull()) return
+            if (!GlobalValues.DROP_EXCESS_ON_GROUND && !inventory.hasEmptySlot()) return
             
             energyHolder.energy -= energyHolder.energyConsumption
             
@@ -130,7 +121,7 @@ class AutoFisher(
             .map { CraftItemStack.asCraftMirror(it) }
             .forEach {
                 val leftover = inventory.addItem(SELF_UPDATE_REASON, it)
-                if (DROP_EXCESS_ON_GROUND && leftover != 0) {
+                if (GlobalValues.DROP_EXCESS_ON_GROUND && leftover != 0) {
                     it.amount = leftover
                     world.dropItemNaturally(itemDropLocation, it)
                 }

@@ -6,9 +6,8 @@ import de.studiocode.invui.gui.builder.guitype.GUIType
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.SOLAR_PANEL
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
@@ -21,7 +20,6 @@ import xyz.xenondevs.nova.util.CUBE_FACES
 import xyz.xenondevs.nova.util.isGlass
 import xyz.xenondevs.nova.util.runTaskTimer
 import xyz.xenondevs.nova.util.untilHeightLimit
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -29,13 +27,7 @@ import kotlin.math.roundToInt
 private val MAX_ENERGY = NovaConfig[SOLAR_PANEL].getLong("capacity")!!
 private val ENERGY_PER_TICK = NovaConfig[SOLAR_PANEL].getLong("energy_per_tick")!!
 
-class SolarPanel(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class SolarPanel(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { SolarPanelGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)

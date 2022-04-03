@@ -18,14 +18,13 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
-import xyz.xenondevs.nova.data.config.DEFAULT_CONFIG
+import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.QUARRY
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.material.CoreGUIMaterial
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.Model
 import xyz.xenondevs.nova.tileentity.MultiModel
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -47,9 +46,11 @@ import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.nova.util.concurrent.CombinedBooleanFuture
 import xyz.xenondevs.nova.util.data.addLoreLines
 import xyz.xenondevs.nova.util.data.localized
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
+import xyz.xenondevs.nova.util.item.ToolUtils
+import xyz.xenondevs.nova.world.block.BlockManager
+import xyz.xenondevs.nova.world.block.context.BlockBreakContext
+import xyz.xenondevs.nova.world.pos
 import xyz.xenondevs.particle.ParticleEffect
-import java.util.*
 import java.util.concurrent.CompletableFuture
 import kotlin.math.max
 import kotlin.math.min
@@ -57,9 +58,7 @@ import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
 private val SCAFFOLDING_STACKS = Items.SCAFFOLDING.item.let { modelData ->
-    modelData.dataArray.let {
-        it.copyOfRange(1, it.size)
-    }.indices.map { modelData.createItemStack(it) }
+    (1..modelData.dataArray.lastIndex).map { modelData.createItemStack(it) }
 }
 private val FULL_HORIZONTAL = SCAFFOLDING_STACKS[0]
 private val FULL_VERTICAL = SCAFFOLDING_STACKS[1]
@@ -85,16 +84,7 @@ private val MAX_ENERGY = NovaConfig[QUARRY].getLong("capacity")!!
 private val BASE_ENERGY_CONSUMPTION = NovaConfig[QUARRY].getInt("base_energy_consumption")!!
 private val ENERGY_PER_SQUARE_BLOCK = NovaConfig[QUARRY].getInt("energy_consumption_per_square_block")!!
 
-private val DROP_EXCESS_ON_GROUND = DEFAULT_CONFIG.getBoolean("drop_excess_on_ground")
-private val DISABLE_BLOCK_BREAK_EFFECTS = DEFAULT_CONFIG.getBoolean("disable_block_break_effects")
-
-class Quarry(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { QuarryGUI() }
     private val inventory = getInventory("quarryInventory", 9) {}
@@ -190,7 +180,7 @@ class Quarry(
         
         if (checkPermission && !canBreak(owner, location, positions).get()) {
             if (sizeX == MIN_SIZE && sizeZ == MIN_SIZE) {
-                TileEntityManager.destroyAndDropTileEntity(this, true)
+                BlockManager.breakBlock(BlockBreakContext(pos, this, location))
                 return false
             } else resize(MIN_SIZE, MIN_SIZE)
         }
@@ -241,8 +231,6 @@ class Quarry(
         if (energyHolder.energy == 0L) return
         
         if (!done || serverTick % 300 == 0) {
-            if (!DROP_EXCESS_ON_GROUND && inventory.isFull()) return
-            
             if (!drilling) {
                 val pointerDestination = pointerDestination ?: selectNextDestination()
                 if (pointerDestination != null) {
@@ -294,24 +282,40 @@ class Quarry(
     
     private fun drill() {
         val block = pointerDestination!!.block
+        
+        // calculate and add damage
+        val damage = ToolUtils.calculateDamage(
+            block.hardness,
+            correctCategory = true,
+            correctForDrops = true,
+            toolMultiplier = currentDrillSpeedMultiplier,
+            efficiency = 0,
+            onGround = true,
+            underWater = false,
+            hasteLevel = 0,
+            fatigueLevel = 0
+        ).coerceAtMost(DRILL_SPEED_CLAMP)
+        drillProgress = min(1.0, drillProgress + damage)
+        
+        // lower the drill
+        pointerLocation.y = pointerDestination!!.y + 1 - drillProgress
+        // particle effects
         spawnDrillParticles(block)
         
-        val drillSpeed = min(DRILL_SPEED_CLAMP, block.type.breakSpeed * currentDrillSpeedMultiplier)
-        drillProgress += drillSpeed
-        pointerLocation.y -= drillSpeed - max(0.0, drillProgress - 1)
-        
-        block.setBreakState(entityId, (drillProgress * 9).roundToInt())
-        
-        if (drillProgress >= 1f) { // is done drilling
-            var drops = block.getAllDrops().toMutableList()
-            val event = TileEntityBreakBlockEvent(this, block, drops)
-            callEvent(event)
-            drops = event.drops
+        if (drillProgress >= 1) { // is done drilling
+            val ctx = BlockBreakContext(block.pos, this, location, BlockFace.UP)
+            var drops = block.getAllDrops(ctx).toMutableList()
+            drops = TileEntityBreakBlockEvent(this, block, drops).also(::callEvent).drops
             
-            block.remove(!DISABLE_BLOCK_BREAK_EFFECTS)
+            if (!GlobalValues.DROP_EXCESS_ON_GROUND && !inventory.canHold(drops))
+                return
+            
+            block.setBreakStage(entityId, -1)
+            block.remove(ctx)
+            
             drops.forEach { drop ->
                 val leftover = inventory.addItem(null, drop)
-                if (DROP_EXCESS_ON_GROUND && leftover != 0) {
+                if (GlobalValues.DROP_EXCESS_ON_GROUND && leftover != 0) {
                     drop.amount = leftover
                     world.dropItemNaturally(block.location, drop)
                 }
@@ -320,6 +324,8 @@ class Quarry(
             pointerDestination = null
             drillProgress = 0.0
             drilling = false
+        } else {
+            block.setBreakStage(entityId, (drillProgress * 9).roundToInt())
         }
     }
     
@@ -411,7 +417,7 @@ class Quarry(
     private fun spawnDrillParticles(block: Block) {
         // block cracks
         particleBuilder(ParticleEffect.BLOCK_CRACK, block.location.center().apply { y += 1 }) {
-            texture(block.type)
+            texture(block.breakTexture)
             offsetX(0.2f)
             offsetZ(0.2f)
             speed(0.5f)
@@ -452,8 +458,7 @@ class Quarry(
                 createSmallHorizontalScaffolding(
                     armX,
                     location.apply { yaw = if (index == 0) 180f else 0f },
-                    Axis.X,
-                    center = false
+                    Axis.X
                 )
             } else {
                 createHorizontalScaffolding(armX, location, Axis.X, false)
@@ -466,8 +471,7 @@ class Quarry(
             if (index == 0 || index == armZLocations.size - 1) {
                 createSmallHorizontalScaffolding(armZ,
                     location.apply { yaw = if (index == 0) 0f else 180f },
-                    Axis.Z,
-                    center = false
+                    Axis.Z
                 )
             } else {
                 createHorizontalScaffolding(armZ, location, Axis.Z, false)
@@ -509,9 +513,9 @@ class Quarry(
             Location(world, minX.toDouble(), y, maxZ.toDouble(), 270f, 0f)
         )
     
-    private fun createSmallHorizontalScaffolding(model: MultiModel, location: Location, axis: Axis, center: Boolean = true) {
+    private fun createSmallHorizontalScaffolding(model: MultiModel, location: Location, axis: Axis) {
         location.yaw += if (axis == Axis.Z) 0f else 90f
-        model.addModels(Model(SMALL_HORIZONTAL, if (center) location.center() else location))
+        model.addModels(Model(SMALL_HORIZONTAL, location))
     }
     
     private fun createHorizontalScaffolding(model: MultiModel, location: Location, axis: Axis, center: Boolean = true) {

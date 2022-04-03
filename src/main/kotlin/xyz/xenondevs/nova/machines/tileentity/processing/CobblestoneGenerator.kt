@@ -14,13 +14,12 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.LeftRightFluidProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.Blocks.COBBLESTONE_GENERATOR
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.ItemNovaMaterial
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -44,7 +43,6 @@ import xyz.xenondevs.nova.util.axis
 import xyz.xenondevs.nova.util.particleBuilder
 import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
-import java.util.*
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -58,13 +56,7 @@ private val WATER_CAPACITY = NovaConfig[COBBLESTONE_GENERATOR].getLong("water_ca
 private val LAVA_CAPACITY = NovaConfig[COBBLESTONE_GENERATOR].getLong("lava_capacity")!!
 private val MB_PER_TICK = NovaConfig[COBBLESTONE_GENERATOR].getLong("mb_per_tick")!!
 
-class CobblestoneGenerator(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::CobblestoneGeneratorGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
@@ -83,11 +75,11 @@ class CobblestoneGenerator(
     private var currentMode = mode
     private var mbUsed = 0L
     
-    private val waterLevel = FakeArmorStand(armorStand.location) { it.isInvisible = true; it.isMarker = true }
-    private val lavaLevel = FakeArmorStand(armorStand.location) { it.isInvisible = true; it.isMarker = true }
+    private val waterLevel = FakeArmorStand(centerLocation) { it.isInvisible = true; it.isMarker = true }
+    private val lavaLevel = FakeArmorStand(centerLocation) { it.isInvisible = true; it.isMarker = true }
     
     private val particleEffect = particleBuilder(ParticleEffect.SMOKE_LARGE) {
-        location(armorStand.location.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
+        location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
         offset(getFace(BlockSide.RIGHT).axis, 0.15f)
         amount(5)
         speed(0.03f)

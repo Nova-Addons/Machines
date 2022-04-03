@@ -11,13 +11,12 @@ import org.bukkit.Material
 import org.bukkit.Tag
 import org.bukkit.block.Block
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
-import xyz.xenondevs.nova.data.config.DEFAULT_CONFIG
+import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.HARVESTER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType.BUFFER
@@ -38,7 +37,8 @@ import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.nova.util.item.*
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
+import xyz.xenondevs.nova.world.block.context.BlockBreakContext
+import xyz.xenondevs.nova.world.pos
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import java.util.*
@@ -50,16 +50,8 @@ private val IDLE_TIME = NovaConfig[HARVESTER].getInt("idle_time")!!
 private val MIN_RANGE = NovaConfig[HARVESTER].getInt("range.min")!!
 private val MAX_RANGE = NovaConfig[HARVESTER].getInt("range.max")!!
 private val DEFAULT_RANGE = NovaConfig[HARVESTER].getInt("range.default")!!
-private val DROP_EXCESS_ON_GROUND = DEFAULT_CONFIG.getBoolean("drop_excess_on_ground")
-private val DISABLE_BLOCK_BREAK_EFFECTS = DEFAULT_CONFIG.getBoolean("disable_block_break_effects")
 
-class Harvester(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("harvest", 12, ::handleInventoryUpdate)
     private val shearInventory = getInventory("shears", 1, ::handleShearInventoryUpdate)
@@ -121,7 +113,7 @@ class Harvester(
                 if (timePassed++ >= maxIdleTime) {
                     timePassed = 0
                     
-                    if (!DROP_EXCESS_ON_GROUND && inventory.isFull()) return
+                    if (!GlobalValues.DROP_EXCESS_ON_GROUND && inventory.isFull()) return
                     if (queuedBlocks.isEmpty()) loadBlocks()
                     harvestNextBlock()
                 }
@@ -167,6 +159,24 @@ class Harvester(
                         continue
                     }
                     
+                    // get drops
+                    val ctx = BlockBreakContext(block.pos, this, location, null, tool)
+                    var drops = (if (PlantUtils.COMPLEX_HARVESTABLE_BLOCKS.contains(expectedType)) {
+                        // use complex harvesting method to harvest this block
+                        listOf(PlantUtils.COMPLEX_HARVESTABLE_BLOCKS[expectedType]!!.second(block))
+                    } else {
+                        // break the drops with the provided tool
+                        block.getAllDrops(ctx)
+                    }).toMutableList()
+                    drops = TileEntityBreakBlockEvent(this, block, drops).also(::callEvent).drops
+                    
+                    // check that the drops will fit in the inventory or can be dropped on the ground
+                    if (!GlobalValues.DROP_EXCESS_ON_GROUND && !inventory.canHold(drops)) {
+                        tryAgain = true
+                        continue
+                    }
+                    
+                    // check for tool and damage if present
                     if (toolInventory != null) {
                         if (tool == null) {
                             tryAgain = true
@@ -176,23 +186,13 @@ class Harvester(
                         toolInventory.setItemStack(SELF_UPDATE_REASON, 0, ToolUtils.damageTool(tool))
                     }
                     
-                    var drops = (if (PlantUtils.COMPLEX_HARVESTABLE_BLOCKS.contains(expectedType)) {
-                        // use complex harvesting method to harvest this block
-                        listOf(PlantUtils.COMPLEX_HARVESTABLE_BLOCKS[expectedType]!!.second(block))
-                    } else {
-                        // break the drops with the provided tool
-                        block.getAllDrops(tool)
-                    }).toMutableList()
-                    
-                    val event = TileEntityBreakBlockEvent(this, block, drops)
-                    callEvent(event)
-                    drops = event.drops
-                    block.remove(!DISABLE_BLOCK_BREAK_EFFECTS)
+                    // remove the block
+                    block.remove(ctx)
                     
                     // add the drops to the inventory or drop them in the world if they don't fit
                     if (inventory.canHold(drops))
                         inventory.addAll(SELF_UPDATE_REASON, drops)
-                    else if (DROP_EXCESS_ON_GROUND)
+                    else if (GlobalValues.DROP_EXCESS_ON_GROUND)
                         world.dropItemsNaturally(block.location, drops)
                     
                     // take energy

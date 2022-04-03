@@ -10,10 +10,9 @@ import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Animals
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.BREEDER
 import xyz.xenondevs.nova.material.CoreGUIMaterial
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -38,10 +37,8 @@ import xyz.xenondevs.nova.util.getSurroundingChunks
 import xyz.xenondevs.nova.util.item.FoodUtils
 import xyz.xenondevs.nova.util.item.canBredNow
 import xyz.xenondevs.nova.util.item.genericMaxHealth
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
-import java.util.*
 import kotlin.math.min
 
 private val MAX_ENERGY = NovaConfig[BREEDER].getLong("capacity")!!
@@ -53,13 +50,7 @@ private val MIN_RANGE = NovaConfig[BREEDER].getInt("range.min")!!
 private val MAX_RANGE = NovaConfig[BREEDER].getInt("range.max")!!
 private val DEFAULT_RANGE = NovaConfig[BREEDER].getInt("range.default")!!
 
-class Breeder(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 9, ::handleInventoryUpdate)
     override val gui = lazy { MobCrusherGUI() }

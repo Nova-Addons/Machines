@@ -27,13 +27,13 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.data.serialization.cbf.element.other.ListElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.BrewProgressItem
 import xyz.xenondevs.nova.machines.recipe.ElectricBrewingStandRecipe
 import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_BREWING_STAND
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.machines.registry.GUITextures
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -55,9 +55,7 @@ import xyz.xenondevs.nova.util.contains
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.localizedName
 import xyz.xenondevs.nova.util.removeFirstMatching
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import java.awt.Color
-import java.util.*
 import kotlin.math.roundToInt
 
 private val ENERGY_CAPACITY = NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_capacity")!!
@@ -67,13 +65,7 @@ private val BREW_TIME = NovaConfig[ELECTRIC_BREWING_STAND].getInt("brew_time")!!
 
 private val IGNORE_UPDATE_REASON = object : UpdateReason {}
 
-class ElectricBrewingStand(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     // These values need to be accessed from outside the class
     companion object {

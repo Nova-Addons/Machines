@@ -3,11 +3,9 @@ package xyz.xenondevs.nova.machines.tileentity.energy
 import de.studiocode.invui.gui.GUI
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
-import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.LAVA_GENERATOR
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
@@ -23,22 +21,14 @@ import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.*
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
-import java.util.*
 
 private val ENERGY_CAPACITY = NovaConfig[LAVA_GENERATOR].getLong("energy_capacity")!!
 private val FLUID_CAPACITY = NovaConfig[LAVA_GENERATOR].getLong("fluid_capacity")!!
 private val ENERGY_PER_MB = NovaConfig[LAVA_GENERATOR].getDouble("energy_per_mb")!!
 private val BURN_RATE = NovaConfig[LAVA_GENERATOR].getDouble("burn_rate")!!
 
-class LavaGenerator(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::LavaGeneratorGUI)
     
@@ -54,7 +44,7 @@ class LavaGenerator(
     
     private val smokeParticleTask = createParticleTask(listOf(
         particle(ParticleEffect.SMOKE_NORMAL) {
-            location(armorStand.location.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
+            location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
             offset(getFace(BlockSide.RIGHT).axis, 0.15f)
             offsetY(0.1f)
             speed(0f)
@@ -64,7 +54,7 @@ class LavaGenerator(
     
     private val lavaParticleTask = createParticleTask(listOf(
         particle(ParticleEffect.LAVA) {
-            location(armorStand.location.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
+            location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
             offset(getFace(BlockSide.RIGHT).axis, 0.15f)
             offsetY(0.1f)
         }
@@ -74,8 +64,8 @@ class LavaGenerator(
         handleUpgradeUpdates()
     }
     
-    override fun getHeadStack(): ItemStack {
-        return material.block!!.createItemStack(on.intValue)
+    private fun updateModelState() {
+        blockState.modelProvider.update(on.intValue)
     }
     
     private fun handleUpgradeUpdates() {
@@ -87,7 +77,7 @@ class LavaGenerator(
         if (energyHolder.energy == energyHolder.maxEnergy || fluidContainer.isEmpty()) {
             if (on) {
                 on = false
-                updateHeadStack()
+                updateModelState()
                 smokeParticleTask.stop()
                 lavaParticleTask.stop()
             }
@@ -95,7 +85,7 @@ class LavaGenerator(
             return
         } else if (!on) {
             on = true
-            updateHeadStack()
+            updateModelState()
             smokeParticleTask.start()
             lavaParticleTask.start()
         }

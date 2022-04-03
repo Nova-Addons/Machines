@@ -23,12 +23,11 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.item.MobCatcherItem
 import xyz.xenondevs.nova.machines.registry.Blocks.MOB_DUPLICATOR
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.CoreGUIMaterial
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
@@ -46,10 +45,8 @@ import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.nova.util.data.NBTUtils
 import xyz.xenondevs.nova.util.data.isString
 import xyz.xenondevs.nova.util.data.localized
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import java.io.IOException
 import java.net.URL
-import java.util.*
 import kotlin.random.Random
 import kotlin.random.nextInt
 
@@ -61,13 +58,7 @@ private val IDLE_TIME_NBT = NovaConfig[MOB_DUPLICATOR].getInt("idle_time_nbt")!!
 private val ENTITY_LIMIT = NovaConfig[MOB_DUPLICATOR].getInt("entity_limit")!!
 private val NERF_MOBS = NovaConfig[MOB_DUPLICATOR].getBoolean("nerf_mobs")
 
-class MobDuplicator(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 1, ::handleInventoryUpdate)
     override val gui = lazy { MobDuplicatorGUI() }

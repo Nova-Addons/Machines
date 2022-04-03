@@ -8,13 +8,12 @@ import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.NamespacedKey
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.recipe.RecipeManager
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.ProgressArrowItem
 import xyz.xenondevs.nova.machines.gui.PulverizerProgressItem
 import xyz.xenondevs.nova.machines.recipe.PulverizerRecipe
 import xyz.xenondevs.nova.machines.registry.Blocks.PULVERIZER
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -31,22 +30,14 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.particle
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
-import java.util.*
 import kotlin.math.max
 
 private val MAX_ENERGY = NovaConfig[PULVERIZER].getLong("capacity")!!
 private val ENERGY_PER_TICK = NovaConfig[PULVERIZER].getLong("energy_per_tick")!!
 private val PULVERIZE_SPEED = NovaConfig[PULVERIZER].getInt("speed")!!
 
-class Pulverizer(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { PulverizerGUI() }
     
@@ -69,7 +60,7 @@ class Pulverizer(
     
     private val particleTask = createParticleTask(listOf(
         particle(ParticleEffect.SMOKE_NORMAL) {
-            location(armorStand.location.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.8 })
+            location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.8 })
             offset(0.05, 0.2, 0.05)
             speed(0f)
         }

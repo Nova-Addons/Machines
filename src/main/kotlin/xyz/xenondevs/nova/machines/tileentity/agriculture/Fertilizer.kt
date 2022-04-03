@@ -16,10 +16,9 @@ import org.bukkit.block.Block
 import org.bukkit.block.data.Ageable
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.FERTILIZER
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -43,10 +42,8 @@ import xyz.xenondevs.nova.util.item.PlantUtils
 import xyz.xenondevs.nova.util.item.isFullyAged
 import xyz.xenondevs.nova.util.nmsStack
 import xyz.xenondevs.nova.util.serverLevel
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
-import java.util.*
 
 private val MAX_ENERGY = NovaConfig[FERTILIZER].getLong("capacity")!!
 private val ENERGY_PER_TICK = NovaConfig[FERTILIZER].getLong("energy_per_tick")!!
@@ -56,13 +53,7 @@ private val MIN_RANGE = NovaConfig[FERTILIZER].getInt("range.min")!!
 private val MAX_RANGE = NovaConfig[FERTILIZER].getInt("range.max")!!
 private val DEFAULT_RANGE = NovaConfig[FERTILIZER].getInt("range.default")!!
 
-class Fertilizer(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val fertilizerInventory = getInventory("fertilizer", 12, ::handleFertilizerUpdate)
     override val gui = lazy(::FertilizerGUI)

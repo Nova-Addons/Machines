@@ -8,14 +8,13 @@ import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import net.minecraft.world.entity.EquipmentSlot
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
-import xyz.xenondevs.nova.data.config.DEFAULT_CONFIG
+import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.Blocks.TREE_FACTORY
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.ItemNovaMaterial
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -29,11 +28,13 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.center
+import xyz.xenondevs.nova.util.dropItem
+import xyz.xenondevs.nova.util.particleBuilder
 import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
 import java.awt.Color
-import java.util.*
 
 private class PlantConfiguration(val miniature: ItemNovaMaterial, val loot: ItemStack, val color: Color)
 
@@ -55,17 +56,9 @@ private val ENERGY_PER_TICK = NovaConfig[TREE_FACTORY].getLong("energy_per_tick"
 private val PROGRESS_PER_TICK = NovaConfig[TREE_FACTORY].getDouble("progress_per_tick")!!
 private val IDLE_TIME = NovaConfig[TREE_FACTORY].getInt("idle_time")!!
 
-private val DROP_EXCESS_ON_GROUND = DEFAULT_CONFIG.getBoolean("drop_excess_on_ground")
-
 private const val MAX_GROWTH_STAGE = 199
 
-class TreeFactory(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inputInventory = getInventory("input", 1, intArrayOf(1), ::handleInputInventoryUpdate)
     private val outputInventory = getInventory("output", 9, ::handleOutputInventoryUpdate)
@@ -106,7 +99,8 @@ class TreeFactory(
     
     override fun handleTick() {
         if (energyHolder.energy >= energyHolder.energyConsumption && plantType != null) {
-            if (!DROP_EXCESS_ON_GROUND && outputInventory.isFull()) return
+            val plantLoot = PLANTS[plantType]!!.loot
+            if (!GlobalValues.DROP_EXCESS_ON_GROUND && !outputInventory.canHold(plantLoot)) return
             
             energyHolder.energy -= energyHolder.energyConsumption
             
@@ -132,10 +126,9 @@ class TreeFactory(
                 if (idleTimeLeft == 0) {
                     growthProgress = 0.0
                     
-                    val loot = PLANTS[plantType]!!.loot
-                    val leftover = outputInventory.addItem(SELF_UPDATE_REASON, loot)
-                    if (DROP_EXCESS_ON_GROUND && leftover > 0)
-                        armorStand.location.dropItem(loot.clone().apply { amount = leftover })
+                    val leftover = outputInventory.addItem(SELF_UPDATE_REASON, plantLoot)
+                    if (GlobalValues.DROP_EXCESS_ON_GROUND && leftover > 0)
+                        centerLocation.dropItem(plantLoot.clone().apply { amount = leftover })
                 }
             }
         }

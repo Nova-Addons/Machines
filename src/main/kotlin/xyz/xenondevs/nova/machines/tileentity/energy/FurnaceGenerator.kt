@@ -6,10 +6,9 @@ import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
+import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.EnergyProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.FURNACE_GENERATOR
-import xyz.xenondevs.nova.material.TileEntityNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType.NONE
@@ -26,9 +25,7 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.nova.util.BlockSide.FRONT
 import xyz.xenondevs.nova.util.item.fuel
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
-import java.util.*
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -37,13 +34,7 @@ private val ENERGY_PER_TICK = NovaConfig[FURNACE_GENERATOR].getLong("energy_per_
 private val BURN_TIME_MULTIPLIER = NovaConfig[FURNACE_GENERATOR].getDouble("burn_time_multiplier")!!
 private val ACCEPTED_UPGRADE_TYPES = arrayOf(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
 
-class FurnaceGenerator(
-    uuid: UUID,
-    data: CompoundElement,
-    material: TileEntityNovaMaterial,
-    ownerUUID: UUID,
-    armorStand: FakeArmorStand,
-) : NetworkedTileEntity(uuid, data, material, ownerUUID, armorStand), Upgradable {
+class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { FurnaceGeneratorGUI() }
     private val inventory = getInventory("fuel", 1, ::handleInventoryUpdate)
@@ -55,19 +46,19 @@ class FurnaceGenerator(
     private var burnTime: Int = retrieveData("burnTime") { 0 }
     private var totalBurnTime: Int = retrieveData("totalBurnTime") { 0 }
     private var active = burnTime != 0
-        set(value) {
-            if (field != value) {
-                field = value
-                if (value) particleTask.start()
+        set(active) {
+            if (field != active) {
+                field = active
+                if (active) particleTask.start()
                 else particleTask.stop()
                 
-                updateHeadStack()
+                blockState.modelProvider.update(active.intValue)
             }
         }
     
     private val particleTask = createParticleTask(listOf(
         particle(ParticleEffect.SMOKE_NORMAL) {
-            location(armorStand.location.advance(getFace(FRONT), 0.6).apply { y += 0.8 })
+            location(centerLocation.advance(getFace(FRONT), 0.6).apply { y += 0.8 })
             offset(getFace(BlockSide.RIGHT).axis, 0.15f)
             offsetY(0.1f)
             speed(0f)
@@ -92,9 +83,6 @@ class FurnaceGenerator(
         // set the burn time based on the calculated total burn time and the percentage of burn time that was left previously
         burnTime = (totalBurnTime * burnPercentage).toInt()
     }
-    
-    override fun getHeadStack() =
-        material.block!!.createItemStack(active.intValue)
     
     override fun handleTick() {
         if (burnTime == 0) burnItem()
