@@ -125,7 +125,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
             
             queuedBlocks += harvestRegion
                 .blocks
-                .filter { it.isHarvestable() }
+                .filter(PlantUtils::isHarvestable)
                 .sortedWith(HarvestPriorityComparator)
                 .map { it to it.type }
         }
@@ -144,8 +144,8 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 if (block.type == expectedType) {
                     
                     val toolInventory: VirtualInventory? = when {
+                        Tag.LEAVES.isTagged(expectedType) -> if (shearInventory.isEmpty) hoeInventory else shearInventory
                         Tag.MINEABLE_AXE.isTagged(expectedType) -> axeInventory
-                        Tag.LEAVES.isTagged(expectedType) -> shearInventory
                         Tag.MINEABLE_HOE.isTagged(expectedType) -> hoeInventory
                         else -> null
                     }
@@ -159,13 +159,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                     
                     // get drops
                     val ctx = BlockBreakContext(block.pos, this, location, null, tool)
-                    var drops = (if (PlantUtils.COMPLEX_HARVESTABLE_BLOCKS.contains(expectedType)) {
-                        // use complex harvesting method to harvest this block
-                        listOf(PlantUtils.COMPLEX_HARVESTABLE_BLOCKS[expectedType]!!.second(block))
-                    } else {
-                        // break the drops with the provided tool
-                        block.getAllDrops(ctx)
-                    }).toMutableList()
+                    var drops = PlantUtils.getHarvestDrops(ctx)!!.toMutableList()
                     drops = TileEntityBreakBlockEvent(this, block, drops).also(::callEvent).drops
                     
                     // check that the drops will fit in the inventory or can be dropped on the ground
@@ -184,8 +178,8 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                         toolInventory.setItemStack(SELF_UPDATE_REASON, 0, ToolUtils.damageTool(tool))
                     }
                     
-                    // remove the block
-                    block.remove(ctx)
+                    // harvest the plant
+                    PlantUtils.harvest(ctx, true)
                     
                     // add the drops to the inventory or drop them in the world if they don't fit
                     if (inventory.canHold(drops))
@@ -275,13 +269,13 @@ private object HarvestPriorityComparator : Comparator<Block> {
         
         if (type1 == type2) compareLocation()
         
-        if (type1.isTreeAttachment()) {
-            if (type2.isTreeAttachment()) {
+        if (PlantUtils.isTreeAttachment(type1)) {
+            if (PlantUtils.isTreeAttachment(type2)) {
                 return compareLocation()
             } else {
                 return -1
             }
-        } else if (type2.isTreeAttachment()) {
+        } else if (PlantUtils.isTreeAttachment(type2)) {
             return 1
         }
         

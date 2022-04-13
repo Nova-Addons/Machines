@@ -5,12 +5,6 @@ import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.item.Item
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
-import net.minecraft.core.Direction
-import net.minecraft.world.InteractionHand
-import net.minecraft.world.item.BoneMealItem
-import net.minecraft.world.item.context.UseOnContext
-import net.minecraft.world.phys.BlockHitResult
-import net.minecraft.world.phys.Vec3
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.data.Ageable
@@ -36,11 +30,8 @@ import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
-import xyz.xenondevs.nova.util.blockPos
 import xyz.xenondevs.nova.util.item.PlantUtils
 import xyz.xenondevs.nova.util.item.isFullyAged
-import xyz.xenondevs.nova.util.nmsStack
-import xyz.xenondevs.nova.util.serverLevel
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 
@@ -110,16 +101,8 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private fun fertilizeNextPlant() {
         for ((index, item) in fertilizerInventory.items.withIndex()) {
             if (item == null) continue
-            val plant = getRandomPlant() ?: return
-            
-            val context = UseOnContext(
-                plant.world.serverLevel,
-                null,
-                InteractionHand.MAIN_HAND,
-                item.nmsStack,
-                BlockHitResult(Vec3.ZERO, Direction.DOWN, plant.location.blockPos, false)
-            )
-            BoneMealItem.applyBonemeal(context)
+            val plant = getNextPlant() ?: return
+            PlantUtils.fertilize(plant)
             
             energyHolder.energy -= energyHolder.specialEnergyConsumption
             fertilizerInventory.addItemAmount(SELF_UPDATE_REASON, index, -1)
@@ -127,13 +110,12 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         }
     }
     
-    private fun getRandomPlant(): Block? =
+    private fun getNextPlant(): Block? =
         fertilizeRegion.blocks
-            .filter {
-                ProtectionManager.canUseBlock(this, ItemStack(Material.BONE_MEAL), it.location).get()
-                    && ((it.blockData is Ageable && !it.isFullyAged()) || (it.blockData !is Ageable && it.type in PlantUtils.PLANTS))
+            .firstOrNull {
+                (it.blockData is Ageable && !it.isFullyAged())
+                    && ProtectionManager.canUseBlock(this, ItemStack(Material.BONE_MEAL), it.location).get()
             }
-            .randomOrNull()
     
     private fun handleFertilizerUpdate(event: ItemUpdateEvent) {
         if ((event.isAdd || event.isSwap) && event.newItemStack.type != Material.BONE_MEAL)

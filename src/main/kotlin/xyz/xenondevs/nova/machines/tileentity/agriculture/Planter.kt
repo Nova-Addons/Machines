@@ -38,10 +38,12 @@ import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
-import xyz.xenondevs.nova.util.item.*
+import xyz.xenondevs.nova.util.item.PlantUtils
+import xyz.xenondevs.nova.util.item.ToolUtils
+import xyz.xenondevs.nova.util.item.isHoe
+import xyz.xenondevs.nova.util.item.isTillable
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
-import kotlin.random.Random
 
 private val MAX_ENERGY = NovaConfig[PLANTER].getLong("capacity")!!
 private val ENERGY_PER_TICK = NovaConfig[PLANTER].getLong("energy_per_tick")!!
@@ -117,15 +119,14 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 if (item == null) continue
                 
                 // find a location to place this seed or skip to the next one if there isn't one
-                val (plant, soil) = getNextBlock(item.type) ?: continue
+                val (plant, soil) = getNextPlantBlock(item) ?: continue
                 energyHolder.energy -= energyHolder.specialEnergyConsumption
                 
                 // till dirt if possible
                 if (soil.type.isTillable() && autoTill && !hoesInventory.isEmpty) tillDirt(soil)
                 
                 // plant the seed
-                plant.type = PlantUtils.SEED_BLOCKS[item.type] ?: item.type
-                plant.world.playSound(plant.location, plant.type.soundGroup.placeSound, 1f, Random.nextDouble(0.8, 0.95).toFloat())
+                PlantUtils.placeSeed(item, plant, true)
                 
                 // remove one from the seed stack
                 inputInventory.addItemAmount(SELF_UPDATE_REASON, index, -1)
@@ -134,7 +135,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 break
             }
         } else if (autoTill && !hoesInventory.isEmpty) {
-            val block = getNextBlock(null)?.second
+            val block = getNextTillableBlock()
             if (block != null) {
                 energyHolder.energy -= energyHolder.specialEnergyConsumption
                 tillDirt(block)
@@ -142,35 +143,44 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         }
     }
     
-    private fun getNextBlock(seedMaterial: Material?): Pair<Block, Block>? {
+    private fun getNextPlantBlock(seedStack: ItemStack): Pair<Block, Block>? {
         val emptyHoes = hoesInventory.isEmpty
         val index = plantRegion.withIndex().indexOfFirst { (index, block) ->
             val soilBlock = soilRegion[index]
             val soilType = soilBlock.type
             
-            // If there are no seeds search for dirt that can be tilled
-            if (seedMaterial == null) return@indexOfFirst autoTill && !emptyHoes && soilType.isTillable()
-            
-            // If the plant block is already occupied return false
+            // if the plant block is already occupied return false
             if (!block.type.isAir)
                 return@indexOfFirst false
             
-            // If farmland is required and auto tilling is disabled or there are no hoes available,
-            // only use this block if it's already farmland
-            if (seedMaterial.requiresFarmland() && (!autoTill || emptyHoes))
-                return@indexOfFirst soilType == Material.FARMLAND
-            
-            // if soil type is applicable for the seed or can be made applicable
-            if (!seedMaterial.canBePlacedOn(soilType) && !(seedMaterial.canBePlacedOn(Material.FARMLAND) && autoTill && !emptyHoes && soilType.isTillable()))
-                return@indexOfFirst false
-            
-            return@indexOfFirst ProtectionManager.canPlace(this, ItemStack(seedMaterial), block.location).get()
-                && (!autoTill || ProtectionManager.canUseBlock(this, hoesInventory.getItemStack(0), soilBlock.location).get())
+            val soilTypeApplicable = PlantUtils.canBePlaced(seedStack, soilBlock)
+            if (soilTypeApplicable) {
+                // if the seed can be placed on the soil block, only the permission needs to be checked
+                return@indexOfFirst ProtectionManager.canPlace(this, seedStack, block.location).get()
+            } else {
+                // if the seed can not be placed on the soil block, check if this seed requires farmland and if it does
+                // check if the soil block can be tilled
+                val requiresFarmland = PlantUtils.requiresFarmland(seedStack)
+                val isOrCanBeFarmland = soilType == Material.FARMLAND || (soilType.isTillable() && autoTill && !emptyHoes)
+                if (requiresFarmland && !isOrCanBeFarmland)
+                    return@indexOfFirst false
+                
+                // the block can be tilled, now check for both planting and tilling permissions
+                return@indexOfFirst ProtectionManager.canPlace(this, seedStack, block.location).get() &&
+                    ProtectionManager.canUseBlock(this, hoesInventory.getItemStack(0), soilBlock.location).get()
+            }
         }
         
         if (index == -1)
             return null
         return plantRegion[index] to soilRegion[index]
+    }
+    
+    private fun getNextTillableBlock(): Block? {
+        return plantRegion.firstOrNull {
+            it.type.isTillable() 
+                && ProtectionManager.canUseBlock(this, hoesInventory.getItemStack(0), it.location).get()
+        }
     }
     
     private fun tillDirt(block: Block) {
@@ -185,7 +195,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     }
     
     private fun handleSeedUpdate(event: ItemUpdateEvent) {
-        if ((event.isAdd || event.isSwap) && event.newItemStack.type !in PlantUtils.PLANTS)
+        if (!event.isRemove && !PlantUtils.isSeed(event.newItemStack))
             event.isCancelled = true
     }
     
