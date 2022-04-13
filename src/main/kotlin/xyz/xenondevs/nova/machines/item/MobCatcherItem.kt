@@ -21,10 +21,14 @@ import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.item.NovaItem
 import xyz.xenondevs.nova.item.behavior.ItemBehavior
 import xyz.xenondevs.nova.machines.registry.Items
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.EntityUtils
+import xyz.xenondevs.nova.util.addPrioritized
 import xyz.xenondevs.nova.util.data.addLoreLines
 import xyz.xenondevs.nova.util.data.getAllStrings
 import xyz.xenondevs.nova.util.data.localized
+import xyz.xenondevs.nova.util.getTargetLocation
+import xyz.xenondevs.nova.util.item.retrieveData
+import xyz.xenondevs.nova.util.item.storeData
 
 private val DATA_KEY = NamespacedKey(NOVA, "entityData")
 private val TYPE_KEY = NamespacedKey(NOVA, "entityType")

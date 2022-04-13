@@ -25,8 +25,6 @@ import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType.CONSUME
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType.NONE
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -56,7 +54,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     private val outputInv = getInventory("output", 1, ::handleOutputUpdate)
     
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ALL_ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createEnergySideConfig(CONSUME, FRONT) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
         inputInv to NetworkConnectionType.BUFFER,
@@ -136,12 +134,12 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         
         private val sideConfigGUI = SideConfigGUI(
             this@MechanicalPress,
-            listOf(NONE, CONSUME),
             listOf(
                 itemHolder.getNetworkedInventory(inputInv) to "inventory.nova.input",
                 itemHolder.getNetworkedInventory(outputInv) to "inventory.nova.output",
-            )
-        ) { openWindow(it) }
+            ),
+            ::openWindow
+        )
         
         override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
             .setStructure("" +

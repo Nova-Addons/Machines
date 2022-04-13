@@ -11,8 +11,6 @@ import xyz.xenondevs.nova.machines.gui.EnergyProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.FURNACE_GENERATOR
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType.NONE
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType.PROVIDE
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -25,6 +23,7 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.nova.util.BlockSide.FRONT
 import xyz.xenondevs.nova.util.item.fuel
+import xyz.xenondevs.nova.util.item.toItemStack
 import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -39,7 +38,7 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
     override val gui = lazy { FurnaceGeneratorGUI() }
     private val inventory = getInventory("fuel", 1, ::handleInventoryUpdate)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = ACCEPTED_UPGRADE_TYPES)
-    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder) { createEnergySideConfig(PROVIDE, FRONT) }
+    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder) { createSideConfig(NetworkConnectionType.EXTRACT, FRONT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     
     private var burnTimeMultiplier = BURN_TIME_MULTIPLIER
@@ -135,9 +134,9 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
         
         private val sideConfigGUI = SideConfigGUI(
             this@FurnaceGenerator,
-            listOf(NONE, PROVIDE),
-            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.fuel")
-        ) { openWindow(it) }
+            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.fuel"),
+            ::openWindow
+        )
         
         override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 6)
             .setStructure("" +

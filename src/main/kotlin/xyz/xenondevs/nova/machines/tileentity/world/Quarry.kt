@@ -30,7 +30,6 @@ import xyz.xenondevs.nova.tileentity.MultiModel
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntityManager
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -89,7 +88,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     override val gui = lazy { QuarryGUI() }
     private val inventory = getInventory("quarryInventory", 9) {}
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, 0, 0, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, 0, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
     
     private val entityId = uuid.hashCode()
@@ -377,7 +376,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
                     
                     val topLoc = LocationUtils.getTopBlockBetween(world, x, z, maxBreakY, minBreakY)
                     if (topLoc != null
-                        && (topLoc.block.type.isBreakable() || TileEntityManager.getTileEntityAt(topLoc) != null)
+                        && (topLoc.block.hardness >= 0 || TileEntityManager.getTileEntityAt(topLoc) != null)
                         && ProtectionManager.canBreak(this, null, topLoc).get()) {
                         
                         results += topLoc
@@ -569,9 +568,9 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         
         private val sideConfigGUI = SideConfigGUI(
             this@Quarry,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
-            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default")
-        ) { openWindow(it) }
+            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default"),
+            ::openWindow
+        )
         
         private val sizeItems = ArrayList<Item>()
         private val depthItems = ArrayList<Item>()

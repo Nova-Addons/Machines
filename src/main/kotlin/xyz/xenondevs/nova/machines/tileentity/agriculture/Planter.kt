@@ -23,7 +23,6 @@ import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -40,7 +39,6 @@ import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.item.*
-import xyz.xenondevs.nova.util.soundGroup
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import kotlin.random.Random
@@ -59,7 +57,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     private val hoesInventory = getInventory("hoes", 1, ::handleHoeUpdate)
     override val gui = lazy(::PlanterGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_PLANT, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.FRONT) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_PLANT, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
         inputInventory to NetworkConnectionType.BUFFER,
@@ -210,12 +208,12 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         
         private val sideConfigGUI = SideConfigGUI(
             this@Planter,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
             listOf(
                 itemHolder.getNetworkedInventory(inputInventory) to "inventory.nova.input",
                 itemHolder.getNetworkedInventory(hoesInventory) to "inventory.nova.hoes",
-            )
-        ) { openWindow(it) }
+            ),
+            ::openWindow
+        )
         
         private val rangeItems = ArrayList<Item>()
         

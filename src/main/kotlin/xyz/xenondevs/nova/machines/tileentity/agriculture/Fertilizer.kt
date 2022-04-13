@@ -22,7 +22,6 @@ import xyz.xenondevs.nova.machines.registry.Blocks.FERTILIZER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -58,7 +57,7 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private val fertilizerInventory = getInventory("fertilizer", 12, ::handleFertilizerUpdate)
     override val gui = lazy(::FertilizerGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_FERTILIZE, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.FRONT) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_FERTILIZE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, fertilizerInventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
     private var maxIdleTime = 0
@@ -150,9 +149,9 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         
         private val sideConfigGUI = SideConfigGUI(
             this@Fertilizer,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
-            listOf(itemHolder.getNetworkedInventory(fertilizerInventory) to "inventory.nova.fertilizer")
-        ) { openWindow(it) }
+            listOf(itemHolder.getNetworkedInventory(fertilizerInventory) to "inventory.nova.fertilizer"),
+            ::openWindow
+        )
         
         private val rangeItems = ArrayList<Item>()
         

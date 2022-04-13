@@ -16,17 +16,15 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.LIGHTNING_EXCHANGER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntityManager
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType.NONE
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType.PROVIDE
+import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
-import xyz.xenondevs.nova.util.CUBE_FACES
+import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
-import java.util.*
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -40,8 +38,7 @@ class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(
     override val gui = lazy { LightningExchangerGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, 0, upgradeHolder) {
-        CUBE_FACES.associateWithTo(EnumMap(BlockFace::class.java))
-        { if (it == BlockFace.DOWN) PROVIDE else NONE }
+        createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
     }
     
     private var minBurst = 0L

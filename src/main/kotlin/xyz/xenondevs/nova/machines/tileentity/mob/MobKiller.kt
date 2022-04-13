@@ -13,7 +13,7 @@ import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.MOB_KILLER
 import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
+import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
@@ -47,7 +47,7 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     
     override val gui = lazy { MobCrusherGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_DAMAGE, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_DAMAGE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID, "Mob Killer").bukkitEntity
     
     private var timePassed = 0
@@ -118,9 +118,8 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         
         private val sideConfigGUI = SideConfigGUI(
             this@MobKiller,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
-            null
-        ) { openWindow(it) }
+            ::openWindow
+        )
         
         private val rangeItems = ArrayList<Item>()
         

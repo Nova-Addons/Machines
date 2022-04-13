@@ -13,7 +13,6 @@ import xyz.xenondevs.nova.machines.registry.Blocks.BLOCK_BREAKER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -25,6 +24,7 @@ import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.nova.util.item.ToolUtils
+import xyz.xenondevs.nova.util.item.isTraversable
 import xyz.xenondevs.nova.world.block.context.BlockBreakContext
 import xyz.xenondevs.nova.world.pos
 import kotlin.math.min
@@ -40,7 +40,7 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     private val inventory = getInventory("inventory", 9) { if (it.isAdd && it.updateReason != SELF_UPDATE_REASON) it.isCancelled = true }
     override val gui = lazy { BlockBreakerGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, allowed = UpgradeType.ALL_ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.FRONT) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
         inventory to NetworkConnectionType.EXTRACT
@@ -119,9 +119,9 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
         
         private val sideConfigGUI = SideConfigGUI(
             this@BlockBreaker,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
-            listOf(Pair(itemHolder.getNetworkedInventory(inventory), "inventory.nova.default"))
-        ) { openWindow(it) }
+            listOf(Pair(itemHolder.getNetworkedInventory(inventory), "inventory.nova.default")),
+            ::openWindow
+        )
         
         override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
             .setStructure("" +

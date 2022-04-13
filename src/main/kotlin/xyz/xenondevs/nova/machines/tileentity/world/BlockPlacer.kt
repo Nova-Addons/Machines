@@ -12,7 +12,6 @@ import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.TileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -24,7 +23,7 @@ import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
-import xyz.xenondevs.nova.util.isReplaceable
+import xyz.xenondevs.nova.util.item.isReplaceable
 import xyz.xenondevs.nova.util.place
 import xyz.xenondevs.nova.world.block.BlockManager
 import xyz.xenondevs.nova.world.block.context.BlockPlaceContext
@@ -38,7 +37,7 @@ class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     private val inventory = getInventory("inventory", 9) {}
     override val gui = lazy { BlockPlacerGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_PLACE, 0, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.FRONT) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_PLACE, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
     private val placePos = location.clone().advance(getFace(BlockSide.FRONT)).pos
@@ -73,9 +72,9 @@ class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         
         private val sideConfigGUI = SideConfigGUI(
             this@BlockPlacer,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
-            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default")
-        ) { openWindow(it) }
+            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default"),
+            ::openWindow
+        )
         
         override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
             .setStructure("" +

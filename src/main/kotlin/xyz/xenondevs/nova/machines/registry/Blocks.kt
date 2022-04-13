@@ -15,7 +15,7 @@ import xyz.xenondevs.nova.material.BlockOptions
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerEnergyTileEntity
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerItem
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerTileEntity
-import xyz.xenondevs.nova.tileentity.network.energy.holder.EnergyHolder
+import xyz.xenondevs.nova.tileentity.network.energy.holder.NovaEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.util.SoundEffect
 import xyz.xenondevs.nova.util.item.ToolCategory
@@ -47,16 +47,16 @@ object Blocks {
     val STAR_COLLECTOR = registerEnergyTileEntity(MACHINES, "star_collector", STONE, ::StarCollector)
     val CHUNK_LOADER = registerEnergyTileEntity(MACHINES, "chunk_loader", STONE, ::ChunkLoader)
     val QUARRY = registerEnergyTileEntity(MACHINES, "quarry", STONE, ::Quarry, Quarry::canPlace)
-    val ELECTRIC_BREWING_STAND = registerTileEntity(MACHINES, "electric_brewing_stand", STONE, ::ElectricBrewingStand, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
-    val PUMP = registerTileEntity(MACHINES, "pump", STONE, ::Pump, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
-    val FREEZER = registerTileEntity(MACHINES, "freezer", STONE, ::Freezer, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
-    val FLUID_INFUSER = registerTileEntity(MACHINES, "fluid_infuser", STONE, ::FluidInfuser, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
+    val ELECTRIC_BREWING_STAND = registerTileEntity(MACHINES, "electric_brewing_stand", STONE, ::ElectricBrewingStand, listOf(NovaEnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
+    val PUMP = registerTileEntity(MACHINES, "pump", STONE, ::Pump, listOf(NovaEnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
+    val FREEZER = registerTileEntity(MACHINES, "freezer", STONE, ::Freezer, listOf(NovaEnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
+    val FLUID_INFUSER = registerTileEntity(MACHINES, "fluid_infuser", STONE, ::FluidInfuser, listOf(NovaEnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
     val SPRINKLER = registerTileEntity(MACHINES, "sprinkler", LIGHT_METAL, ::Sprinkler, listOf(NovaFluidHolder::modifyItemBuilder))
     val SOLAR_PANEL = registerEnergyTileEntity(MACHINES, "solar_panel", STONE, ::SolarPanel)
     val LIGHTNING_EXCHANGER = registerEnergyTileEntity(MACHINES, "lightning_exchanger", STONE, ::LightningExchanger)
     val WIND_TURBINE = registerEnergyTileEntity(MACHINES, "wind_turbine", METAL, ::WindTurbine, WindTurbine::canPlace, multiBlockLoader = WindTurbine::loadMultiBlock)
     val FURNACE_GENERATOR = registerEnergyTileEntity(MACHINES, "furnace_generator", STONE, ::FurnaceGenerator)
-    val LAVA_GENERATOR = registerTileEntity(MACHINES, "lava_generator", STONE, ::LavaGenerator, listOf(EnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
+    val LAVA_GENERATOR = registerTileEntity(MACHINES, "lava_generator", STONE, ::LavaGenerator, listOf(NovaEnergyHolder::modifyItemBuilder, NovaFluidHolder::modifyItemBuilder))
     val INFINITE_WATER_SOURCE = registerTileEntity(MACHINES, "infinite_water_source", SANDSTONE, ::InfiniteWaterSource)
     
     // Tree Miniatures

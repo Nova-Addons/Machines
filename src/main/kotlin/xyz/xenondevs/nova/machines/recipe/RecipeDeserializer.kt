@@ -8,7 +8,7 @@ import org.bukkit.potion.PotionEffectType
 import xyz.xenondevs.nova.data.serialization.json.ConversionRecipeDeserializer
 import xyz.xenondevs.nova.data.serialization.json.RecipeDeserializer
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
-import xyz.xenondevs.nova.util.ItemUtils
+import xyz.xenondevs.nova.util.item.ItemUtils
 import xyz.xenondevs.nova.util.data.*
 import java.io.File
 

@@ -18,7 +18,6 @@ import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -52,7 +51,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
     }
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, IDLE_ENERGY_PER_TICK, COLLECTING_ENERGY_PER_TICK, upgradeHolder) {
-        createExclusiveEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.BOTTOM)
+        createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM)
     }
     
     private var maxIdleTime = 0
@@ -181,7 +180,6 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         
         private val sideConfigGUI = SideConfigGUI(
             this@StarCollector,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output"),
             ::openWindow
         )

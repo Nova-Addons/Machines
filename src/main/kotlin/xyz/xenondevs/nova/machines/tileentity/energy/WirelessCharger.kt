@@ -10,7 +10,7 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.item.behavior.Chargeable
 import xyz.xenondevs.nova.machines.registry.Blocks.WIRELESS_CHARGER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
+import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
@@ -23,7 +23,7 @@ import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
-import xyz.xenondevs.nova.util.novaMaterial
+import xyz.xenondevs.nova.util.item.novaMaterial
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import de.studiocode.invui.item.Item as UIItem
@@ -38,7 +38,7 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     
     override val gui = lazy(::WirelessChargerGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.ENERGY, UpgradeType.RANGE)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, CHARGE_SPEED, 0, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, CHARGE_SPEED, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     
     private var maxRange = 0
     private var range = retrieveData("range") { DEFAULT_RANGE }
@@ -120,9 +120,8 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         
         private val sideConfigGUI = SideConfigGUI(
             this@WirelessCharger,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.NONE),
-            null
-        ) { openWindow(it) }
+            ::openWindow
+        )
         
         private val rangeItems = ArrayList<UIItem>()
         

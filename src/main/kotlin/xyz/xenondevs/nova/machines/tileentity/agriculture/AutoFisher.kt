@@ -28,7 +28,6 @@ import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -53,7 +52,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private val fishingRodInventory = getInventory("fishingRod", 1, ::handleFishingRodInventoryUpdate)
     override val gui = lazy(::AutoFisherGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ALL_ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.BOTTOM) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM) }
     override val itemHolder = NovaItemHolder(
         this,
         inventory to NetworkConnectionType.EXTRACT,
@@ -148,12 +147,12 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         
         private val sideConfigGUI = SideConfigGUI(
             this@AutoFisher,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
             listOf(
                 itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default",
                 itemHolder.getNetworkedInventory(fishingRodInventory) to "inventory.nova.fishing_rod"
-            )
-        ) { openWindow(it) }
+            ),
+            ::openWindow
+        )
         
         val idleBar = object : VerticalBar(height = 3) {
             override val barMaterial = CoreGUIMaterial.BAR_GREEN

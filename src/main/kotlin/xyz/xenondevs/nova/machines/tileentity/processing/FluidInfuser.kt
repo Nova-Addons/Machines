@@ -23,7 +23,6 @@ import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
@@ -69,7 +68,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     private val input = getInventory("input", 1, ::handleInputInventoryUpdate)
     private val output = getInventory("output", 1, ::handleOutputInventoryUpdate)
     private val tank = getFluidContainer("tank", hashSetOf(FluidType.WATER, FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
-    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, 0, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.FRONT) }
+    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val fluidHolder = NovaFluidHolder(this, tank to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -149,7 +148,6 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
         
         private val sideConfigGUI = SideConfigGUI(
             this@FluidInfuser,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
             listOf(
                 itemHolder.getNetworkedInventory(input) to "inventory.nova.input",
                 itemHolder.getNetworkedInventory(output) to "inventory.nova.output"

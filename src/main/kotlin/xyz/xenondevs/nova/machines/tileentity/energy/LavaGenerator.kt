@@ -8,7 +8,6 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.LAVA_GENERATOR
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
@@ -35,7 +34,7 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.EFFICIENCY, UpgradeType.SPEED, UpgradeType.ENERGY, UpgradeType.FLUID)
     private val fluidContainer = getFluidContainer("tank", hashSetOf(FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
     override val fluidHolder = NovaFluidHolder(this, fluidContainer to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
-    override val energyHolder = ProviderEnergyHolder(this, ENERGY_CAPACITY, 0, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.PROVIDE, BlockSide.FRONT) }
+    override val energyHolder = ProviderEnergyHolder(this, ENERGY_CAPACITY, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
     
     private var on = false
     private var burnRate = 0.0
@@ -111,8 +110,7 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         
         private val sideConfigGUI = SideConfigGUI(
             this@LavaGenerator,
-            fluidContainers = listOf(fluidContainer to "container.nova.lava_tank"),
-            allowedEnergyTypes = listOf(EnergyConnectionType.NONE, EnergyConnectionType.PROVIDE),
+            fluidContainerNames = listOf(fluidContainer to "container.nova.lava_tank"),
             openPrevious = ::openWindow
         )
         

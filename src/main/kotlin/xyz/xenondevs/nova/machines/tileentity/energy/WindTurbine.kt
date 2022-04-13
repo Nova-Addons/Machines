@@ -14,7 +14,7 @@ import xyz.xenondevs.nova.machines.registry.Blocks.WIND_TURBINE
 import xyz.xenondevs.nova.tileentity.Model
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntity
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
+import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
@@ -24,7 +24,7 @@ import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.add
 import xyz.xenondevs.nova.util.concurrent.CombinedBooleanFuture
-import xyz.xenondevs.nova.util.isReplaceable
+import xyz.xenondevs.nova.util.item.isReplaceable
 import xyz.xenondevs.nova.world.BlockPos
 import xyz.xenondevs.nova.world.pos
 import java.util.concurrent.CompletableFuture
@@ -39,10 +39,7 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     override val gui = lazy { WindTurbineGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, ::updateEnergyPerTick, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder) {
-        createEnergySideConfig(
-            EnergyConnectionType.PROVIDE,
-            BlockSide.TOP, BlockSide.RIGHT, BlockSide.LEFT, BlockSide.BACK
-        )
+        createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT, BlockSide.BOTTOM)
     }
     
     private val turbineModel = createMultiModel()

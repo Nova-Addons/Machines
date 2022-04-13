@@ -16,7 +16,6 @@ import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -55,7 +54,7 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     private val inventory = getInventory("inventory", 9, ::handleInventoryUpdate)
     override val gui = lazy { MobCrusherGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREED, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREED, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
     private lateinit var region: Region
@@ -178,9 +177,9 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         
         private val sideConfigGUI = SideConfigGUI(
             this@Breeder,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
-            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default")
-        ) { openWindow(it) }
+            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default"),
+            ::openWindow
+        )
         
         private val rangeItems = ArrayList<Item>()
         

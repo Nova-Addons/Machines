@@ -21,7 +21,6 @@ import xyz.xenondevs.nova.material.ItemNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
@@ -53,7 +52,7 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     
     override val fluidHolder = NovaFluidHolder(this, waterTank to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
-    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, 0, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.FRONT) }
+    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
     private val snowSpawnBlock = location.clone().apply { y += 1 }.block
     
@@ -109,10 +108,9 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         
         private val progressItem = LeftRightFluidProgressItem()
         private val sideConfigGUI = SideConfigGUI(this@Freezer,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output"),
             listOf(waterTank to "container.nova.water_tank"),
-            openPrevious = ::openWindow
+            ::openWindow
         )
         
         override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)

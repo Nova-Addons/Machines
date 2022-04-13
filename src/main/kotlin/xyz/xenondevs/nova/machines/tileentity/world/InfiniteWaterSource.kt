@@ -25,7 +25,7 @@ class InfiniteWaterSource(blockState: NovaTileEntityState) : NetworkedTileEntity
         
         private val sideConfigGUI = SideConfigGUI(
             this@InfiniteWaterSource,
-            fluidContainers = listOf(fluidContainer to "block.minecraft.water"),
+            fluidContainerNames = listOf(fluidContainer to "block.minecraft.water"),
             openPrevious = ::openWindow
         )
         

@@ -9,7 +9,7 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.CHUNK_LOADER
 import xyz.xenondevs.nova.tileentity.ChunkLoadManager
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
+import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
@@ -33,7 +33,7 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     override val gui = lazy { ChunkLoaderGUI() }
     
     override val upgradeHolder = UpgradeHolder(this, gui, ::updateEnergyPerTick, UpgradeType.ENERGY, UpgradeType.EFFICIENCY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, 0, 0, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, 0, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     
     private var range = retrieveData("range") { 0 }
     private var chunks = chunk.getSurroundingChunks(range, true)
@@ -91,9 +91,8 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         
         private val sideConfigGUI = SideConfigGUI(
             this@ChunkLoader,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
-            null
-        ) { openWindow(it) }
+            ::openWindow
+        )
         
         private val rangeItems = ArrayList<Item>()
         

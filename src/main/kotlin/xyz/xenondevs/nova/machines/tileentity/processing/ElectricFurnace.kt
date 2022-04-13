@@ -23,7 +23,6 @@ import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_FURNACE
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -52,7 +51,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     private val outputInventory = getInventory("output", 1, ::handleOutputInventoryUpdate)
     
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ALL_ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.FRONT) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
         inputInventory to NetworkConnectionType.BUFFER,
@@ -168,12 +167,12 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         
         private val sideConfigGUI = SideConfigGUI(
             this@ElectricFurnace,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
             listOf(
                 itemHolder.getNetworkedInventory(inputInventory) to "inventory.nova.input",
                 itemHolder.getNetworkedInventory(outputInventory) to "inventory.nova.output"
-            )
-        ) { openWindow(it) }
+            ),
+            ::openWindow
+        )
         
         override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
             .setStructure("" +

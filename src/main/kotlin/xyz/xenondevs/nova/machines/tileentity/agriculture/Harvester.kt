@@ -19,9 +19,7 @@ import xyz.xenondevs.nova.machines.registry.Blocks.HARVESTER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
-import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType.BUFFER
-import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType.EXTRACT
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
+import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -59,12 +57,12 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     private val hoeInventory = getInventory("hoe", 1, ::handleHoeInventoryUpdate)
     override val gui = lazy(::HarvesterGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREAK, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.FRONT) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREAK, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
-        inventory to EXTRACT,
-        shearInventory to BUFFER, axeInventory to BUFFER, hoeInventory to BUFFER
-    ) { createSideConfig(EXTRACT, BlockSide.FRONT) }
+        inventory to NetworkConnectionType.EXTRACT,
+        shearInventory to NetworkConnectionType.BUFFER, axeInventory to NetworkConnectionType.BUFFER, hoeInventory to NetworkConnectionType.BUFFER
+    ) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
     
     private var maxIdleTime = 0
     private var maxRange = 0
@@ -228,14 +226,14 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         
         private val sideConfigGUI = SideConfigGUI(
             this@Harvester,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
             listOf(
                 itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output",
                 itemHolder.getNetworkedInventory(shearInventory) to "inventory.nova.shears",
                 itemHolder.getNetworkedInventory(axeInventory) to "inventory.nova.axes",
                 itemHolder.getNetworkedInventory(hoeInventory) to "inventory.nova.hoes",
-            )
-        ) { openWindow(it) }
+            ),
+            ::openWindow
+        )
         
         private val rangeItems = ArrayList<Item>()
         

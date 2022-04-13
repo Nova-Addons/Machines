@@ -30,7 +30,6 @@ import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.EnergyConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -45,6 +44,7 @@ import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.nova.util.data.NBTUtils
 import xyz.xenondevs.nova.util.data.isString
 import xyz.xenondevs.nova.util.data.localized
+import xyz.xenondevs.nova.util.item.novaMaterial
 import java.io.IOException
 import java.net.URL
 import kotlin.random.Random
@@ -63,7 +63,7 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     private val inventory = getInventory("inventory", 1, ::handleInventoryUpdate)
     override val gui = lazy { MobDuplicatorGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ALL_ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_TICK_NBT, upgradeHolder) { createEnergySideConfig(EnergyConnectionType.CONSUME, BlockSide.TOP) }
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_TICK_NBT, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.TOP) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER)
     private val energyPerTick: Long
         get() = if (keepNbt) energyHolder.specialEnergyConsumption else energyHolder.energyConsumption
@@ -155,9 +155,9 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         
         private val sideConfigGUI = SideConfigGUI(
             this@MobDuplicator,
-            listOf(EnergyConnectionType.NONE, EnergyConnectionType.CONSUME),
-            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default")
-        ) { openWindow(it) }
+            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default"),
+            ::openWindow
+        )
         
         private val idleBar = object : VerticalBar(3) {
             override val barMaterial = CoreGUIMaterial.BAR_GREEN

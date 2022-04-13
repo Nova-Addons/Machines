@@ -100,9 +100,8 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         
         private val sideConfigGUI = SideConfigGUI(
             this@Sprinkler,
-            null, null,
-            listOf(tank to "container.nova.fluid_tank"),
-            ::openWindow
+            fluidContainerNames = listOf(tank to "container.nova.fluid_tank"),
+            openPrevious = ::openWindow
         )
         
         private val rangeItems = ArrayList<Item>()
