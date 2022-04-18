@@ -57,7 +57,7 @@ import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
 private val SCAFFOLDING_STACKS = Items.SCAFFOLDING.item.let { modelData ->
-    (1..modelData.dataArray.lastIndex).map { modelData.createItemStack(it) }
+    (1..modelData.dataArray.lastIndex).map { modelData.createClientsideItemStack(it) }
 }
 private val FULL_HORIZONTAL = SCAFFOLDING_STACKS[0]
 private val FULL_VERTICAL = SCAFFOLDING_STACKS[1]
@@ -65,7 +65,7 @@ private val CORNER_DOWN = SCAFFOLDING_STACKS[2]
 private val SMALL_HORIZONTAL = SCAFFOLDING_STACKS[3]
 private val FULL_SLIM_VERTICAL = SCAFFOLDING_STACKS[4]
 private val SLIM_VERTICAL_DOWN = SCAFFOLDING_STACKS[5]
-private val DRILL = Items.NETHERITE_DRILL.createItemStack()
+private val DRILL = Items.NETHERITE_DRILL.item.createClientsideItemStack()
 
 private val MIN_SIZE = NovaConfig[QUARRY].getInt("min_size")!!
 private val MAX_SIZE = NovaConfig[QUARRY].getInt("max_size")!!

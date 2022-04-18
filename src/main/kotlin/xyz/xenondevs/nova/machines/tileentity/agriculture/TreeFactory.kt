@@ -84,9 +84,9 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     
     init {
         val plantLocation = location.clone().center().apply { y += 1 / 16.0 }
-        plant = FakeArmorStand(plantLocation, true) {
-            it.isInvisible = true
-            it.isMarker = true
+        plant = FakeArmorStand(plantLocation, true) { _, data ->
+            data.invisible = true
+            data.marker = true
         }
         handleUpgradesUpdate()
     }
@@ -135,8 +135,7 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     
     private fun updatePlantArmorStand() {
         val growthStage = (MAX_GROWTH_STAGE * growthProgress).toInt().coerceAtMost(MAX_GROWTH_STAGE)
-        plant.setEquipment(EquipmentSlot.HEAD, plantType?.let { PLANTS[it]!!.miniature.item.createItemStack(growthStage) })
-        plant.updateEquipment()
+        plant.setEquipment(EquipmentSlot.HEAD, plantType?.let { PLANTS[it]!!.miniature.item.createClientsideItemStack(growthStage) }, true)
     }
     
     private fun handleInputInventoryUpdate(event: ItemUpdateEvent) {

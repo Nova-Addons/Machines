@@ -74,8 +74,8 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private var currentMode = mode
     private var mbUsed = 0L
     
-    private val waterLevel = FakeArmorStand(centerLocation) { it.isInvisible = true; it.isMarker = true }
-    private val lavaLevel = FakeArmorStand(centerLocation) { it.isInvisible = true; it.isMarker = true }
+    private val waterLevel = FakeArmorStand(centerLocation) { _, data -> data.invisible = true; data.marker = true }
+    private val lavaLevel = FakeArmorStand(centerLocation) { _, data -> data.invisible = true; data.marker = true }
     
     private val particleEffect = particleBuilder(ParticleEffect.SMOKE_LARGE) {
         location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
@@ -97,19 +97,17 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private fun updateWaterLevel() {
         val item = if (!waterTank.isEmpty()) {
             val state = getFluidState(waterTank)
-            Blocks.COBBLESTONE_GENERATOR_WATER_LEVELS.item.createItemStack(state)
+            Blocks.COBBLESTONE_GENERATOR_WATER_LEVELS.item.createClientsideItemStack(state)
         } else null
-        waterLevel.setEquipment(EquipmentSlot.HEAD, item)
-        waterLevel.updateEquipment()
+        waterLevel.setEquipment(EquipmentSlot.HEAD, item, true)
     }
     
     private fun updateLavaLevel() {
         val item = if (!lavaTank.isEmpty()) {
             val state = getFluidState(lavaTank)
-            Blocks.COBBLESTONE_GENERATOR_LAVA_LEVELS.item.createItemStack(state)
+            Blocks.COBBLESTONE_GENERATOR_LAVA_LEVELS.item.createClientsideItemStack(state)
         } else null
-        lavaLevel.setEquipment(EquipmentSlot.HEAD, item)
-        lavaLevel.updateEquipment()
+        lavaLevel.setEquipment(EquipmentSlot.HEAD, item, true)
     }
     
     private fun getFluidState(container: FluidContainer) =

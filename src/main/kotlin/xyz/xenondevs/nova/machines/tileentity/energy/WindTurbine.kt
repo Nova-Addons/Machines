@@ -63,14 +63,14 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         location.y += 1.0 / 32.0
         
         turbineModel.addModels(Model(
-            WIND_TURBINE.block.createItemStack(4),
+            WIND_TURBINE.block.createClientsideItemStack(4),
             location,
             Rotations(90f, 0f, 0f)
         ))
         
         for (blade in 0..2) {
             turbineModel.addModels(Model(
-                material.block.createItemStack(5),
+                material.block.createClientsideItemStack(5),
                 location,
                 Rotations(90f, 0f, blade * 120f)
             ))
@@ -84,8 +84,9 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     override fun handleAsyncTick() {
         if (PLAY_ANIMATION) {
             turbineModel.useArmorStands {
-                it.setHeadPose(it.headPose.add(0f, 0f, rotationPerTick))
-                it.updateEntityData()
+                it.updateEntityData(true) {
+                    headRotation = headRotation!!.add(0f, 0f, rotationPerTick)
+                }
             }
         }
     }

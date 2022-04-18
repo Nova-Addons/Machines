@@ -61,10 +61,10 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     private lateinit var particleVector: Vector
     
     private val rodLocation = location.clone().center().apply { y += 0.7 }
-    private val rod = FakeArmorStand(location.clone().center().apply { y -= 1 }, true) {
-        it.isMarker = true
-        it.isInvisible = true
-        it.setEquipment(EquipmentSlot.HEAD, material.block.createItemStack(1))
+    private val rod = FakeArmorStand(location.clone().center().apply { y -= 1 }, true) { ast, data ->
+        data.marker = true
+        data.invisible = true
+        ast.setEquipment(EquipmentSlot.HEAD, material.block.createClientsideItemStack(1), false)
     }
     
     private val particleTask = createParticleTask(listOf(
@@ -114,8 +114,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             if (GlobalValues.DROP_EXCESS_ON_GROUND && leftOver != 0) location.dropItem(item)
             
             particleTask.stop()
-            rod.setEquipment(EquipmentSlot.HEAD, material.block.createItemStack(1))
-            rod.updateEquipment()
+            rod.setEquipment(EquipmentSlot.HEAD, material.block.createItemStack(1), true)
         } else {
             val percentageCollected = (maxCollectionTime - timeSpentCollecting) / maxCollectionTime.toDouble()
             val particleDistance = percentageCollected * (STAR_PARTICLE_DISTANCE_PER_TICK * maxCollectionTime)
@@ -138,8 +137,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             
             particleTask.start()
             
-            rod.setEquipment(EquipmentSlot.HEAD, material.block.createItemStack(2))
-            rod.updateEquipment()
+            rod.setEquipment(EquipmentSlot.HEAD, material.block.createItemStack(2), true)
             
             rodLocation.yaw = rod.location.yaw
             particleVector = Vector(rod.location.yaw, -65F)
