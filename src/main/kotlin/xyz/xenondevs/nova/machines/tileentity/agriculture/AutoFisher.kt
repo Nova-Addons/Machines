@@ -51,7 +51,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private val inventory = getInventory("inventory", 12, ::handleInventoryUpdate)
     private val fishingRodInventory = getInventory("fishingRod", 1, ::handleFishingRodInventoryUpdate)
     override val gui = lazy(::AutoFisherGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ALL_ENERGY)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -74,7 +74,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     }
     
     private fun handleUpgradeUpdates() {
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getSpeedModifier()).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
     }
     
@@ -160,12 +160,12 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
                 itemBuilder.setDisplayName(TranslatableComponent("menu.machines.auto_fisher.idle", maxIdleTime - timePassed))
         }
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s u # # f p e |" +
-                "| i i i i # p e |" +
-                "| i i i i # p e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s u # # f p e |",
+                "| i i i i # p e |",
+                "| i i i i # p e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))

@@ -24,6 +24,7 @@ import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
+import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -52,7 +53,7 @@ private val DEFAULT_RANGE = NovaConfig[PUMP].getInt("range.default")!!
 class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::PumpGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE, UpgradeType.FLUID)
     
     private val fluidTank = getFluidContainer("tank", hashSetOf(FluidType.WATER, FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
     
@@ -82,10 +83,10 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
     }
     
     private fun handleUpgradeUpdates() {
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getSpeedModifier()).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (idleTime > maxIdleTime) idleTime = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getRangeModifier()
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
         if (maxRange < range) range = maxRange
     }
     
@@ -217,12 +218,12 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s p # f # e M |" +
-                "| u n # f # e # |" +
-                "| v m # f # e # |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s p # f # e M |",
+                "| u n # f # e # |",
+                "| v m # f # e # |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))

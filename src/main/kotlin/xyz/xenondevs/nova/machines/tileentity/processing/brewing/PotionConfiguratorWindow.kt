@@ -62,13 +62,13 @@ class PotionConfiguratorWindow(
                 .setDisplayName(TranslatableComponent("menu.machines.color_picker.current_color"))
         ), color, ::openConfigurator)
     
-    private val gui = GUIBuilder(GUIType.SCROLL_GUIS, 9, 6)
-        .setStructure("" +
-            "< c t . . . . . s" +
-            "x x x x x x x x u" +
-            "x x x x x x x x ." +
-            "x x x x x x x x ." +
-            "x x x x x x x x ." +
+    private val gui = GUIBuilder(GUIType.SCROLL_GUIS)
+        .setStructure(
+            "< c t . . . . . s",
+            "x x x x x x x x u",
+            "x x x x x x x x .",
+            "x x x x x x x x .",
+            "x x x x x x x x .",
             "x x x x x x x x d")
         .addIngredient('<', BackItem { p -> updatePotionData(type, this.effects.keys.filter { it.type != null }, colorPickerWindow.color); openPrevious(p) })
         .addIngredient('c', OpenColorPickerWindowItem(colorPickerWindow))
@@ -98,7 +98,7 @@ class PotionConfiguratorWindow(
     }
     
     private fun createAddEffectGUI(): GUI {
-        return GUIBuilder(GUIType.NORMAL, 8, 1)
+        return GUIBuilder(GUIType.NORMAL)
             .setStructure("+ . . . . . . .")
             .addIngredient('+', clickableItem(
                 GUIMaterials.TP_GREEN_PLUS.createItemBuilder()
@@ -117,7 +117,7 @@ class PotionConfiguratorWindow(
         private val amplifierModifierItem = AmplifierModifierItem()
         private val potionPickerItem = OpenPotionPickerItem()
         
-        val gui: GUI = GUIBuilder(GUIType.NORMAL, 8, 1)
+        val gui: GUI = GUIBuilder(GUIType.NORMAL)
             .setStructure("- . p . d . a .")
             .addIngredient('p', potionPickerItem)
             .addIngredient('d', durationModifierItem)
@@ -239,13 +239,13 @@ class PotionConfiguratorWindow(
             .filter { availableEffect -> effects.keys.none { builder -> builder.type == availableEffect } }
             .map(::ChooseEffectTypeItem)
         
-        private val gui = GUIBuilder(GUIType.SCROLL_ITEMS, 9, 6)
-            .setStructure("" +
-                "< - - - - - - - 2" +
-                "| x x x x x x x u" +
-                "| x x x x x x x |" +
-                "| x x x x x x x |" +
-                "| x x x x x x x d" +
+        private val gui = GUIBuilder(GUIType.SCROLL_ITEMS)
+            .setStructure(
+                "< - - - - - - - 2",
+                "| x x x x x x x u",
+                "| x x x x x x x |",
+                "| x x x x x x x |",
+                "| x x x x x x x d",
                 "3 - - - - - - - 4")
             .addIngredient('<', BackItem { openConfigurator(it) })
             .setItems(potionItems)

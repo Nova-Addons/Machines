@@ -46,7 +46,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     
     private val inventory = getInventory("inventory", 1, ::handleInventoryUpdate)
     override val gui: Lazy<StarCollectorGUI> = lazy(::StarCollectorGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradesUpdate, allowed = UpgradeType.ALL_ENERGY)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradesUpdate, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
     }
@@ -81,8 +81,8 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     }
     
     private fun handleUpgradesUpdate() {
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getSpeedModifier()).toInt()
-        maxCollectionTime = (COLLECTION_TIME / upgradeHolder.getSpeedModifier()).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        maxCollectionTime = (COLLECTION_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
     }
     
     override fun handleTick() {
@@ -197,12 +197,12 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.star_collector.idle"))
         }
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s # # # c p e |" +
-                "| u # i # c p e |" +
-                "| # # # # c p e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s # # # c p e |",
+                "| u # i # c p e |",
+                "| # # # # c p e |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))

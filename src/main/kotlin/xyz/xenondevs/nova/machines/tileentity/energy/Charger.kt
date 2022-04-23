@@ -60,12 +60,12 @@ class Charger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s # # # # # e |" +
-                "| u # # i # # e |" +
-                "| # # # # # # e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s # # # # # e |",
+                "| u # # i # # e |",
+                "| # # # # # # e |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('i', VISlotElement(inventory, 0))

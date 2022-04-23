@@ -43,7 +43,7 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private val inputInv = getInventory("input", 1, ::handleInputUpdate)
     private val outputInv = getInventory("output", 2, ::handleOutputUpdate)
     
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ALL_ENERGY)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -71,7 +71,7 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     }
     
     private fun handleUpgradeUpdates() {
-        pulverizeSpeed = (PULVERIZE_SPEED * upgradeHolder.getSpeedModifier()).toInt()
+        pulverizeSpeed = (PULVERIZE_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
     }
     
     override fun handleTick() {
@@ -138,12 +138,12 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s u # # # # e |" +
-                "| i # , # o a e |" +
-                "| c # # # # # e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s u # # # # e |",
+                "| i # , # o a e |",
+                "| c # # # # # e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', VISlotElement(inputInv, 0))
             .addIngredient('o', VISlotElement(outputInv, 0))

@@ -53,7 +53,7 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     
     private val inventory = getInventory("inventory", 9, ::handleInventoryUpdate)
     override val gui = lazy { MobCrusherGUI() }
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREED, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
@@ -75,10 +75,10 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     }
     
     private fun handleUpgradeUpdates() {
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getSpeedModifier()).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getRangeModifier()
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
         if (maxRange < range) range = maxRange
     }
     
@@ -189,12 +189,12 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.breeder.idle", maxIdleTime - timePassed))
         }
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s p i i i b e |" +
-                "| r n i i i b e |" +
-                "| u m i i i b e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s p i i i b e |",
+                "| r n i i i b e |",
+                "| u m i i i b e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))

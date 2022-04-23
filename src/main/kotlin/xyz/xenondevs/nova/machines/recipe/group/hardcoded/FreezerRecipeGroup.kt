@@ -12,22 +12,22 @@ import xyz.xenondevs.nova.ui.menu.item.recipes.createRecipeChoiceItem
 import xyz.xenondevs.nova.ui.menu.item.recipes.group.RecipeGroup
 
 object FreezerRecipeGroup : RecipeGroup() {
-
+    
     override val priority = 8
     override val texture = GUITextures.RECIPE_FREEZER
     override val icon = Blocks.FREEZER.basicItemProvider
-
+    
     override fun createGUI(container: RecipeContainer): GUI {
         val recipe = container.recipe as FreezerRecipe
-
-        return GUIBuilder(GUIType.NORMAL, 9, 3)
-            .setStructure("" +
-                ". w . . . . . . ." +
-                ". w . . . . r . ." +
+        
+        return GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                ". w . . . . . . .",
+                ". w . . . . r . .",
                 ". w . . . . . . .")
             .addIngredient('r', createRecipeChoiceItem(listOf(container.result!!)))
             .addIngredient('w', StaticFluidBar(FluidType.WATER, 1000L * recipe.mode.maxCostMultiplier, 100_000, 3))
             .build()
     }
-
+    
 }

@@ -46,7 +46,7 @@ private val DEFAULT_RANGE = NovaConfig[MOB_KILLER].getInt("range.default")!!
 class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { MobCrusherGUI() }
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_DAMAGE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID, "Mob Killer").bukkitEntity
     
@@ -72,10 +72,10 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     }
     
     private fun handleUpgradeUpdates() {
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getSpeedModifier()).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getRangeModifier()
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
         if (range > maxRange) range = maxRange
     }
     
@@ -129,12 +129,12 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.mob_killer.idle", maxIdleTime - timePassed))
         }
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s # i # e # p |" +
-                "| r # i # e # n |" +
-                "| u # i # e # m |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s # i # e # p |",
+                "| r # i # e # n |",
+                "| u # i # e # m |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('r', VisualizeRegionItem(uuid) { region })

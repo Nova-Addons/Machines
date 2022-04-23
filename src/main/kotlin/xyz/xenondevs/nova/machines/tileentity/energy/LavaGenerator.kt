@@ -31,7 +31,7 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     
     override val gui = lazy(::LavaGeneratorGUI)
     
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.EFFICIENCY, UpgradeType.SPEED, UpgradeType.ENERGY, UpgradeType.FLUID)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
     private val fluidContainer = getFluidContainer("tank", hashSetOf(FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
     override val fluidHolder = NovaFluidHolder(this, fluidContainer to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val energyHolder = ProviderEnergyHolder(this, ENERGY_CAPACITY, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
@@ -68,8 +68,8 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     }
     
     private fun handleUpgradeUpdates() {
-        burnRate = BURN_RATE * upgradeHolder.getSpeedModifier() / upgradeHolder.getEfficiencyModifier()
-        energyPerTick = (ENERGY_PER_MB * BURN_RATE * upgradeHolder.getSpeedModifier()).toLong()
+        burnRate = BURN_RATE * upgradeHolder.getValue(UpgradeType.SPEED) / upgradeHolder.getValue(UpgradeType.EFFICIENCY)
+        energyPerTick = (ENERGY_PER_MB * BURN_RATE * upgradeHolder.getValue(UpgradeType.SPEED)).toLong()
     }
     
     override fun handleTick() {
@@ -114,12 +114,12 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             openPrevious = ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s # # # # f e |" +
-                "| u # # # # f e |" +
-                "| # # # # # f e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s # # # # f e |",
+                "| u # # # # f e |",
+                "| # # # # # f e |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))

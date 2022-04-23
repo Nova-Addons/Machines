@@ -56,7 +56,7 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     }
     
     private fun handleUpgradeUpdates() {
-        maxRange = MAX_RANGE + upgradeHolder.getRangeModifier()
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
         if (maxRange < range) range = maxRange
     }
     
@@ -125,12 +125,12 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         
         private val rangeItems = ArrayList<UIItem>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s # # e # # p |" +
-                "| v # # e # # n |" +
-                "| u # # e # # m |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s # # e # # p |",
+                "| v # # e # # n |",
+                "| u # # e # # m |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('v', VisualizeRegionItem(uuid) { region })

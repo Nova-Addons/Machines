@@ -113,12 +113,12 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     
     inner class WindTurbineGUI : TileEntity.TileEntityGUI() {
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| u # # e # # # |" +
-                "| # # # e # # # |" +
-                "| # # # e # # # |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| u # # e # # # |",
+                "| # # # e # # # |",
+                "| # # # e # # # |",
                 "3 - - - - - - - 4")
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))

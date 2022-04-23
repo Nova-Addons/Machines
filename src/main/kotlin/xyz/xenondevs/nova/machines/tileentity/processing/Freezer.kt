@@ -70,7 +70,7 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     }
     
     private fun handleUpgradeUpdates() {
-        mbPerTick = (MB_PER_TICK * upgradeHolder.getSpeedModifier()).roundToLong()
+        mbPerTick = (MB_PER_TICK * upgradeHolder.getValue(UpgradeType.SPEED)).roundToLong()
     }
     
     override fun handleTick() {
@@ -113,12 +113,12 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| w # i i # s e |" +
-                "| w > i i # u e |" +
-                "| w # i i # m e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| w # i i # s e |",
+                "| w > i i # u e |",
+                "| w # i i # m e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('>', progressItem)

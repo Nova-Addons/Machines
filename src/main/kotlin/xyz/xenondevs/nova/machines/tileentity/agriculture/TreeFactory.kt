@@ -63,7 +63,7 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     private val outputInventory = getInventory("output", 9, ::handleOutputInventoryUpdate)
     
     override val gui: Lazy<TileEntityGUI> = lazy(::TreeFactoryGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradesUpdate, allowed = UpgradeType.ALL_ENERGY)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradesUpdate, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) {
         createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM, BlockSide.BACK)
     }
@@ -92,8 +92,8 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     }
     
     private fun handleUpgradesUpdate() {
-        progressPerTick = PROGRESS_PER_TICK * upgradeHolder.getSpeedModifier()
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getSpeedModifier()).toInt()
+        progressPerTick = PROGRESS_PER_TICK * upgradeHolder.getValue(UpgradeType.SPEED)
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
     }
     
     override fun handleTick() {
@@ -168,13 +168,13 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 6)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s u # # # # e |" +
-                "| # # # o o o e |" +
-                "| # i # o o o e |" +
-                "| # # # o o o e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s u # # # # e |",
+                "| # # # o o o e |",
+                "| # i # o o o e |",
+                "| # # # o o o e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', VISlotElement(inputInventory, 0, GUIMaterials.SAPLING_PLACEHOLDER.itemProvider))
             .addIngredient('o', outputInventory)

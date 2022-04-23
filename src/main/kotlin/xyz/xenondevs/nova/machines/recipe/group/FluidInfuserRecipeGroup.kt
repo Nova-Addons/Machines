@@ -43,10 +43,10 @@ object FluidInfuserRecipeGroup : RecipeGroup() {
             TranslatableComponent(recipe.fluidType.localizedName)
         ))
         
-        return GUIBuilder(GUIType.NORMAL, 9, 3)
-            .setStructure("" +
-                ". f . t . . . . ." +
-                ". f p i . . . r ." +
+        return GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                ". f . t . . . . .",
+                ". f p i . . . r .",
                 ". f . . . . . . .")
             .addIngredient('i', createRecipeChoiceItem(recipe.input))
             .addIngredient('r', createRecipeChoiceItem(listOf(recipe.result)))

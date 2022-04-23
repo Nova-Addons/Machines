@@ -46,7 +46,7 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     }
     
     private fun updateEnergyPerTick() {
-        energyPerTick = (ENERGY_PER_CHUNK * chunks.size / upgradeHolder.getEfficiencyModifier()).toInt()
+        energyPerTick = (ENERGY_PER_CHUNK * chunks.size / upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toInt()
     }
     
     override fun saveData() {
@@ -96,12 +96,11 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 3)
-            .setStructure("" +
-                "1 - - - - - - 2 e" +
-                "| u # m n p # | e" +
-                "3 - - - - - - 4 e"
-            )
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - 2 e",
+                "| u # m n p # | e",
+                "3 - - - - - - 4 e")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('p', AddNumberItem({ 0..MAX_RANGE }, { range }, ::setRange).also(rangeItems::add))
             .addIngredient('m', RemoveNumberItem({ 0..MAX_RANGE }, { range }, ::setRange).also(rangeItems::add))

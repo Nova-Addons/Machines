@@ -47,7 +47,7 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     
     private val fertilizerInventory = getInventory("fertilizer", 12, ::handleFertilizerUpdate)
     override val gui = lazy(::FertilizerGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_FERTILIZE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, fertilizerInventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
@@ -68,10 +68,10 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     }
     
     private fun handleUpgradeUpdates() {
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getSpeedModifier()).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getRangeModifier()
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
         if (range > maxRange) range = maxRange
     }
     
@@ -137,12 +137,12 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s p i i i i e |" +
-                "| v n i i i i e |" +
-                "| u m i i i i e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s p i i i i e |",
+                "| v n i i i i e |",
+                "| u m i i i i e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', fertilizerInventory)
             .addIngredient('v', VisualizeRegionItem(uuid) { fertilizeRegion })

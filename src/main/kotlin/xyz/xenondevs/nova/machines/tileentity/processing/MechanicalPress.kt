@@ -53,7 +53,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     private val inputInv = getInventory("input", 1, ::handleInputUpdate)
     private val outputInv = getInventory("output", 1, ::handleOutputUpdate)
     
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ALL_ENERGY)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -74,7 +74,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     }
     
     private fun handleUpgradeUpdates() {
-        pressSpeed = (PRESS_SPEED * upgradeHolder.getSpeedModifier()).toInt()
+        pressSpeed = (PRESS_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
     }
     
     override fun handleTick() {
@@ -141,12 +141,12 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| p g # i # # e |" +
-                "| # # # , # # e |" +
-                "| s u # o # # e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| p g # i # # e |",
+                "| # # # , # # e |",
+                "| s u # o # # e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', VISlotElement(inputInv, 0))
             .addIngredient('o', VISlotElement(outputInv, 0))

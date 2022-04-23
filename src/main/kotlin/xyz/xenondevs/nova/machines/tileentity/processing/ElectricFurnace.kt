@@ -50,7 +50,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     private val inputInventory = getInventory("input", 1, ::handleInputInventoryUpdate)
     private val outputInventory = getInventory("output", 1, ::handleOutputInventoryUpdate)
     
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ALL_ENERGY)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -152,7 +152,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     }
     
     private fun handleUpgradeUpdates() {
-        cookSpeed = (COOK_SPEED * upgradeHolder.getSpeedModifier()).toInt()
+        cookSpeed = (COOK_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
     }
     
     override fun handleRemoved(unload: Boolean) {
@@ -174,12 +174,12 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s u # # # # e |" +
-                "| i # > # o # e |" +
-                "| # # # # # # e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s u # # # # e |",
+                "| i # > # o # e |",
+                "| # # # # # # e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', SlotElement.VISlotElement(inputInventory, 0))
             .addIngredient('o', SlotElement.VISlotElement(outputInventory, 0))

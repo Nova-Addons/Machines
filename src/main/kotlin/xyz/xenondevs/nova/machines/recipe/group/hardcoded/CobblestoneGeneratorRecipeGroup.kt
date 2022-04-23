@@ -26,10 +26,10 @@ object CobblestoneGeneratorRecipeGroup : RecipeGroup() {
             .createBasicItemBuilder()
             .setDisplayName(TranslatableComponent("menu.machines.recipe.cobblestone_generator.${recipe.mode.name.lowercase()}"))
         
-        return GUIBuilder(GUIType.NORMAL, 9, 3)
-            .setStructure("" +
-                ". w l . . . . . ." +
-                ". w l . > . r . ." +
+        return GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                ". w l . . . . . .",
+                ". w l . > . r . .",
                 ". w l . m . . . .")
             .addIngredient('r', createRecipeChoiceItem(listOf(container.result!!)))
             .addIngredient('m', recipe.mode.uiItem.itemProvider)

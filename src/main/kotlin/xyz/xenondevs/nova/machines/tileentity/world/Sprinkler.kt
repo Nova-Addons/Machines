@@ -87,8 +87,8 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     }
     
     private fun handleUpgradeUpdates() {
-        maxRange = MAX_RANGE + upgradeHolder.getRangeModifier()
-        waterPerMoistureLevel = (WATER_PER_MOISTURE_LEVEL / upgradeHolder.getEfficiencyModifier()).roundToLong()
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
+        waterPerMoistureLevel = (WATER_PER_MOISTURE_LEVEL / upgradeHolder.getValue(UpgradeType.EFFICIENCY)).roundToLong()
     }
     
     override fun saveData() {
@@ -106,12 +106,12 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s # # f # # p |" +
-                "| u # # f # # d |" +
-                "| v # # f # # m |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s # # f # # p |",
+                "| u # # f # # d |",
+                "| v # # f # # m |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))

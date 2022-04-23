@@ -56,7 +56,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     private val axeInventory = getInventory("axe", 1, ::handleAxeInventoryUpdate)
     private val hoeInventory = getInventory("hoe", 1, ::handleHoeInventoryUpdate)
     override val gui = lazy(::HarvesterGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREAK, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -84,10 +84,10 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     }
     
     private fun handleUpgradeUpdates() {
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getSpeedModifier()).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getRangeModifier()
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
         if (range > maxRange) range = maxRange
     }
     
@@ -231,13 +231,13 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 6)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| c v u s a h e |" +
-                "| m n p # # # e |" +
-                "| i i i i i i e |" +
-                "| i i i i i i e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| c v u s a h e |",
+                "| m n p # # # e |",
+                "| i i i i i i e |",
+                "| i i i i i i e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('c', OpenSideConfigItem(sideConfigGUI))

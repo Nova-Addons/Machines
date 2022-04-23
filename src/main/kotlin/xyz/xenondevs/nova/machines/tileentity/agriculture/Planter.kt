@@ -58,7 +58,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     private val inputInventory = getInventory("input", 6, ::handleSeedUpdate)
     private val hoesInventory = getInventory("hoes", 1, ::handleHoeUpdate)
     override val gui = lazy(::PlanterGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_PLANT, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -87,10 +87,10 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     }
     
     private fun handleUpgradeUpdates() {
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getSpeedModifier()).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getRangeModifier()
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
         if (maxRange < range) range = maxRange
     }
     
@@ -178,7 +178,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     
     private fun getNextTillableBlock(): Block? {
         return plantRegion.firstOrNull {
-            it.type.isTillable() 
+            it.type.isTillable()
                 && ProtectionManager.canUseBlock(this, hoesInventory.getItemStack(0), it.location).get()
         }
     }
@@ -227,12 +227,12 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s u v # # p e |" +
-                "| i i i # h n e |" +
-                "| i i i # f m e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s u v # # p e |",
+                "| i i i # h n e |",
+                "| i i i # f m e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inputInventory)
             .addIngredient('h', VISlotElement(hoesInventory, 0, GUIMaterials.HOE_PLACEHOLDER.createBasicItemBuilder()))

@@ -141,7 +141,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     }
     
     private fun handleUpgradeUpdates() {
-        maxBrewTime = (BREW_TIME / upgradeHolder.getSpeedModifier()).roundToInt()
+        maxBrewTime = (BREW_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).roundToInt()
     }
     
     private fun updatePotionData(type: PotionBuilder.PotionType, effects: List<PotionEffectBuilder>, color: Color) {
@@ -285,13 +285,13 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         val progressItem = BrewProgressItem()
         val ingredientsDisplay = IngredientsDisplay()
         
-        override val gui: GUI = GUIBuilder(GUIType.SCROLL_INVENTORY, 9, 6)
-            .setStructure("" +
-                ". x x x u i . U s" +
-                ". x x x . p . . ." +
-                ". x x x d . . f e" +
-                ". ^ . ^ . . . f e" +
-                ". o . o . . . f e" +
+        override val gui: GUI = GUIBuilder(GUIType.SCROLL_INVENTORY)
+            .setStructure(
+                ". x x x u i . U s",
+                ". x x x . p . . .",
+                ". x x x d . . f e",
+                ". ^ . ^ . . . f e",
+                ". o . o . . . f e",
                 ". . o . . . . f e")
             .setInventory(ingredientsInventory)
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))

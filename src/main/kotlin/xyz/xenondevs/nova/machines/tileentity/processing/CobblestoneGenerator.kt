@@ -91,7 +91,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     }
     
     private fun handleUpgradeUpdates() {
-        mbPerTick = (MB_PER_TICK * upgradeHolder.getSpeedModifier()).roundToLong()
+        mbPerTick = (MB_PER_TICK * upgradeHolder.getValue(UpgradeType.SPEED)).roundToLong()
     }
     
     private fun updateWaterLevel() {
@@ -169,12 +169,12 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
         
         val progressItem = LeftRightFluidProgressItem()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| w l # i # s e |" +
-                "| w l > i # u e |" +
-                "| w l # i # m e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2" ,
+                "| w l # i # s e |" ,
+                "| w l > i # u e |" ,
+                "| w l # i # m e |" ,
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))

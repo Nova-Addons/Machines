@@ -87,7 +87,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     override val gui = lazy { QuarryGUI() }
     private val inventory = getInventory("quarryInventory", 9) {}
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ENERGY_AND_RANGE)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, 0, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
     
@@ -163,9 +163,9 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     private fun handleUpgradeUpdates() {
         updateEnergyPerTick()
         
-        maxSize = MAX_SIZE + upgradeHolder.getRangeModifier()
-        drillSpeedMultiplier = DRILL_SPEED_MULTIPLIER * upgradeHolder.getSpeedModifier()
-        moveSpeed = MOVE_SPEED * upgradeHolder.getSpeedModifier()
+        maxSize = MAX_SIZE + upgradeHolder.getValue(UpgradeType.RANGE)
+        drillSpeedMultiplier = DRILL_SPEED_MULTIPLIER * upgradeHolder.getValue(UpgradeType.SPEED)
+        moveSpeed = MOVE_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)
     }
     
     private fun updateBounds(checkPermission: Boolean): Boolean {
@@ -210,7 +210,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     private fun updateEnergyPerTick() {
         energyPerTick = ((BASE_ENERGY_CONSUMPTION + sizeX * sizeZ * ENERGY_PER_SQUARE_BLOCK)
-            * upgradeHolder.getSpeedModifier() / upgradeHolder.getEfficiencyModifier()).toInt()
+            * upgradeHolder.getValue(UpgradeType.SPEED) / upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toInt()
     }
     
     override fun saveData() {
@@ -575,13 +575,13 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         private val sizeItems = ArrayList<Item>()
         private val depthItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 6)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s u # # # # e |" +
-                "| # # # i i i e |" +
-                "| m n p i i i e |" +
-                "| M N P i i i e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s u # # # # e |",
+                "| # # # i i i e |",
+                "| m n p i i i e |",
+                "| M N P i i i e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))

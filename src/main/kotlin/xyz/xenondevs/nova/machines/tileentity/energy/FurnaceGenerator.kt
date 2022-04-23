@@ -31,13 +31,12 @@ import kotlin.math.roundToInt
 private val MAX_ENERGY = NovaConfig[FURNACE_GENERATOR].getLong("capacity")!!
 private val ENERGY_PER_TICK = NovaConfig[FURNACE_GENERATOR].getLong("energy_per_tick")!!
 private val BURN_TIME_MULTIPLIER = NovaConfig[FURNACE_GENERATOR].getDouble("burn_time_multiplier")!!
-private val ACCEPTED_UPGRADE_TYPES = arrayOf(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
 
 class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { FurnaceGeneratorGUI() }
     private val inventory = getInventory("fuel", 1, ::handleInventoryUpdate)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = ACCEPTED_UPGRADE_TYPES)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder) { createSideConfig(NetworkConnectionType.EXTRACT, FRONT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     
@@ -76,7 +75,7 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
         // previous burn time without the burnTimeMultiplier
         val previousBurnTime = totalBurnTime.toDouble() / burnTimeMultiplier
         // calculate the new burn time multiplier based on upgrades
-        burnTimeMultiplier = BURN_TIME_MULTIPLIER / upgradeHolder.getSpeedModifier() * upgradeHolder.getEfficiencyModifier()
+        burnTimeMultiplier = BURN_TIME_MULTIPLIER / upgradeHolder.getValue(UpgradeType.SPEED) * upgradeHolder.getValue(UpgradeType.EFFICIENCY)
         // set the new total burn time based on the fuel burn time and the new multiplier
         totalBurnTime = (previousBurnTime * burnTimeMultiplier).toInt()
         // set the burn time based on the calculated total burn time and the percentage of burn time that was left previously
@@ -138,13 +137,13 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 6)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s # # # # # e |" +
-                "| u # # i # # e |" +
-                "| # # # ! # # e |" +
-                "| # # # # # # e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s # # # # # e |",
+                "| u # # i # # e |",
+                "| # # # ! # # e |",
+                "| # # # # # # e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', SlotElement.VISlotElement(inventory, 0))
             .addIngredient('!', progressItem)

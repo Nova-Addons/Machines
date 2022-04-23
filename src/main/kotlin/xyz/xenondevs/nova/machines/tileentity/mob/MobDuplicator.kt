@@ -62,7 +62,7 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     
     private val inventory = getInventory("inventory", 1, ::handleInventoryUpdate)
     override val gui = lazy { MobDuplicatorGUI() }
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, allowed = UpgradeType.ALL_ENERGY)
+    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_TICK_NBT, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.TOP) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER)
     private val energyPerTick: Long
@@ -86,8 +86,8 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     }
     
     private fun handleUpgradeUpdates() {
-        idleTimeNBT = (IDLE_TIME_NBT / upgradeHolder.getSpeedModifier()).toInt()
-        idleTime = (IDLE_TIME / upgradeHolder.getSpeedModifier()).toInt()
+        idleTimeNBT = (IDLE_TIME_NBT / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        idleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > totalIdleTime) timePassed = totalIdleTime
     }
     
@@ -165,12 +165,12 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.mob_duplicator.idle", totalIdleTime - timePassed))
         }
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s # # # # p e |" +
-                "| n # # i # p e |" +
-                "| u # # # # p e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s # # # # p e |",
+                "| n # # i # p e |",
+                "| u # # # # p e |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('i', VISlotElement(inventory, 0, GUIMaterials.MOB_CATCHER_PLACEHOLDER.createBasicItemBuilder()))

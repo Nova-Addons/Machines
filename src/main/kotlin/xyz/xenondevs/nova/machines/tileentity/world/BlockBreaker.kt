@@ -39,7 +39,7 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     
     private val inventory = getInventory("inventory", 9) { if (it.isAdd && it.updateReason != SELF_UPDATE_REASON) it.isCancelled = true }
     override val gui = lazy { BlockBreakerGUI() }
-    override val upgradeHolder = UpgradeHolder(this, gui, allowed = UpgradeType.ALL_ENERGY)
+    override val upgradeHolder = UpgradeHolder(this, gui, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -77,7 +77,7 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
                 block.hardness,
                 correctCategory = true,
                 correctForDrops = true,
-                toolMultiplier = BREAK_SPEED_MULTIPLIER * upgradeHolder.getSpeedModifier(),
+                toolMultiplier = BREAK_SPEED_MULTIPLIER * upgradeHolder.getValue(UpgradeType.SPEED),
                 efficiency = 0,
                 onGround = true,
                 underWater = false,
@@ -123,12 +123,12 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s # i i i # e |" +
-                "| u # i i i # e |" +
-                "| # # i i i # e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s # i i i # e |",
+                "| u # i i i # e |",
+                "| # # i i i # e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))

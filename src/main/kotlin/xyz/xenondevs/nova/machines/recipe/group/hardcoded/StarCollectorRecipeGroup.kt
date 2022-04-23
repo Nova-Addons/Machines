@@ -16,10 +16,10 @@ object StarCollectorRecipeGroup : RecipeGroup() {
     override val icon = Blocks.STAR_COLLECTOR.basicItemProvider
     
     override fun createGUI(container: RecipeContainer): GUI {
-        return GUIBuilder(GUIType.NORMAL, 9, 3)
-            .setStructure("" +
-                ". . . . . . . . ." +
-                ". . . . . . . r ." +
+        return GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                ". . . . . . . . .",
+                ". . . . . . . r .",
                 ". . . . . . . . .")
             .addIngredient('r', createRecipeChoiceItem(listOf(container.result!!)))
             .build()

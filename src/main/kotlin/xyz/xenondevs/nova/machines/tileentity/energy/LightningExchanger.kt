@@ -50,8 +50,8 @@ class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(
     }
     
     private fun handleUpgradeUpdates() {
-        minBurst = (MIN_BURST * upgradeHolder.getEfficiencyModifier()).toLong()
-        maxBurst = (MAX_BURST * upgradeHolder.getEfficiencyModifier()).toLong()
+        minBurst = (MIN_BURST * upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toLong()
+        maxBurst = (MAX_BURST * upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toLong()
     }
     
     override fun handleTick() {
@@ -67,12 +67,12 @@ class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(
     
     inner class LightningExchangerGUI : TileEntityGUI() {
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| u # # e # # # |" +
-                "| # # # e # # # |" +
-                "| # # # e # # # |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| u # # e # # # |",
+                "| # # # e # # # |",
+                "| # # # e # # # |",
                 "3 - - - - - - - 4")
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))

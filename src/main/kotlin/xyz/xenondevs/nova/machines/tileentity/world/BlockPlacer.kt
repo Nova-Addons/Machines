@@ -76,12 +76,12 @@ class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s # i i i # e |" +
-                "| u # i i i # e |" +
-                "| # # i i i # e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s # i i i # e |",
+                "| u # i i i # e |",
+                "| # # i i i # e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))

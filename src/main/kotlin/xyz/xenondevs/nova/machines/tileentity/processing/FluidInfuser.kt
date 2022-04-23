@@ -80,7 +80,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     
     private var recipe: FluidInfuserRecipe? = null
     private val recipeTime: Int
-        get() = (recipe!!.time.toDouble() / upgradeHolder.getSpeedModifier()).roundToInt()
+        get() = (recipe!!.time.toDouble() / upgradeHolder.getValue(UpgradeType.SPEED)).roundToInt()
     private var timePassed = 0
     
     override fun saveData() {
@@ -156,12 +156,12 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| f # m u s # e |" +
-                "| f p i > o # e |" +
-                "| f # # # # # e |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| f # m u s # e |",
+                "| f p i > o # e |",
+                "| f # # # # # e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', input)
             .addIngredient('o', output)

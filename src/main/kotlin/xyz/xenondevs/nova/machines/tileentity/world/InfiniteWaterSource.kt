@@ -29,12 +29,12 @@ class InfiniteWaterSource(blockState: NovaTileEntityState) : NetworkedTileEntity
             openPrevious = ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL, 9, 5)
-            .setStructure("" +
-                "1 - - - - - - - 2" +
-                "| s # # f # # # |" +
-                "| # # # f # # # |" +
-                "| # # # f # # # |" +
+        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+            .setStructure(
+                "1 - - - - - - - 2",
+                "| s # # f # # # |",
+                "| # # # f # # # |",
+                "| # # # f # # # |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('f', FluidBar(3, fluidHolder, fluidContainer))
