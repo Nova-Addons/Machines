@@ -118,6 +118,7 @@
   "menu.machines.electric_brewing_stand.pick_effect": "Pick Effect",
   "menu.machines.electric_brewing_stand.configured_potion": "Configured Potion",
   "menu.machines.electric_brewing_stand.ingredients": "Ingredients:",
+  "menu.machines.color_picker.current_color": "Current Color",
   "menu.machines.potion_configurator.undefined_effect": "Click to set an effect",
   "menu.machines.potion_configurator.effect": "Effect:",
   "menu.machines.potion_configurator.add_effect": "Add Effect",
