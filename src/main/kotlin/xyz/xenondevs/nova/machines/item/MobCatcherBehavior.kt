@@ -104,7 +104,7 @@ object MobCatcherBehavior : ItemBehavior() {
         
         itemStack.itemMeta = ItemBuilder(itemStack).addLoreLines(localized(
             ChatColor.DARK_GRAY,
-            "item.nova.mob_catcher.type",
+            "item.machines.mob_catcher.type",
             localized(ChatColor.YELLOW, entity)
         )).get().itemMeta
     }
