@@ -1,12 +1,12 @@
 package xyz.xenondevs.nova.machines.registry
 
 import xyz.xenondevs.nova.machines.MACHINES
-import xyz.xenondevs.nova.machines.item.MobCatcherItem
+import xyz.xenondevs.nova.machines.item.MobCatcherBehavior
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerDefaultItem
 
 object Items {
     
-    val MOB_CATCHER = registerDefaultItem(MACHINES, "mob_catcher", MobCatcherItem)
+    val MOB_CATCHER = registerDefaultItem(MACHINES, "mob_catcher", MobCatcherBehavior)
     
     // Plates
     val IRON_PLATE = registerDefaultItem(MACHINES, "iron_plate")

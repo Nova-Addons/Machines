@@ -24,7 +24,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
-import xyz.xenondevs.nova.machines.item.MobCatcherItem
+import xyz.xenondevs.nova.machines.item.MobCatcherBehavior
 import xyz.xenondevs.nova.machines.registry.Blocks.MOB_DUPLICATOR
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.CoreGUIMaterial
@@ -112,9 +112,9 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     }
     
     private fun updateEntityData(itemStack: ItemStack?): Boolean {
-        val novaItem = itemStack?.novaMaterial?.novaItem
-        if (novaItem is MobCatcherItem) {
-            setEntityData(novaItem.getEntityType(itemStack), novaItem.getEntityData(itemStack))
+        val catcher = itemStack?.novaMaterial?.novaItem?.getBehavior(MobCatcherBehavior::class)
+        if (catcher != null) {
+            setEntityData(catcher.getEntityType(itemStack), catcher.getEntityData(itemStack))
             return true
         }
         return false
