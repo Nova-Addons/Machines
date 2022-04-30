@@ -40,11 +40,11 @@ import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToLong
 
-private val WATER_CAPACITY = NovaConfig[SPRINKLER].getLong("water_capacity")!!
-private val WATER_PER_MOISTURE_LEVEL = NovaConfig[SPRINKLER].getLong("water_per_moisture_level")!!
-private val MIN_RANGE = NovaConfig[SPRINKLER].getInt("range.min")!!
-private val MAX_RANGE = NovaConfig[SPRINKLER].getInt("range.max")!!
-private val DEFAULT_RANGE = NovaConfig[SPRINKLER].getInt("range.default")!!
+private val WATER_CAPACITY = NovaConfig[SPRINKLER].getLong("water_capacity")
+private val WATER_PER_MOISTURE_LEVEL = NovaConfig[SPRINKLER].getLong("water_per_moisture_level")
+private val MIN_RANGE = NovaConfig[SPRINKLER].getInt("range.min")
+private val MAX_RANGE = NovaConfig[SPRINKLER].getInt("range.max")
+private val DEFAULT_RANGE = NovaConfig[SPRINKLER].getInt("range.default")
 
 class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

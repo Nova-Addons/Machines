@@ -16,14 +16,13 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.NOVA
-import xyz.xenondevs.nova.data.config.DEFAULT_CONFIG
+import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.item.behavior.ItemBehavior
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.addPrioritized
 import xyz.xenondevs.nova.util.data.addLoreLines
-import xyz.xenondevs.nova.util.data.getAllStrings
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.getTargetLocation
 import xyz.xenondevs.nova.util.item.retrieveData
@@ -33,10 +32,11 @@ private val DATA_KEY = NamespacedKey(NOVA, "entityData")
 private val TYPE_KEY = NamespacedKey(NOVA, "entityType")
 private val TIME_KEY = NamespacedKey(NOVA, "fillTime")
 
-private val BLACKLISTED_ENTITY_TYPES = DEFAULT_CONFIG
-    .getArray("bottled_mob_blacklist")!!
-    .getAllStrings()
-    .mapTo(HashSet(), EntityType::valueOf)
+private val BLACKLISTED_ENTITY_TYPES by lazy { 
+    NovaConfig[Items.MOB_CATCHER]
+        .getStringList("entity_blacklist")
+        .mapTo(HashSet(), EntityType::valueOf)
+}
 
 object MobCatcherBehavior : ItemBehavior() {
     

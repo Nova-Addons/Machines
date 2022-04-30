@@ -50,12 +50,12 @@ import java.net.URL
 import kotlin.random.Random
 import kotlin.random.nextInt
 
-private val MAX_ENERGY = NovaConfig[MOB_DUPLICATOR].getLong("capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[MOB_DUPLICATOR].getLong("energy_per_tick")!!
-private val ENERGY_PER_TICK_NBT = NovaConfig[MOB_DUPLICATOR].getLong("energy_per_tick_nbt")!!
-private val IDLE_TIME = NovaConfig[MOB_DUPLICATOR].getInt("idle_time")!!
-private val IDLE_TIME_NBT = NovaConfig[MOB_DUPLICATOR].getInt("idle_time_nbt")!!
-private val ENTITY_LIMIT = NovaConfig[MOB_DUPLICATOR].getInt("entity_limit")!!
+private val MAX_ENERGY = NovaConfig[MOB_DUPLICATOR].getLong("capacity")
+private val ENERGY_PER_TICK = NovaConfig[MOB_DUPLICATOR].getLong("energy_per_tick")
+private val ENERGY_PER_TICK_NBT = NovaConfig[MOB_DUPLICATOR].getLong("energy_per_tick_nbt")
+private val IDLE_TIME = NovaConfig[MOB_DUPLICATOR].getInt("idle_time")
+private val IDLE_TIME_NBT = NovaConfig[MOB_DUPLICATOR].getInt("idle_time_nbt")
+private val ENTITY_LIMIT = NovaConfig[MOB_DUPLICATOR].getInt("entity_limit")
 private val NERF_MOBS = NovaConfig[MOB_DUPLICATOR].getBoolean("nerf_mobs")
 
 class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {

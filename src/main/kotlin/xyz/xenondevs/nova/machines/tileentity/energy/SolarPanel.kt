@@ -22,8 +22,8 @@ import xyz.xenondevs.nova.util.untilHeightLimit
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-private val MAX_ENERGY = NovaConfig[SOLAR_PANEL].getLong("capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[SOLAR_PANEL].getLong("energy_per_tick")!!
+private val MAX_ENERGY = NovaConfig[SOLAR_PANEL].getLong("capacity")
+private val ENERGY_PER_TICK = NovaConfig[SOLAR_PANEL].getLong("energy_per_tick")
 
 class SolarPanel(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

@@ -28,10 +28,10 @@ import xyz.xenondevs.nova.util.advance
 import kotlin.math.min
 import kotlin.random.Random
 
-private val MAX_ENERGY = NovaConfig[LIGHTNING_EXCHANGER].getLong("capacity")!!
-private val CONVERSION_RATE = NovaConfig[LIGHTNING_EXCHANGER].getLong("conversion_rate")!!
-private val MIN_BURST = NovaConfig[LIGHTNING_EXCHANGER].getLong("burst.min")!!
-private val MAX_BURST = NovaConfig[LIGHTNING_EXCHANGER].getLong("burst.max")!!
+private val MAX_ENERGY = NovaConfig[LIGHTNING_EXCHANGER].getLong("capacity")
+private val CONVERSION_RATE = NovaConfig[LIGHTNING_EXCHANGER].getLong("conversion_rate")
+private val MIN_BURST = NovaConfig[LIGHTNING_EXCHANGER].getLong("burst.min")
+private val MAX_BURST = NovaConfig[LIGHTNING_EXCHANGER].getLong("burst.max")
 
 class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

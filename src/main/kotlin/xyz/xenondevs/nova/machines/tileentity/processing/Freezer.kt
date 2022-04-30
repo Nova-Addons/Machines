@@ -38,10 +38,10 @@ import java.lang.Long.min
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-private val WATER_CAPACITY = NovaConfig[FREEZER].getLong("water_capacity")!!
-private val ENERGY_CAPACITY = NovaConfig[FREEZER].getLong("energy_capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[FREEZER].getLong("energy_per_tick")!!
-private val MB_PER_TICK = NovaConfig[FREEZER].getLong("mb_per_tick")!!
+private val WATER_CAPACITY = NovaConfig[FREEZER].getLong("water_capacity")
+private val ENERGY_CAPACITY = NovaConfig[FREEZER].getLong("energy_capacity")
+private val ENERGY_PER_TICK = NovaConfig[FREEZER].getLong("energy_per_tick")
+private val MB_PER_TICK = NovaConfig[FREEZER].getLong("mb_per_tick")
 
 class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

@@ -45,13 +45,13 @@ import xyz.xenondevs.nova.util.item.isTillable
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 
-private val MAX_ENERGY = NovaConfig[PLANTER].getLong("capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[PLANTER].getLong("energy_per_tick")!!
-private val ENERGY_PER_PLANT = NovaConfig[PLANTER].getLong("energy_per_plant")!!
-private val IDLE_TIME = NovaConfig[PLANTER].getInt("idle_time")!!
-private val MIN_RANGE = NovaConfig[PLANTER].getInt("range.min")!!
-private val MAX_RANGE = NovaConfig[PLANTER].getInt("range.max")!!
-private val DEFAULT_RANGE = NovaConfig[PLANTER].getInt("range.default")!!
+private val MAX_ENERGY = NovaConfig[PLANTER].getLong("capacity")
+private val ENERGY_PER_TICK = NovaConfig[PLANTER].getLong("energy_per_tick")
+private val ENERGY_PER_PLANT = NovaConfig[PLANTER].getLong("energy_per_plant")
+private val IDLE_TIME = NovaConfig[PLANTER].getInt("idle_time")
+private val MIN_RANGE = NovaConfig[PLANTER].getInt("range.min")
+private val MAX_RANGE = NovaConfig[PLANTER].getInt("range.max")
+private val DEFAULT_RANGE = NovaConfig[PLANTER].getInt("range.default")
 
 class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

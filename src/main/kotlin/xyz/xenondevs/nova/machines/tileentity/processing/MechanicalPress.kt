@@ -37,9 +37,9 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide.FRONT
 import kotlin.math.max
 
-private val MAX_ENERGY = NovaConfig[MECHANICAL_PRESS].getLong("capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[MECHANICAL_PRESS].getLong("energy_per_tick")!!
-private val PRESS_SPEED = NovaConfig[MECHANICAL_PRESS].getInt("speed")!!
+private val MAX_ENERGY = NovaConfig[MECHANICAL_PRESS].getLong("capacity")
+private val ENERGY_PER_TICK = NovaConfig[MECHANICAL_PRESS].getLong("energy_per_tick")
+private val PRESS_SPEED = NovaConfig[MECHANICAL_PRESS].getInt("speed")
 
 private enum class PressType(val recipeType: RecipeType<out ConversionNovaRecipe>) {
     PLATE(RecipeTypes.PLATE_PRESS),

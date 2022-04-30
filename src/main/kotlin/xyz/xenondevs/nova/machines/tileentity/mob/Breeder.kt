@@ -40,14 +40,14 @@ import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import kotlin.math.min
 
-private val MAX_ENERGY = NovaConfig[BREEDER].getLong("capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[BREEDER].getLong("energy_per_tick")!!
-private val ENERGY_PER_BREED = NovaConfig[BREEDER].getLong("energy_per_breed")!!
-private val IDLE_TIME = NovaConfig[BREEDER].getInt("idle_time")!!
-private val BREED_LIMIT = NovaConfig[BREEDER].getInt("breed_limit")!!
-private val MIN_RANGE = NovaConfig[BREEDER].getInt("range.min")!!
-private val MAX_RANGE = NovaConfig[BREEDER].getInt("range.max")!!
-private val DEFAULT_RANGE = NovaConfig[BREEDER].getInt("range.default")!!
+private val MAX_ENERGY = NovaConfig[BREEDER].getLong("capacity")
+private val ENERGY_PER_TICK = NovaConfig[BREEDER].getLong("energy_per_tick")
+private val ENERGY_PER_BREED = NovaConfig[BREEDER].getLong("energy_per_breed")
+private val IDLE_TIME = NovaConfig[BREEDER].getInt("idle_time")
+private val BREED_LIMIT = NovaConfig[BREEDER].getInt("breed_limit")
+private val MIN_RANGE = NovaConfig[BREEDER].getInt("range.min")
+private val MAX_RANGE = NovaConfig[BREEDER].getInt("range.max")
+private val DEFAULT_RANGE = NovaConfig[BREEDER].getInt("range.default")
 
 class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

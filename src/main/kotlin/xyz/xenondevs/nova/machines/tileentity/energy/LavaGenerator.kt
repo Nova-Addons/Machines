@@ -22,10 +22,10 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.particle.ParticleEffect
 
-private val ENERGY_CAPACITY = NovaConfig[LAVA_GENERATOR].getLong("energy_capacity")!!
-private val FLUID_CAPACITY = NovaConfig[LAVA_GENERATOR].getLong("fluid_capacity")!!
-private val ENERGY_PER_MB = NovaConfig[LAVA_GENERATOR].getDouble("energy_per_mb")!!
-private val BURN_RATE = NovaConfig[LAVA_GENERATOR].getDouble("burn_rate")!!
+private val ENERGY_CAPACITY = NovaConfig[LAVA_GENERATOR].getLong("energy_capacity")
+private val FLUID_CAPACITY = NovaConfig[LAVA_GENERATOR].getLong("fluid_capacity")
+private val ENERGY_PER_MB = NovaConfig[LAVA_GENERATOR].getDouble("energy_per_mb")
+private val BURN_RATE = NovaConfig[LAVA_GENERATOR].getDouble("burn_rate")
 
 class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

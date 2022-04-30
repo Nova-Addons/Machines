@@ -28,11 +28,11 @@ import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import de.studiocode.invui.item.Item as UIItem
 
-private val MAX_ENERGY = NovaConfig[WIRELESS_CHARGER].getLong("capacity")!!
-private val CHARGE_SPEED = NovaConfig[WIRELESS_CHARGER].getLong("charge_speed")!!
-private val MIN_RANGE = NovaConfig[WIRELESS_CHARGER].getInt("range.min")!!
-private val MAX_RANGE = NovaConfig[WIRELESS_CHARGER].getInt("range.max")!!
-private val DEFAULT_RANGE = NovaConfig[WIRELESS_CHARGER].getInt("range.default")!!
+private val MAX_ENERGY = NovaConfig[WIRELESS_CHARGER].getLong("capacity")
+private val CHARGE_SPEED = NovaConfig[WIRELESS_CHARGER].getLong("charge_speed")
+private val MIN_RANGE = NovaConfig[WIRELESS_CHARGER].getInt("range.min")
+private val MAX_RANGE = NovaConfig[WIRELESS_CHARGER].getInt("range.max")
+private val DEFAULT_RANGE = NovaConfig[WIRELESS_CHARGER].getInt("range.default")
 
 class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

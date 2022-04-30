@@ -57,10 +57,10 @@ import xyz.xenondevs.nova.util.removeFirstMatching
 import java.awt.Color
 import kotlin.math.roundToInt
 
-private val ENERGY_CAPACITY = NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_per_tick")!!
-private val FLUID_CAPACITY = NovaConfig[ELECTRIC_BREWING_STAND].getLong("fluid_capacity")!!
-private val BREW_TIME = NovaConfig[ELECTRIC_BREWING_STAND].getInt("brew_time")!!
+private val ENERGY_CAPACITY = NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_capacity")
+private val ENERGY_PER_TICK = NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_per_tick")
+private val FLUID_CAPACITY = NovaConfig[ELECTRIC_BREWING_STAND].getLong("fluid_capacity")
+private val BREW_TIME = NovaConfig[ELECTRIC_BREWING_STAND].getInt("brew_time")
 
 private val IGNORE_UPDATE_REASON = object : UpdateReason {}
 

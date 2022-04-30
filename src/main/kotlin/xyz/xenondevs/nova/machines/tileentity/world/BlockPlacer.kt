@@ -29,8 +29,8 @@ import xyz.xenondevs.nova.world.block.BlockManager
 import xyz.xenondevs.nova.world.block.context.BlockPlaceContext
 import xyz.xenondevs.nova.world.pos
 
-private val MAX_ENERGY = NovaConfig[BLOCK_PLACER].getLong("capacity")!!
-private val ENERGY_PER_PLACE = NovaConfig[BLOCK_PLACER].getLong("energy_per_place")!!
+private val MAX_ENERGY = NovaConfig[BLOCK_PLACER].getLong("capacity")
+private val ENERGY_PER_PLACE = NovaConfig[BLOCK_PLACER].getLong("energy_per_place")
 
 class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

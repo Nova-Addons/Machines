@@ -49,11 +49,11 @@ import kotlin.random.Random
 
 private const val MAX_STATE = 99
 
-private val ENERGY_CAPACITY = NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_per_tick")!!
-private val WATER_CAPACITY = NovaConfig[COBBLESTONE_GENERATOR].getLong("water_capacity")!!
-private val LAVA_CAPACITY = NovaConfig[COBBLESTONE_GENERATOR].getLong("lava_capacity")!!
-private val MB_PER_TICK = NovaConfig[COBBLESTONE_GENERATOR].getLong("mb_per_tick")!!
+private val ENERGY_CAPACITY = NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_capacity")
+private val ENERGY_PER_TICK = NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_per_tick")
+private val WATER_CAPACITY = NovaConfig[COBBLESTONE_GENERATOR].getLong("water_capacity")
+private val LAVA_CAPACITY = NovaConfig[COBBLESTONE_GENERATOR].getLong("lava_capacity")
+private val MB_PER_TICK = NovaConfig[COBBLESTONE_GENERATOR].getLong("mb_per_tick")
 
 class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

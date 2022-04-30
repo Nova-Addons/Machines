@@ -39,9 +39,9 @@ private fun getRecipe(input: ItemStack, world: World): SmeltingRecipe? {
         .first { it.matches(SimpleContainer(input.nmsStack), world.serverLevel) }
 }
 
-private val MAX_ENERGY = NovaConfig[ELECTRIC_FURNACE].getLong("capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[ELECTRIC_FURNACE].getLong("energy_per_tick")!!
-private val COOK_SPEED = NovaConfig[ELECTRIC_FURNACE].getInt("cook_speed")!!
+private val MAX_ENERGY = NovaConfig[ELECTRIC_FURNACE].getLong("capacity")
+private val ENERGY_PER_TICK = NovaConfig[ELECTRIC_FURNACE].getLong("energy_per_tick")
+private val COOK_SPEED = NovaConfig[ELECTRIC_FURNACE].getInt("cook_speed")
 
 class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

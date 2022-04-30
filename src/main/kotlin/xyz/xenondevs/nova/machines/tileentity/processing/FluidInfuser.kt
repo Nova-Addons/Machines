@@ -57,9 +57,9 @@ fun getFluidInfuserExtractRecipeFor(input: ItemStack): FluidInfuserRecipe? {
         }
 }
 
-private val ENERGY_PER_TICK = NovaConfig[FLUID_INFUSER].getLong("energy_per_tick")!!
-private val ENERGY_CAPACITY = NovaConfig[FLUID_INFUSER].getLong("energy_capacity")!!
-private val FLUID_CAPACITY = NovaConfig[FLUID_INFUSER].getLong("fluid_capacity")!!
+private val ENERGY_PER_TICK = NovaConfig[FLUID_INFUSER].getLong("energy_per_tick")
+private val ENERGY_CAPACITY = NovaConfig[FLUID_INFUSER].getLong("energy_capacity")
+private val FLUID_CAPACITY = NovaConfig[FLUID_INFUSER].getLong("fluid_capacity")
 
 class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

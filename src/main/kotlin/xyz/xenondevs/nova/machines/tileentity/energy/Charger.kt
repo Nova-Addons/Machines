@@ -22,8 +22,8 @@ import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.item.novaMaterial
 
-private val MAX_ENERGY = NovaConfig[CHARGER].getLong("capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[CHARGER].getLong("charge_speed")!!
+private val MAX_ENERGY = NovaConfig[CHARGER].getLong("capacity")
+private val ENERGY_PER_TICK = NovaConfig[CHARGER].getLong("charge_speed")
 
 class Charger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

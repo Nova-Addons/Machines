@@ -28,9 +28,9 @@ import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-private val MAX_ENERGY = NovaConfig[FURNACE_GENERATOR].getLong("capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[FURNACE_GENERATOR].getLong("energy_per_tick")!!
-private val BURN_TIME_MULTIPLIER = NovaConfig[FURNACE_GENERATOR].getDouble("burn_time_multiplier")!!
+private val MAX_ENERGY = NovaConfig[FURNACE_GENERATOR].getLong("capacity")
+private val ENERGY_PER_TICK = NovaConfig[FURNACE_GENERATOR].getLong("energy_per_tick")
+private val BURN_TIME_MULTIPLIER = NovaConfig[FURNACE_GENERATOR].getDouble("burn_time_multiplier")
 
 class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

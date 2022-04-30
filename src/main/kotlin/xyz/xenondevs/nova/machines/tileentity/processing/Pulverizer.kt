@@ -32,9 +32,9 @@ import xyz.xenondevs.nova.util.particle
 import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.max
 
-private val MAX_ENERGY = NovaConfig[PULVERIZER].getLong("capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[PULVERIZER].getLong("energy_per_tick")!!
-private val PULVERIZE_SPEED = NovaConfig[PULVERIZER].getInt("speed")!!
+private val MAX_ENERGY = NovaConfig[PULVERIZER].getLong("capacity")
+private val ENERGY_PER_TICK = NovaConfig[PULVERIZER].getLong("energy_per_tick")
+private val PULVERIZE_SPEED = NovaConfig[PULVERIZER].getInt("speed")
 
 class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

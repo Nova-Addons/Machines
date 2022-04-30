@@ -35,13 +35,13 @@ import xyz.xenondevs.nova.util.item.isFullyAged
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 
-private val MAX_ENERGY = NovaConfig[FERTILIZER].getLong("capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[FERTILIZER].getLong("energy_per_tick")!!
-private val ENERGY_PER_FERTILIZE = NovaConfig[FERTILIZER].getLong("energy_per_fertilize")!!
-private val IDLE_TIME = NovaConfig[FERTILIZER].getInt("idle_time")!!
-private val MIN_RANGE = NovaConfig[FERTILIZER].getInt("range.min")!!
-private val MAX_RANGE = NovaConfig[FERTILIZER].getInt("range.max")!!
-private val DEFAULT_RANGE = NovaConfig[FERTILIZER].getInt("range.default")!!
+private val MAX_ENERGY = NovaConfig[FERTILIZER].getLong("capacity")
+private val ENERGY_PER_TICK = NovaConfig[FERTILIZER].getLong("energy_per_tick")
+private val ENERGY_PER_FERTILIZE = NovaConfig[FERTILIZER].getLong("energy_per_fertilize")
+private val IDLE_TIME = NovaConfig[FERTILIZER].getInt("idle_time")
+private val MIN_RANGE = NovaConfig[FERTILIZER].getInt("range.min")
+private val MAX_RANGE = NovaConfig[FERTILIZER].getInt("range.max")
+private val DEFAULT_RANGE = NovaConfig[FERTILIZER].getInt("range.default")
 
 class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

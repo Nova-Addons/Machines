@@ -40,15 +40,15 @@ import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import java.util.*
 
-private val ENERGY_CAPACITY = NovaConfig[PUMP].getLong("energy_capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[PUMP].getLong("energy_per_tick")!!
-private val FLUID_CAPACITY = NovaConfig[PUMP].getLong("fluid_capacity")!!
+private val ENERGY_CAPACITY = NovaConfig[PUMP].getLong("energy_capacity")
+private val ENERGY_PER_TICK = NovaConfig[PUMP].getLong("energy_per_tick")
+private val FLUID_CAPACITY = NovaConfig[PUMP].getLong("fluid_capacity")
 private val REPLACEMENT_BLOCK = Material.valueOf(NovaConfig[PUMP].getString("replacement_block")!!)
-private val IDLE_TIME = NovaConfig[PUMP].getLong("idle_time")!!
+private val IDLE_TIME = NovaConfig[PUMP].getLong("idle_time")
 
-private val MIN_RANGE = NovaConfig[PUMP].getInt("range.min")!!
-private val MAX_RANGE = NovaConfig[PUMP].getInt("range.max")!!
-private val DEFAULT_RANGE = NovaConfig[PUMP].getInt("range.default")!!
+private val MIN_RANGE = NovaConfig[PUMP].getInt("range.min")
+private val MAX_RANGE = NovaConfig[PUMP].getInt("range.max")
+private val DEFAULT_RANGE = NovaConfig[PUMP].getInt("range.default")
 
 class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     

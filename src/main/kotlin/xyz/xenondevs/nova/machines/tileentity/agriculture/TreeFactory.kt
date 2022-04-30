@@ -50,10 +50,10 @@ private val PLANTS = mapOf(
     Material.BROWN_MUSHROOM to PlantConfiguration(Blocks.GIANT_BROWN_MUSHROOM_MINIATURE, ItemStack(Material.BROWN_MUSHROOM, 3), Color(149, 112, 80))
 )
 
-private val MAX_ENERGY = NovaConfig[TREE_FACTORY].getLong("capacity")!!
-private val ENERGY_PER_TICK = NovaConfig[TREE_FACTORY].getLong("energy_per_tick")!!
-private val PROGRESS_PER_TICK = NovaConfig[TREE_FACTORY].getDouble("progress_per_tick")!!
-private val IDLE_TIME = NovaConfig[TREE_FACTORY].getInt("idle_time")!!
+private val MAX_ENERGY = NovaConfig[TREE_FACTORY].getLong("capacity")
+private val ENERGY_PER_TICK = NovaConfig[TREE_FACTORY].getLong("energy_per_tick")
+private val PROGRESS_PER_TICK = NovaConfig[TREE_FACTORY].getDouble("progress_per_tick")
+private val IDLE_TIME = NovaConfig[TREE_FACTORY].getInt("idle_time")
 
 private const val MAX_GROWTH_STAGE = 199
 
