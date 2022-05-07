@@ -1,0 +1,16 @@
+{
+  "result": "nova:pump",
+  "shape": [
+    "bpw",
+    "gfg",
+    " i "
+  ],
+  "ingredients": {
+    "b": "minecraft:bucket",
+    "w": "minecraft:water_bucket",
+    "p": "nova:iron_plate",
+    "f": "nova:advanced_machine_frame",
+    "i": "minecraft:iron_ingot",
+    "g": "nova:copper_gear"
+  }
+}
