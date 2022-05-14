@@ -14,7 +14,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.ConversionNovaRecipe
 import xyz.xenondevs.nova.data.recipe.RecipeManager
@@ -30,7 +29,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -39,8 +37,8 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide.FRONT
 import kotlin.math.max
 
-private val MAX_ENERGY by configReloadable { NovaConfig[MECHANICAL_PRESS].getLong("capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[MECHANICAL_PRESS].getLong("energy_per_tick") }
+private val MAX_ENERGY = configReloadable { NovaConfig[MECHANICAL_PRESS].getLong("capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[MECHANICAL_PRESS].getLong("energy_per_tick") }
 private val PRESS_SPEED by configReloadable { NovaConfig[MECHANICAL_PRESS].getInt("speed") }
 
 private enum class PressType(val recipeType: RecipeType<out ConversionNovaRecipe>) {
@@ -48,15 +46,15 @@ private enum class PressType(val recipeType: RecipeType<out ConversionNovaRecipe
     GEAR(RecipeTypes.GEAR_PRESS)
 }
 
-class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { MechanicalPressGUI() }
     
     private val inputInv = getInventory("input", 1, ::handleInputUpdate)
     private val outputInv = getInventory("output", 1, ::handleOutputUpdate)
     
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
         inputInv to NetworkConnectionType.BUFFER,
@@ -71,19 +69,12 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         retrieveOrNull<NamespacedKey>("currentRecipe")?.let { RecipeManager.getRecipe(type.recipeType, it) }
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
         if (currentRecipe == null) timeLeft = 0
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        
-        handleUpgradeUpdates()
-    }
-    
-    private fun handleUpgradeUpdates() {
+        super.reload()
         pressSpeed = (PRESS_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
     }
     

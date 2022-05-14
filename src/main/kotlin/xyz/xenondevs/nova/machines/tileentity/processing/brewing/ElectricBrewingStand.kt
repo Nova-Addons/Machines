@@ -24,7 +24,6 @@ import org.bukkit.potion.PotionData
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.potion.PotionType
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
@@ -44,7 +43,6 @@ import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
@@ -59,23 +57,23 @@ import xyz.xenondevs.nova.util.removeFirstMatching
 import java.awt.Color
 import kotlin.math.roundToInt
 
-private val ENERGY_CAPACITY by configReloadable { NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_per_tick") }
-private val FLUID_CAPACITY by configReloadable { NovaConfig[ELECTRIC_BREWING_STAND].getLong("fluid_capacity") }
+private val ENERGY_CAPACITY = configReloadable { NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_per_tick") }
+private val FLUID_CAPACITY = configReloadable { NovaConfig[ELECTRIC_BREWING_STAND].getLong("fluid_capacity") }
 private val BREW_TIME by configReloadable { NovaConfig[ELECTRIC_BREWING_STAND].getInt("brew_time") }
 
 private val IGNORE_UPDATE_REASON = object : UpdateReason {}
 
-class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::ElectricBrewingStandGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
     private val fluidTank = getFluidContainer("tank", setOf(FluidType.WATER), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
     private val ingredientsInventory = getInventory("ingredients", 27, null, ::handleIngredientsInventoryAfterUpdate)
     private val outputInventory = getInventory("output", 3, ::handleOutputPreUpdate, ::handleOutputInventoryAfterUpdate)
     
     override val energyHolder = ConsumerEnergyHolder(
-        this, ENERGY_CAPACITY, ENERGY_PER_TICK, 0, upgradeHolder
+        this, ENERGY_CAPACITY, ENERGY_PER_TICK, null, upgradeHolder
     ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
     override val itemHolder = NovaItemHolder(
@@ -100,7 +98,6 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     private var nextPotion: ItemStack? = null
     
     init {
-        NovaConfig.reloadables.add(this)
         val potionEffects = ArrayList<PotionEffectBuilder>()
         retrieveElementOrNull<ListElement>("potionEffects")?.forEach { potionCompound ->
             potionCompound as CompoundElement
@@ -112,15 +109,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         }
         
         updatePotionData(potionType, potionEffects, color)
-        handleUpgradeUpdates()
-    }
-    
-    override fun reload() {
-        energyHolder.defaultMaxEnergy = ENERGY_CAPACITY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        fluidTank.capacity = FLUID_CAPACITY
-        
-        handleUpgradeUpdates()
+        reload()
     }
     
     override fun saveData() {
@@ -141,7 +130,8 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         storeData("potionColor", color)
     }
     
-    private fun handleUpgradeUpdates() {
+    override fun reload() {
+        super.reload()
         maxBrewTime = (BREW_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).roundToInt()
     }
     

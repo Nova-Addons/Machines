@@ -13,7 +13,6 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.LeftRightFluidProgressItem
@@ -28,7 +27,6 @@ import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
@@ -40,21 +38,21 @@ import java.lang.Long.min
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-private val WATER_CAPACITY by configReloadable { NovaConfig[FREEZER].getLong("water_capacity") }
-private val ENERGY_CAPACITY by configReloadable { NovaConfig[FREEZER].getLong("energy_capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[FREEZER].getLong("energy_per_tick") }
+private val WATER_CAPACITY = configReloadable { NovaConfig[FREEZER].getLong("water_capacity") }
+private val ENERGY_CAPACITY = configReloadable { NovaConfig[FREEZER].getLong("energy_capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[FREEZER].getLong("energy_per_tick") }
 private val MB_PER_TICK by configReloadable { NovaConfig[FREEZER].getLong("mb_per_tick") }
 
-class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::FreezerGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
     private val inventory = getInventory("inventory", 6, ::handleInventoryUpdate)
     private val waterTank = getFluidContainer("water", setOf(FluidType.WATER), WATER_CAPACITY, 0, upgradeHolder = upgradeHolder)
     
     override val fluidHolder = NovaFluidHolder(this, waterTank to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
-    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
     private val snowSpawnBlock = location.clone().apply { y += 1 }.block
     
@@ -64,23 +62,16 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     private var mode = retrieveEnum("mode") { Mode.ICE }
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = ENERGY_CAPACITY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        
-        handleUpgradeUpdates()
+        super.reload()
+        mbPerTick = (MB_PER_TICK * upgradeHolder.getValue(UpgradeType.SPEED)).roundToLong()
     }
     
     private fun handleInventoryUpdate(event: ItemUpdateEvent) {
         event.isCancelled = !event.isRemove && event.updateReason != SELF_UPDATE_REASON
-    }
-    
-    private fun handleUpgradeUpdates() {
-        mbPerTick = (MB_PER_TICK * upgradeHolder.getValue(UpgradeType.SPEED)).roundToLong()
     }
     
     override fun handleTick() {

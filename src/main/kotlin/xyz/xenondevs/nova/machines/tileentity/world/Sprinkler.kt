@@ -14,7 +14,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPhysicsEvent
 import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.SPRINKLER
@@ -23,7 +22,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -42,16 +40,16 @@ import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToLong
 
-private val WATER_CAPACITY by configReloadable { NovaConfig[SPRINKLER].getLong("water_capacity") }
+private val WATER_CAPACITY = configReloadable { NovaConfig[SPRINKLER].getLong("water_capacity") }
 private val WATER_PER_MOISTURE_LEVEL by configReloadable { NovaConfig[SPRINKLER].getLong("water_per_moisture_level") }
 private val MIN_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("range.min") }
 private val MAX_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("range.default") }
 
-class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::SprinklerGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.EFFICIENCY, UpgradeType.FLUID, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.EFFICIENCY, UpgradeType.FLUID, UpgradeType.RANGE)
     private val tank = getFluidContainer("tank", hashSetOf(FluidType.WATER), WATER_CAPACITY, upgradeHolder = upgradeHolder)
     override val fluidHolder = NovaFluidHolder(this, tank to NetworkConnectionType.BUFFER) { createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM) }
     
@@ -67,23 +65,23 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         }
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
         updateRegion()
         
         sprinklers += this
-    }
-    
-    override fun reload() {
-        tank.capacity = WATER_CAPACITY
-        
-        handleUpgradeUpdates()
     }
     
     override fun handleRemoved(unload: Boolean) {
         super.handleRemoved(unload)
         sprinklers -= this
         VisualRegion.removeRegion(uuid)
+    }
+    
+    override fun reload() {
+        super.reload()
+        
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
+        waterPerMoistureLevel = (WATER_PER_MOISTURE_LEVEL / upgradeHolder.getValue(UpgradeType.EFFICIENCY)).roundToLong()
     }
     
     private fun updateRegion() {
@@ -93,11 +91,6 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
             location.clone().center().add(d, 0.0, d)
         )
         VisualRegion.updateRegion(uuid, region)
-    }
-    
-    private fun handleUpgradeUpdates() {
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
-        waterPerMoistureLevel = (WATER_PER_MOISTURE_LEVEL / upgradeHolder.getValue(UpgradeType.EFFICIENCY)).roundToLong()
     }
     
     override fun saveData() {

@@ -12,7 +12,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
@@ -25,7 +24,6 @@ import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
@@ -42,9 +40,9 @@ import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import java.util.*
 
-private val ENERGY_CAPACITY by configReloadable { NovaConfig[PUMP].getLong("energy_capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[PUMP].getLong("energy_per_tick") }
-private val FLUID_CAPACITY by configReloadable { NovaConfig[PUMP].getLong("fluid_capacity") }
+private val ENERGY_CAPACITY = configReloadable { NovaConfig[PUMP].getLong("energy_capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[PUMP].getLong("energy_per_tick") }
+private val FLUID_CAPACITY = configReloadable { NovaConfig[PUMP].getLong("fluid_capacity") }
 private val REPLACEMENT_BLOCK by configReloadable { Material.valueOf(NovaConfig[PUMP].getString("replacement_block")!!) }
 private val IDLE_TIME by configReloadable { NovaConfig[PUMP].getLong("idle_time") }
 
@@ -52,14 +50,14 @@ private val MIN_RANGE by configReloadable { NovaConfig[PUMP].getInt("range.min")
 private val MAX_RANGE by configReloadable { NovaConfig[PUMP].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[PUMP].getInt("range.default") }
 
-class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::PumpGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE, UpgradeType.FLUID)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE, UpgradeType.FLUID)
     
     private val fluidTank = getFluidContainer("tank", hashSetOf(FluidType.WATER, FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
     
-    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, 0, upgradeHolder = upgradeHolder) { createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.TOP) }
+    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, null, upgradeHolder = upgradeHolder) { createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.TOP) }
     override val fluidHolder = NovaFluidHolder(this, fluidTank to NetworkConnectionType.EXTRACT) { createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.TOP) }
     
     private var maxIdleTime = 0
@@ -80,20 +78,13 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
     private var sortedFaces = LinkedList(HORIZONTAL_FACES)
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
         updateRegion()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = ENERGY_CAPACITY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        fluidTank.capacity = FLUID_CAPACITY
+        super.reload()
         
-        handleUpgradeUpdates()
-    }
-    
-    private fun handleUpgradeUpdates() {
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (idleTime > maxIdleTime) idleTime = maxIdleTime
         

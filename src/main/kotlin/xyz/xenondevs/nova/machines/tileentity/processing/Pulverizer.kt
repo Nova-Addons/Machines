@@ -7,7 +7,6 @@ import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.NamespacedKey
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -22,7 +21,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -34,19 +32,19 @@ import xyz.xenondevs.nova.util.particle
 import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.max
 
-private val MAX_ENERGY by configReloadable { NovaConfig[PULVERIZER].getLong("capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[PULVERIZER].getLong("energy_per_tick") }
+private val MAX_ENERGY = configReloadable { NovaConfig[PULVERIZER].getLong("capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[PULVERIZER].getLong("energy_per_tick") }
 private val PULVERIZE_SPEED by configReloadable { NovaConfig[PULVERIZER].getInt("speed") }
 
-class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { PulverizerGUI() }
     
     private val inputInv = getInventory("input", 1, ::handleInputUpdate)
     private val outputInv = getInventory("output", 2, ::handleOutputUpdate)
     
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
         inputInv to NetworkConnectionType.BUFFER,
@@ -68,19 +66,12 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     ), 6)
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
         if (currentRecipe == null) timeLeft = 0
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        
-        handleUpgradeUpdates()
-    }
-    
-    private fun handleUpgradeUpdates() {
+        super.reload()
         pulverizeSpeed = (PULVERIZE_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
     }
     

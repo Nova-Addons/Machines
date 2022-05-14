@@ -8,7 +8,6 @@ import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
@@ -19,7 +18,6 @@ import xyz.xenondevs.nova.tileentity.TileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -32,14 +30,14 @@ import xyz.xenondevs.nova.world.pos
 import java.util.concurrent.CompletableFuture
 import kotlin.math.abs
 
-private val MAX_ENERGY by configReloadable { NovaConfig[WIND_TURBINE].getLong("capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[WIND_TURBINE].getLong("energy_per_tick") }
+private val MAX_ENERGY = configReloadable { NovaConfig[WIND_TURBINE].getLong("capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[WIND_TURBINE].getLong("energy_per_tick") }
 private val PLAY_ANIMATION by configReloadable { NovaConfig[WIND_TURBINE].getBoolean("animation") }
 
-class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { WindTurbineGUI() }
-    override val upgradeHolder = UpgradeHolder(this, gui, ::updateEnergyPerTick, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT, BlockSide.BOTTOM)
     }
@@ -51,19 +49,12 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     private var energyPerTick = 0
     
     init {
-        NovaConfig.reloadables.add(this)
-        updateEnergyPerTick()
+        reload()
         spawnModels()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyGeneration = ENERGY_PER_TICK
-        
-        updateEnergyPerTick()
-    }
-    
-    private fun updateEnergyPerTick() {
+        super.reload()
         energyPerTick = (altitude * energyHolder.energyGeneration).toInt()
     }
     

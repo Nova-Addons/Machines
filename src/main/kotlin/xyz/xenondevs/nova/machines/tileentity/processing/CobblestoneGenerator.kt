@@ -14,7 +14,6 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.LeftRightFluidProgressItem
@@ -31,7 +30,6 @@ import xyz.xenondevs.nova.tileentity.network.fluid.container.FluidContainer
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
@@ -51,22 +49,22 @@ import kotlin.random.Random
 
 private const val MAX_STATE = 99
 
-private val ENERGY_CAPACITY by configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_capacity") }
-private val ENERGY_PER_TICK by configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_per_tick") }
-private val WATER_CAPACITY by configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("water_capacity") }
-private val LAVA_CAPACITY by configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("lava_capacity") }
+private val ENERGY_CAPACITY = configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_capacity") }
+private val ENERGY_PER_TICK = configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_per_tick") }
+private val WATER_CAPACITY = configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("water_capacity") }
+private val LAVA_CAPACITY = configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("lava_capacity") }
 private val MB_PER_TICK by configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("mb_per_tick") }
 
-class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::CobblestoneGeneratorGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
     
     private val inventory = getInventory("inventory", 3, ::handleInventoryUpdate)
     private val waterTank = getFluidContainer("water", setOf(FluidType.WATER), WATER_CAPACITY, 0, ::updateWaterLevel, upgradeHolder)
     private val lavaTank = getFluidContainer("lava", setOf(FluidType.LAVA), LAVA_CAPACITY, 0, ::updateLavaLevel, upgradeHolder)
     
-    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
     override val fluidHolder = NovaFluidHolder(this, waterTank to NetworkConnectionType.BUFFER, lavaTank to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
@@ -87,22 +85,13 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     }
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
         updateWaterLevel()
         updateLavaLevel()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = ENERGY_CAPACITY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        waterTank.capacity = WATER_CAPACITY
-        lavaTank.capacity = LAVA_CAPACITY
-        
-        handleUpgradeUpdates()
-    }
-    
-    private fun handleUpgradeUpdates() {
+        super.reload()
         mbPerTick = (MB_PER_TICK * upgradeHolder.getValue(UpgradeType.SPEED)).roundToLong()
     }
     

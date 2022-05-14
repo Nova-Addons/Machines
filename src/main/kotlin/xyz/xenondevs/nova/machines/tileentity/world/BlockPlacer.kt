@@ -5,7 +5,6 @@ import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import org.bukkit.block.BlockFace
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
@@ -17,7 +16,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -31,28 +29,19 @@ import xyz.xenondevs.nova.world.block.BlockManager
 import xyz.xenondevs.nova.world.block.context.BlockPlaceContext
 import xyz.xenondevs.nova.world.pos
 
-private val MAX_ENERGY by configReloadable { NovaConfig[BLOCK_PLACER].getLong("capacity") }
-private val ENERGY_PER_PLACE by configReloadable { NovaConfig[BLOCK_PLACER].getLong("energy_per_place") }
+private val MAX_ENERGY = configReloadable { NovaConfig[BLOCK_PLACER].getLong("capacity") }
+private val ENERGY_PER_PLACE = configReloadable { NovaConfig[BLOCK_PLACER].getLong("energy_per_place") }
 
-class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 9) {}
     override val gui = lazy { BlockPlacerGUI() }
-    override val upgradeHolder = UpgradeHolder(this, gui, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_PLACE, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_PLACE, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
     private val placePos = location.clone().advance(getFace(BlockSide.FRONT)).pos
     private val placeBlock = placePos.block
-    
-    init {
-        NovaConfig.reloadables.add(this)
-    }
-    
-    override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_PLACE
-    }
     
     private fun placeBlock(): Boolean {
         for ((index, item) in inventory.items.withIndex()) {

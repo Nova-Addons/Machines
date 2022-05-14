@@ -16,7 +16,6 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
@@ -28,7 +27,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -47,20 +45,20 @@ import xyz.xenondevs.nova.util.item.isTillable
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 
-private val MAX_ENERGY by configReloadable { NovaConfig[PLANTER].getLong("capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[PLANTER].getLong("energy_per_tick") }
-private val ENERGY_PER_PLANT by configReloadable { NovaConfig[PLANTER].getLong("energy_per_plant") }
+private val MAX_ENERGY = configReloadable { NovaConfig[PLANTER].getLong("capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[PLANTER].getLong("energy_per_tick") }
+private val ENERGY_PER_PLANT = configReloadable { NovaConfig[PLANTER].getLong("energy_per_plant") }
 private val IDLE_TIME by configReloadable { NovaConfig[PLANTER].getInt("idle_time") }
 private val MIN_RANGE by configReloadable { NovaConfig[PLANTER].getInt("range.min") }
 private val MAX_RANGE by configReloadable { NovaConfig[PLANTER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[PLANTER].getInt("range.default") }
 
-class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inputInventory = getInventory("input", 6, ::handleSeedUpdate)
     private val hoesInventory = getInventory("hoes", 1, ::handleHoeUpdate)
     override val gui = lazy(::PlanterGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_PLANT, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -84,21 +82,13 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     private lateinit var soilRegion: Region
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
         updateRegion()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        energyHolder.defaultSpecialEnergyConsumption = ENERGY_PER_PLANT
+        super.reload()
         
-        handleUpgradeUpdates()
-        updateRegion()
-    }
-    
-    private fun handleUpgradeUpdates() {
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         

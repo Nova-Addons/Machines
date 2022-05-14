@@ -10,7 +10,6 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks
@@ -23,7 +22,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -52,21 +50,21 @@ private val PLANTS = mapOf(
     Material.BROWN_MUSHROOM to PlantConfiguration(Blocks.GIANT_BROWN_MUSHROOM_MINIATURE, ItemStack(Material.BROWN_MUSHROOM, 3), Color(149, 112, 80))
 )
 
-private val MAX_ENERGY by configReloadable { NovaConfig[TREE_FACTORY].getLong("capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[TREE_FACTORY].getLong("energy_per_tick") }
+private val MAX_ENERGY = configReloadable { NovaConfig[TREE_FACTORY].getLong("capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[TREE_FACTORY].getLong("energy_per_tick") }
 private val PROGRESS_PER_TICK by configReloadable { NovaConfig[TREE_FACTORY].getDouble("progress_per_tick") }
 private val IDLE_TIME by configReloadable { NovaConfig[TREE_FACTORY].getInt("idle_time") }
 
 private const val MAX_GROWTH_STAGE = 199
 
-class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inputInventory = getInventory("input", 1, intArrayOf(1), ::handleInputInventoryUpdate)
     private val outputInventory = getInventory("output", 9, ::handleOutputInventoryUpdate)
     
     override val gui: Lazy<TileEntityGUI> = lazy(::TreeFactoryGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradesUpdate, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) {
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) {
         createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM, BlockSide.BACK)
     }
     override val itemHolder = NovaItemHolder(
@@ -85,23 +83,16 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     private var idleTimeLeft = 0
     
     init {
-        NovaConfig.reloadables.add(this)
         val plantLocation = location.clone().center().apply { y += 1 / 16.0 }
         plant = FakeArmorStand(plantLocation, true) { _, data ->
             data.invisible = true
             data.marker = true
         }
-        handleUpgradesUpdate()
+        reload()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        
-        handleUpgradesUpdate()
-    }
-    
-    private fun handleUpgradesUpdate() {
+        super.reload()
         progressPerTick = PROGRESS_PER_TICK * upgradeHolder.getValue(UpgradeType.SPEED)
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
     }

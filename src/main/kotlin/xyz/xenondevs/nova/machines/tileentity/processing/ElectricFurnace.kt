@@ -17,7 +17,6 @@ import org.bukkit.entity.EntityType
 import org.bukkit.entity.ExperienceOrb
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.ProgressArrowItem
@@ -28,7 +27,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -41,19 +39,19 @@ private fun getRecipe(input: ItemStack, world: World): SmeltingRecipe? {
         .first { it.matches(SimpleContainer(input.nmsStack), world.serverLevel) }
 }
 
-private val MAX_ENERGY by configReloadable { NovaConfig[ELECTRIC_FURNACE].getLong("capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[ELECTRIC_FURNACE].getLong("energy_per_tick") }
+private val MAX_ENERGY = configReloadable { NovaConfig[ELECTRIC_FURNACE].getLong("capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[ELECTRIC_FURNACE].getLong("energy_per_tick") }
 private val COOK_SPEED by configReloadable { NovaConfig[ELECTRIC_FURNACE].getInt("cook_speed") }
 
-class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { ElectricFurnaceGUI() }
     
     private val inputInventory = getInventory("input", 1, ::handleInputInventoryUpdate)
     private val outputInventory = getInventory("output", 1, ::handleOutputInventoryUpdate)
     
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
         inputInventory to NetworkConnectionType.BUFFER,
@@ -76,15 +74,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         }
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
-    }
-    
-    override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        
-        handleUpgradeUpdates()
+        reload()
     }
     
     override fun saveData() {
@@ -92,6 +82,11 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         storeData("currentRecipe", currentRecipe?.id?.namespacedKey)
         storeData("timeCooked", timeCooked)
         storeData("experience", experience)
+    }
+    
+    override fun reload() {
+        super.reload()
+        cookSpeed = (COOK_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
     }
     
     private fun handleInputInventoryUpdate(event: ItemUpdateEvent) {
@@ -159,10 +154,6 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 if (gui.isInitialized()) gui.value.updateProgress()
             }
         } else active = false
-    }
-    
-    private fun handleUpgradeUpdates() {
-        cookSpeed = (COOK_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
     }
     
     override fun handleRemoved(unload: Boolean) {

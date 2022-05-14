@@ -13,7 +13,6 @@ import org.bukkit.block.Block
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
@@ -25,7 +24,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -43,22 +41,22 @@ import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import java.util.*
 
-private val MAX_ENERGY by configReloadable { NovaConfig[HARVESTER].getLong("capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[HARVESTER].getLong("energy_per_tick") }
-private val ENERGY_PER_BREAK by configReloadable { NovaConfig[HARVESTER].getLong("energy_per_break") }
+private val MAX_ENERGY = configReloadable { NovaConfig[HARVESTER].getLong("capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[HARVESTER].getLong("energy_per_tick") }
+private val ENERGY_PER_BREAK = configReloadable { NovaConfig[HARVESTER].getLong("energy_per_break") }
 private val IDLE_TIME by configReloadable { NovaConfig[HARVESTER].getInt("idle_time") }
 private val MIN_RANGE by configReloadable { NovaConfig[HARVESTER].getInt("range.min") }
 private val MAX_RANGE by configReloadable { NovaConfig[HARVESTER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[HARVESTER].getInt("range.default") }
 
-class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("harvest", 12, ::handleInventoryUpdate)
     private val shearInventory = getInventory("shears", 1, ::handleShearInventoryUpdate)
     private val axeInventory = getInventory("axe", 1, ::handleAxeInventoryUpdate)
     private val hoeInventory = getInventory("hoe", 1, ::handleHoeInventoryUpdate)
     override val gui = lazy(::HarvesterGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREAK, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -81,21 +79,13 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     private var loadCooldown = 0
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
         updateRegion()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        energyHolder.defaultSpecialEnergyConsumption = ENERGY_PER_BREAK
+        super.reload()
         
-        handleUpgradeUpdates()
-        updateRegion()
-    }
-    
-    private fun handleUpgradeUpdates() {
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         

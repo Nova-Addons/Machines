@@ -8,7 +8,6 @@ import de.studiocode.invui.item.builder.ItemBuilder
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Mob
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
@@ -18,7 +17,6 @@ import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -35,9 +33,9 @@ import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import kotlin.math.min
 
-private val MAX_ENERGY by configReloadable { NovaConfig[MOB_KILLER].getLong("capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[MOB_KILLER].getLong("energy_per_tick") }
-private val ENERGY_PER_DAMAGE by configReloadable { NovaConfig[MOB_KILLER].getLong("energy_per_damage") }
+private val MAX_ENERGY = configReloadable { NovaConfig[MOB_KILLER].getLong("capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[MOB_KILLER].getLong("energy_per_tick") }
+private val ENERGY_PER_DAMAGE = configReloadable { NovaConfig[MOB_KILLER].getLong("energy_per_damage") }
 private val IDLE_TIME by configReloadable { NovaConfig[MOB_KILLER].getInt("idle_time") }
 private val KILL_LIMIT by configReloadable { NovaConfig[MOB_KILLER].getInt("kill_limit") }
 private val DAMAGE by configReloadable { NovaConfig[MOB_KILLER].getDouble("damage") }
@@ -45,10 +43,10 @@ private val MIN_RANGE by configReloadable { NovaConfig[MOB_KILLER].getInt("range
 private val MAX_RANGE by configReloadable { NovaConfig[MOB_KILLER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[MOB_KILLER].getInt("range.default") }
 
-class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { MobCrusherGUI() }
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_DAMAGE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID, "Mob Killer").bukkitEntity
     
@@ -64,30 +62,23 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     private lateinit var region: Region
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
         updateRegion()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        energyHolder.defaultSpecialEnergyConsumption = ENERGY_PER_DAMAGE
+        super.reload()
         
-        handleUpgradeUpdates()
-    }
-    
-    override fun saveData() {
-        super.saveData()
-        storeData("range", range)
-    }
-    
-    private fun handleUpgradeUpdates() {
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         
         maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
         if (range > maxRange) range = maxRange
+    }
+    
+    override fun saveData() {
+        super.saveData()
+        storeData("range", range)
     }
     
     private fun updateRegion() {

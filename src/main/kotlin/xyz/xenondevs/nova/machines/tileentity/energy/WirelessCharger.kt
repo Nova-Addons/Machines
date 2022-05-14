@@ -6,7 +6,6 @@ import de.studiocode.invui.gui.builder.guitype.GUIType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.item.behavior.Chargeable
@@ -15,7 +14,6 @@ import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -30,17 +28,17 @@ import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import de.studiocode.invui.item.Item as UIItem
 
-private val MAX_ENERGY by configReloadable { NovaConfig[WIRELESS_CHARGER].getLong("capacity") }
-private val CHARGE_SPEED by configReloadable { NovaConfig[WIRELESS_CHARGER].getLong("charge_speed") }
+private val MAX_ENERGY = configReloadable { NovaConfig[WIRELESS_CHARGER].getLong("capacity") }
+private val CHARGE_SPEED = configReloadable { NovaConfig[WIRELESS_CHARGER].getLong("charge_speed") }
 private val MIN_RANGE by configReloadable { NovaConfig[WIRELESS_CHARGER].getInt("range.min") }
 private val MAX_RANGE by configReloadable { NovaConfig[WIRELESS_CHARGER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[WIRELESS_CHARGER].getInt("range.default") }
 
-class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::WirelessChargerGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.ENERGY, UpgradeType.RANGE)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, CHARGE_SPEED, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, CHARGE_SPEED, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     
     private var maxRange = 0
     private var range = retrieveData("range") { DEFAULT_RANGE }
@@ -53,20 +51,12 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     private lateinit var region: Region
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
         updateRegion()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyConsumption = CHARGE_SPEED
-        
-        handleUpgradeUpdates()
-        updateRegion()
-    }
-    
-    private fun handleUpgradeUpdates() {
+        super.reload()
         maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
         if (maxRange < range) range = maxRange
     }

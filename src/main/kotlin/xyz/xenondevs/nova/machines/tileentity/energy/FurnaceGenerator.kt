@@ -6,7 +6,6 @@ import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.EnergyProgressItem
@@ -16,7 +15,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -30,15 +28,15 @@ import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-private val MAX_ENERGY by configReloadable { NovaConfig[FURNACE_GENERATOR].getLong("capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[FURNACE_GENERATOR].getLong("energy_per_tick") }
+private val MAX_ENERGY = configReloadable { NovaConfig[FURNACE_GENERATOR].getLong("capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[FURNACE_GENERATOR].getLong("energy_per_tick") }
 private val BURN_TIME_MULTIPLIER by configReloadable { NovaConfig[FURNACE_GENERATOR].getDouble("burn_time_multiplier") }
 
-class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { FurnaceGeneratorGUI() }
     private val inventory = getInventory("fuel", 1, ::handleInventoryUpdate)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder) { createSideConfig(NetworkConnectionType.EXTRACT, FRONT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     
@@ -67,19 +65,13 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
     ), 1)
     
     init {
-        NovaConfig.reloadables.add(this)
         if (active) particleTask.start()
-        handleUpgradeUpdates()
+        reload()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyGeneration = ENERGY_PER_TICK
+        super.reload()
         
-        handleUpgradeUpdates()
-    }
-    
-    private fun handleUpgradeUpdates() {
         // percent of the burn time left
         val burnPercentage = burnTime.toDouble() / totalBurnTime.toDouble()
         // previous burn time without the burnTimeMultiplier

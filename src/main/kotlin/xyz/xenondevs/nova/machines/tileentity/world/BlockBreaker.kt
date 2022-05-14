@@ -7,7 +7,6 @@ import org.bukkit.Material
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
@@ -18,7 +17,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -32,17 +30,17 @@ import xyz.xenondevs.nova.world.pos
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-private val MAX_ENERGY by configReloadable { NovaConfig[BLOCK_BREAKER].getLong("capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[BLOCK_BREAKER].getLong("energy_per_tick") }
+private val MAX_ENERGY = configReloadable { NovaConfig[BLOCK_BREAKER].getLong("capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[BLOCK_BREAKER].getLong("energy_per_tick") }
 private val BREAK_SPEED_MULTIPLIER by configReloadable { NovaConfig[BLOCK_BREAKER].getDouble("break_speed_multiplier") }
 private val BREAK_SPEED_CLAMP by configReloadable { NovaConfig[BLOCK_BREAKER].getDouble("break_speed_clamp") }
 
-class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 9) { if (it.isAdd && it.updateReason != SELF_UPDATE_REASON) it.isCancelled = true }
     override val gui = lazy { BlockBreakerGUI() }
-    override val upgradeHolder = UpgradeHolder(this, gui, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
         inventory to NetworkConnectionType.EXTRACT
@@ -53,15 +51,6 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     private var lastType: Material? = null
     private var breakProgress = retrieveData("breakProgress") { 0.0 }
     
-    init {
-        NovaConfig.reloadables.add(this)
-    }
-    
-    override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-    }
-    
     override fun saveData() {
         super.saveData()
         storeData("breakProgress", breakProgress)
@@ -69,7 +58,7 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     
     override fun handleTick() {
         val type = block.type
-        if (energyHolder.energy >= ENERGY_PER_TICK
+        if (energyHolder.energy >= energyHolder.energyConsumption
             && !type.isTraversable()
             && block.hardness >= 0
             && ProtectionManager.canBreak(this, null, block.location).get()

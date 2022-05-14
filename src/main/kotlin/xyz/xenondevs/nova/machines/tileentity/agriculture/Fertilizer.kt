@@ -10,7 +10,6 @@ import org.bukkit.block.Block
 import org.bukkit.block.data.Ageable
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
@@ -21,7 +20,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -37,19 +35,19 @@ import xyz.xenondevs.nova.util.item.isFullyAged
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 
-private val MAX_ENERGY by configReloadable { NovaConfig[FERTILIZER].getLong("capacity") }
-private val ENERGY_PER_TICK by configReloadable { NovaConfig[FERTILIZER].getLong("energy_per_tick") }
-private val ENERGY_PER_FERTILIZE by configReloadable { NovaConfig[FERTILIZER].getLong("energy_per_fertilize") }
+private val MAX_ENERGY = configReloadable { NovaConfig[FERTILIZER].getLong("capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[FERTILIZER].getLong("energy_per_tick") }
+private val ENERGY_PER_FERTILIZE = configReloadable { NovaConfig[FERTILIZER].getLong("energy_per_fertilize") }
 private val IDLE_TIME by configReloadable { NovaConfig[FERTILIZER].getInt("idle_time") }
 private val MIN_RANGE by configReloadable { NovaConfig[FERTILIZER].getInt("range.min") }
 private val MAX_RANGE by configReloadable { NovaConfig[FERTILIZER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[FERTILIZER].getInt("range.default") }
 
-class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val fertilizerInventory = getInventory("fertilizer", 12, ::handleFertilizerUpdate)
     override val gui = lazy(::FertilizerGUI)
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_FERTILIZE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, fertilizerInventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
@@ -65,21 +63,12 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private lateinit var fertilizeRegion: Region
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
         updateRegion()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
-        energyHolder.defaultSpecialEnergyConsumption = ENERGY_PER_FERTILIZE
-        
-        handleUpgradeUpdates()
-        updateRegion()
-    }
-    
-    private fun handleUpgradeUpdates() {
+        super.reload()
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         

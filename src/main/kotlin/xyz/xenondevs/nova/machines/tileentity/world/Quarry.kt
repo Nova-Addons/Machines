@@ -20,7 +20,6 @@ import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
@@ -35,7 +34,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -81,16 +79,16 @@ private val MOVE_SPEED by configReloadable { NovaConfig[QUARRY].getDouble("move_
 private val DRILL_SPEED_MULTIPLIER by configReloadable { NovaConfig[QUARRY].getDouble("drill_speed_multiplier") }
 private val DRILL_SPEED_CLAMP by configReloadable { NovaConfig[QUARRY].getDouble("drill_speed_clamp") }
 
-private val MAX_ENERGY by configReloadable { NovaConfig[QUARRY].getLong("capacity") }
+private val MAX_ENERGY = configReloadable { NovaConfig[QUARRY].getLong("capacity") }
 private val BASE_ENERGY_CONSUMPTION by configReloadable { NovaConfig[QUARRY].getInt("base_energy_consumption") }
 private val ENERGY_PER_SQUARE_BLOCK by configReloadable { NovaConfig[QUARRY].getInt("energy_consumption_per_square_block") }
 
-class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { QuarryGUI() }
-    private val inventory = getInventory("quarryInventory", 9) {}
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, 0, 0, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
+    private val inventory = getInventory("quarryInventory", 9)
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, null, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
     
     private val entityId = uuid.hashCode()
@@ -150,14 +148,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         get() = drillSpeedMultiplier * energySufficiency
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
-    }
-    
-    override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        
-        handleUpgradeUpdates()
+        reload()
     }
     
     override fun handleInitialized(first: Boolean) {
@@ -169,7 +160,9 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         createScaffolding()
     }
     
-    private fun handleUpgradeUpdates() {
+    override fun reload() {
+        super.reload()
+        
         updateEnergyPerTick()
         
         maxSize = MAX_SIZE + upgradeHolder.getValue(UpgradeType.RANGE)

@@ -12,7 +12,6 @@ import org.bukkit.event.weather.LightningStrikeEvent
 import org.bukkit.event.weather.LightningStrikeEvent.Cause
 import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.config.Reloadable
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.LIGHTNING_EXCHANGER
@@ -21,7 +20,6 @@ import xyz.xenondevs.nova.tileentity.TileEntityManager
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeHolder
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -30,16 +28,16 @@ import xyz.xenondevs.nova.util.advance
 import kotlin.math.min
 import kotlin.random.Random
 
-private val MAX_ENERGY by configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getLong("capacity") }
+private val MAX_ENERGY = configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getLong("capacity") }
 private val CONVERSION_RATE by configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getLong("conversion_rate") }
 private val MIN_BURST by configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getLong("burst.min") }
 private val MAX_BURST by configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getLong("burst.max") }
 
-class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
+class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { LightningExchangerGUI() }
-    override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, 0, upgradeHolder) {
+    override val upgradeHolder = getUpgradeHolder(UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, null, upgradeHolder) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
     }
     
@@ -48,17 +46,11 @@ class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(
     private var toCharge = 0L
     
     init {
-        NovaConfig.reloadables.add(this)
-        handleUpgradeUpdates()
+        reload()
     }
     
     override fun reload() {
-        energyHolder.defaultMaxEnergy = MAX_ENERGY
-        
-        handleUpgradeUpdates()
-    }
-    
-    private fun handleUpgradeUpdates() {
+        super.reload()
         minBurst = (MIN_BURST * upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toLong()
         maxBurst = (MAX_BURST * upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toLong()
     }
