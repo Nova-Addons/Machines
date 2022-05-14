@@ -14,6 +14,8 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.LeftRightFluidProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks
@@ -49,13 +51,13 @@ import kotlin.random.Random
 
 private const val MAX_STATE = 99
 
-private val ENERGY_CAPACITY = NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_capacity")
-private val ENERGY_PER_TICK = NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_per_tick")
-private val WATER_CAPACITY = NovaConfig[COBBLESTONE_GENERATOR].getLong("water_capacity")
-private val LAVA_CAPACITY = NovaConfig[COBBLESTONE_GENERATOR].getLong("lava_capacity")
-private val MB_PER_TICK = NovaConfig[COBBLESTONE_GENERATOR].getLong("mb_per_tick")
+private val ENERGY_CAPACITY by configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_capacity") }
+private val ENERGY_PER_TICK by configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_per_tick") }
+private val WATER_CAPACITY by configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("water_capacity") }
+private val LAVA_CAPACITY by configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("lava_capacity") }
+private val MB_PER_TICK by configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("mb_per_tick") }
 
-class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy(::CobblestoneGeneratorGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
@@ -85,9 +87,19 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     }
     
     init {
+        NovaConfig.reloadables.add(this)
         handleUpgradeUpdates()
         updateWaterLevel()
         updateLavaLevel()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = ENERGY_CAPACITY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+        waterTank.capacity = WATER_CAPACITY
+        lavaTank.capacity = LAVA_CAPACITY
+        
+        handleUpgradeUpdates()
     }
     
     private fun handleUpgradeUpdates() {

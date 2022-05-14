@@ -5,6 +5,8 @@ import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.item.Item
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.CHUNK_LOADER
 import xyz.xenondevs.nova.tileentity.ChunkLoadManager
@@ -24,11 +26,11 @@ import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.util.getSurroundingChunks
 import xyz.xenondevs.nova.world.pos
 
-private val MAX_ENERGY = NovaConfig[CHUNK_LOADER].getLong("capacity")
-private val ENERGY_PER_CHUNK = NovaConfig[CHUNK_LOADER].getLong("energy_per_chunk")
-private val MAX_RANGE = NovaConfig[CHUNK_LOADER].getInt("max_range")
+private val MAX_ENERGY by configReloadable { NovaConfig[CHUNK_LOADER].getLong("capacity") }
+private val ENERGY_PER_CHUNK by configReloadable { NovaConfig[CHUNK_LOADER].getLong("energy_per_chunk") }
+private val MAX_RANGE by configReloadable { NovaConfig[CHUNK_LOADER].getInt("max_range") }
 
-class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy { ChunkLoaderGUI() }
     
@@ -42,6 +44,13 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     private var energyPerTick = 0
     
     init {
+        NovaConfig.reloadables.add(this)
+        updateEnergyPerTick()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        
         updateEnergyPerTick()
     }
     

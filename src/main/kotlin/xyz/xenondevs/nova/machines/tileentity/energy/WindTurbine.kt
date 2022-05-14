@@ -8,6 +8,8 @@ import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.WIND_TURBINE
@@ -30,11 +32,11 @@ import xyz.xenondevs.nova.world.pos
 import java.util.concurrent.CompletableFuture
 import kotlin.math.abs
 
-private val MAX_ENERGY = NovaConfig[WIND_TURBINE].getLong("capacity")
-private val ENERGY_PER_TICK = NovaConfig[WIND_TURBINE].getLong("energy_per_tick")
-private val PLAY_ANIMATION = NovaConfig[WIND_TURBINE].getBoolean("animation")
+private val MAX_ENERGY by configReloadable { NovaConfig[WIND_TURBINE].getLong("capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[WIND_TURBINE].getLong("energy_per_tick") }
+private val PLAY_ANIMATION by configReloadable { NovaConfig[WIND_TURBINE].getBoolean("animation") }
 
-class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy { WindTurbineGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, ::updateEnergyPerTick, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
@@ -49,8 +51,16 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     private var energyPerTick = 0
     
     init {
+        NovaConfig.reloadables.add(this)
         updateEnergyPerTick()
         spawnModels()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyGeneration = ENERGY_PER_TICK
+        
+        updateEnergyPerTick()
     }
     
     private fun updateEnergyPerTick() {

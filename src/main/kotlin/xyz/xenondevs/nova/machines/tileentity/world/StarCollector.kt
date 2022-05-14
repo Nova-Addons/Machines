@@ -11,6 +11,8 @@ import org.bukkit.Bukkit
 import org.bukkit.util.Vector
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.STAR_COLLECTOR
 import xyz.xenondevs.nova.machines.registry.Items
@@ -34,15 +36,15 @@ import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
 import java.awt.Color
 
-private val MAX_ENERGY = NovaConfig[STAR_COLLECTOR].getLong("capacity")
-private val IDLE_ENERGY_PER_TICK = NovaConfig[STAR_COLLECTOR].getLong("energy_per_tick_idle")
-private val COLLECTING_ENERGY_PER_TICK = NovaConfig[STAR_COLLECTOR].getLong("energy_per_tick_collecting")
-private val IDLE_TIME = NovaConfig[STAR_COLLECTOR].getInt("idle_time")
-private val COLLECTION_TIME = NovaConfig[STAR_COLLECTOR].getInt("collection_time")
+private val MAX_ENERGY by configReloadable { NovaConfig[STAR_COLLECTOR].getLong("capacity") }
+private val IDLE_ENERGY_PER_TICK by configReloadable { NovaConfig[STAR_COLLECTOR].getLong("energy_per_tick_idle") }
+private val COLLECTING_ENERGY_PER_TICK by configReloadable { NovaConfig[STAR_COLLECTOR].getLong("energy_per_tick_collecting") }
+private val IDLE_TIME by configReloadable { NovaConfig[STAR_COLLECTOR].getInt("idle_time") }
+private val COLLECTION_TIME by configReloadable { NovaConfig[STAR_COLLECTOR].getInt("collection_time") }
 
 private const val STAR_PARTICLE_DISTANCE_PER_TICK = 0.75
 
-class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     private val inventory = getInventory("inventory", 1, ::handleInventoryUpdate)
     override val gui: Lazy<StarCollectorGUI> = lazy(::StarCollectorGUI)
@@ -77,6 +79,15 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     ), 1)
     
     init {
+        NovaConfig.reloadables.add(this)
+        handleUpgradesUpdate()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyConsumption = IDLE_ENERGY_PER_TICK
+        energyHolder.defaultSpecialEnergyConsumption = COLLECTING_ENERGY_PER_TICK
+        
         handleUpgradesUpdate()
     }
     

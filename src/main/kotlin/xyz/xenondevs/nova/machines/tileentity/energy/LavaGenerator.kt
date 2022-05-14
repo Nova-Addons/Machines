@@ -4,6 +4,8 @@ import de.studiocode.invui.gui.GUI
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.LAVA_GENERATOR
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -22,12 +24,12 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.particle.ParticleEffect
 
-private val ENERGY_CAPACITY = NovaConfig[LAVA_GENERATOR].getLong("energy_capacity")
-private val FLUID_CAPACITY = NovaConfig[LAVA_GENERATOR].getLong("fluid_capacity")
-private val ENERGY_PER_MB = NovaConfig[LAVA_GENERATOR].getDouble("energy_per_mb")
-private val BURN_RATE = NovaConfig[LAVA_GENERATOR].getDouble("burn_rate")
+private val ENERGY_CAPACITY by configReloadable { NovaConfig[LAVA_GENERATOR].getLong("energy_capacity") }
+private val FLUID_CAPACITY by configReloadable { NovaConfig[LAVA_GENERATOR].getLong("fluid_capacity") }
+private val ENERGY_PER_MB by configReloadable { NovaConfig[LAVA_GENERATOR].getDouble("energy_per_mb") }
+private val BURN_RATE by configReloadable { NovaConfig[LAVA_GENERATOR].getDouble("burn_rate") }
 
-class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy(::LavaGeneratorGUI)
     
@@ -60,6 +62,14 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     ), 200)
     
     init {
+        NovaConfig.reloadables.add(this)
+        handleUpgradeUpdates()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = ENERGY_CAPACITY
+        fluidContainer.capacity = FLUID_CAPACITY
+        
         handleUpgradeUpdates()
     }
     

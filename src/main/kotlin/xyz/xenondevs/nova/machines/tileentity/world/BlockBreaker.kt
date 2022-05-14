@@ -7,6 +7,8 @@ import org.bukkit.Material
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.BLOCK_BREAKER
@@ -30,12 +32,12 @@ import xyz.xenondevs.nova.world.pos
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-private val MAX_ENERGY = NovaConfig[BLOCK_BREAKER].getLong("capacity")
-private val ENERGY_PER_TICK = NovaConfig[BLOCK_BREAKER].getLong("energy_per_tick")
-private val BREAK_SPEED_MULTIPLIER = NovaConfig[BLOCK_BREAKER].getDouble("break_speed_multiplier")
-private val BREAK_SPEED_CLAMP = NovaConfig[BLOCK_BREAKER].getDouble("break_speed_clamp")
+private val MAX_ENERGY by configReloadable { NovaConfig[BLOCK_BREAKER].getLong("capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[BLOCK_BREAKER].getLong("energy_per_tick") }
+private val BREAK_SPEED_MULTIPLIER by configReloadable { NovaConfig[BLOCK_BREAKER].getDouble("break_speed_multiplier") }
+private val BREAK_SPEED_CLAMP by configReloadable { NovaConfig[BLOCK_BREAKER].getDouble("break_speed_clamp") }
 
-class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     private val inventory = getInventory("inventory", 9) { if (it.isAdd && it.updateReason != SELF_UPDATE_REASON) it.isCancelled = true }
     override val gui = lazy { BlockBreakerGUI() }
@@ -50,6 +52,15 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     private val block = location.clone().advance(getFace(BlockSide.FRONT)).block
     private var lastType: Material? = null
     private var breakProgress = retrieveData("breakProgress") { 0.0 }
+    
+    init {
+        NovaConfig.reloadables.add(this)
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+    }
     
     override fun saveData() {
         super.saveData()

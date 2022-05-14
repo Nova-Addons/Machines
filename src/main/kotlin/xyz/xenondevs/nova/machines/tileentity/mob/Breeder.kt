@@ -10,6 +10,8 @@ import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Animals
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.BREEDER
 import xyz.xenondevs.nova.material.CoreGUIMaterial
@@ -40,16 +42,16 @@ import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import kotlin.math.min
 
-private val MAX_ENERGY = NovaConfig[BREEDER].getLong("capacity")
-private val ENERGY_PER_TICK = NovaConfig[BREEDER].getLong("energy_per_tick")
-private val ENERGY_PER_BREED = NovaConfig[BREEDER].getLong("energy_per_breed")
-private val IDLE_TIME = NovaConfig[BREEDER].getInt("idle_time")
-private val BREED_LIMIT = NovaConfig[BREEDER].getInt("breed_limit")
-private val MIN_RANGE = NovaConfig[BREEDER].getInt("range.min")
-private val MAX_RANGE = NovaConfig[BREEDER].getInt("range.max")
-private val DEFAULT_RANGE = NovaConfig[BREEDER].getInt("range.default")
+private val MAX_ENERGY by configReloadable { NovaConfig[BREEDER].getLong("capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[BREEDER].getLong("energy_per_tick") }
+private val ENERGY_PER_BREED by configReloadable { NovaConfig[BREEDER].getLong("energy_per_breed") }
+private val IDLE_TIME by configReloadable { NovaConfig[BREEDER].getInt("idle_time") }
+private val BREED_LIMIT by configReloadable { NovaConfig[BREEDER].getInt("breed_limit") }
+private val MIN_RANGE by configReloadable { NovaConfig[BREEDER].getInt("range.min") }
+private val MAX_RANGE by configReloadable { NovaConfig[BREEDER].getInt("range.max") }
+private val DEFAULT_RANGE by configReloadable { NovaConfig[BREEDER].getInt("range.default") }
 
-class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     private val inventory = getInventory("inventory", 9, ::handleInventoryUpdate)
     override val gui = lazy { MobCrusherGUI() }
@@ -70,6 +72,16 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         }
     
     init {
+        NovaConfig.reloadables.add(this)
+        handleUpgradeUpdates()
+        updateRegion()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+        energyHolder.defaultSpecialEnergyConsumption = ENERGY_PER_BREED
+        
         handleUpgradeUpdates()
         updateRegion()
     }

@@ -6,6 +6,8 @@ import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.EnergyProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.FURNACE_GENERATOR
@@ -28,11 +30,11 @@ import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-private val MAX_ENERGY = NovaConfig[FURNACE_GENERATOR].getLong("capacity")
-private val ENERGY_PER_TICK = NovaConfig[FURNACE_GENERATOR].getLong("energy_per_tick")
-private val BURN_TIME_MULTIPLIER = NovaConfig[FURNACE_GENERATOR].getDouble("burn_time_multiplier")
+private val MAX_ENERGY by configReloadable { NovaConfig[FURNACE_GENERATOR].getLong("capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[FURNACE_GENERATOR].getLong("energy_per_tick") }
+private val BURN_TIME_MULTIPLIER by configReloadable { NovaConfig[FURNACE_GENERATOR].getDouble("burn_time_multiplier") }
 
-class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy { FurnaceGeneratorGUI() }
     private val inventory = getInventory("fuel", 1, ::handleInventoryUpdate)
@@ -65,7 +67,15 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
     ), 1)
     
     init {
+        NovaConfig.reloadables.add(this)
         if (active) particleTask.start()
+        handleUpgradeUpdates()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyGeneration = ENERGY_PER_TICK
+        
         handleUpgradeUpdates()
     }
     

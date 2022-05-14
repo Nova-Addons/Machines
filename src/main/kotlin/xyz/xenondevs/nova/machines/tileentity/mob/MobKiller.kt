@@ -8,6 +8,8 @@ import de.studiocode.invui.item.builder.ItemBuilder
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Mob
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.MOB_KILLER
@@ -33,17 +35,17 @@ import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import kotlin.math.min
 
-private val MAX_ENERGY = NovaConfig[MOB_KILLER].getLong("capacity")
-private val ENERGY_PER_TICK = NovaConfig[MOB_KILLER].getLong("energy_per_tick")
-private val ENERGY_PER_DAMAGE = NovaConfig[MOB_KILLER].getLong("energy_per_damage")
-private val IDLE_TIME = NovaConfig[MOB_KILLER].getInt("idle_time")
-private val KILL_LIMIT = NovaConfig[MOB_KILLER].getInt("kill_limit")
-private val DAMAGE = NovaConfig[MOB_KILLER].getDouble("damage")
-private val MIN_RANGE = NovaConfig[MOB_KILLER].getInt("range.min")
-private val MAX_RANGE = NovaConfig[MOB_KILLER].getInt("range.max")
-private val DEFAULT_RANGE = NovaConfig[MOB_KILLER].getInt("range.default")
+private val MAX_ENERGY by configReloadable { NovaConfig[MOB_KILLER].getLong("capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[MOB_KILLER].getLong("energy_per_tick") }
+private val ENERGY_PER_DAMAGE by configReloadable { NovaConfig[MOB_KILLER].getLong("energy_per_damage") }
+private val IDLE_TIME by configReloadable { NovaConfig[MOB_KILLER].getInt("idle_time") }
+private val KILL_LIMIT by configReloadable { NovaConfig[MOB_KILLER].getInt("kill_limit") }
+private val DAMAGE by configReloadable { NovaConfig[MOB_KILLER].getDouble("damage") }
+private val MIN_RANGE by configReloadable { NovaConfig[MOB_KILLER].getInt("range.min") }
+private val MAX_RANGE by configReloadable { NovaConfig[MOB_KILLER].getInt("range.max") }
+private val DEFAULT_RANGE by configReloadable { NovaConfig[MOB_KILLER].getInt("range.default") }
 
-class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy { MobCrusherGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
@@ -62,8 +64,17 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     private lateinit var region: Region
     
     init {
+        NovaConfig.reloadables.add(this)
         handleUpgradeUpdates()
         updateRegion()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+        energyHolder.defaultSpecialEnergyConsumption = ENERGY_PER_DAMAGE
+        
+        handleUpgradeUpdates()
     }
     
     override fun saveData() {

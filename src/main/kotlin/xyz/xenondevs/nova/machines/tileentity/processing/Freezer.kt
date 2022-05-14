@@ -13,6 +13,8 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.LeftRightFluidProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.FREEZER
@@ -38,12 +40,12 @@ import java.lang.Long.min
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-private val WATER_CAPACITY = NovaConfig[FREEZER].getLong("water_capacity")
-private val ENERGY_CAPACITY = NovaConfig[FREEZER].getLong("energy_capacity")
-private val ENERGY_PER_TICK = NovaConfig[FREEZER].getLong("energy_per_tick")
-private val MB_PER_TICK = NovaConfig[FREEZER].getLong("mb_per_tick")
+private val WATER_CAPACITY by configReloadable { NovaConfig[FREEZER].getLong("water_capacity") }
+private val ENERGY_CAPACITY by configReloadable { NovaConfig[FREEZER].getLong("energy_capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[FREEZER].getLong("energy_per_tick") }
+private val MB_PER_TICK by configReloadable { NovaConfig[FREEZER].getLong("mb_per_tick") }
 
-class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy(::FreezerGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
@@ -62,6 +64,14 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     private var mode = retrieveEnum("mode") { Mode.ICE }
     
     init {
+        NovaConfig.reloadables.add(this)
+        handleUpgradeUpdates()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = ENERGY_CAPACITY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+        
         handleUpgradeUpdates()
     }
     

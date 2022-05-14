@@ -10,6 +10,8 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.Blocks.TREE_FACTORY
@@ -50,14 +52,14 @@ private val PLANTS = mapOf(
     Material.BROWN_MUSHROOM to PlantConfiguration(Blocks.GIANT_BROWN_MUSHROOM_MINIATURE, ItemStack(Material.BROWN_MUSHROOM, 3), Color(149, 112, 80))
 )
 
-private val MAX_ENERGY = NovaConfig[TREE_FACTORY].getLong("capacity")
-private val ENERGY_PER_TICK = NovaConfig[TREE_FACTORY].getLong("energy_per_tick")
-private val PROGRESS_PER_TICK = NovaConfig[TREE_FACTORY].getDouble("progress_per_tick")
-private val IDLE_TIME = NovaConfig[TREE_FACTORY].getInt("idle_time")
+private val MAX_ENERGY by configReloadable { NovaConfig[TREE_FACTORY].getLong("capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[TREE_FACTORY].getLong("energy_per_tick") }
+private val PROGRESS_PER_TICK by configReloadable { NovaConfig[TREE_FACTORY].getDouble("progress_per_tick") }
+private val IDLE_TIME by configReloadable { NovaConfig[TREE_FACTORY].getInt("idle_time") }
 
 private const val MAX_GROWTH_STAGE = 199
 
-class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     private val inputInventory = getInventory("input", 1, intArrayOf(1), ::handleInputInventoryUpdate)
     private val outputInventory = getInventory("output", 9, ::handleOutputInventoryUpdate)
@@ -83,11 +85,19 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     private var idleTimeLeft = 0
     
     init {
+        NovaConfig.reloadables.add(this)
         val plantLocation = location.clone().center().apply { y += 1 / 16.0 }
         plant = FakeArmorStand(plantLocation, true) { _, data ->
             data.invisible = true
             data.marker = true
         }
+        handleUpgradesUpdate()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+        
         handleUpgradesUpdate()
     }
     

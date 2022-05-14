@@ -12,6 +12,8 @@ import org.bukkit.event.weather.LightningStrikeEvent
 import org.bukkit.event.weather.LightningStrikeEvent.Cause
 import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.LIGHTNING_EXCHANGER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -28,12 +30,12 @@ import xyz.xenondevs.nova.util.advance
 import kotlin.math.min
 import kotlin.random.Random
 
-private val MAX_ENERGY = NovaConfig[LIGHTNING_EXCHANGER].getLong("capacity")
-private val CONVERSION_RATE = NovaConfig[LIGHTNING_EXCHANGER].getLong("conversion_rate")
-private val MIN_BURST = NovaConfig[LIGHTNING_EXCHANGER].getLong("burst.min")
-private val MAX_BURST = NovaConfig[LIGHTNING_EXCHANGER].getLong("burst.max")
+private val MAX_ENERGY by configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getLong("capacity") }
+private val CONVERSION_RATE by configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getLong("conversion_rate") }
+private val MIN_BURST by configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getLong("burst.min") }
+private val MAX_BURST by configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getLong("burst.max") }
 
-class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy { LightningExchangerGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
@@ -46,6 +48,13 @@ class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(
     private var toCharge = 0L
     
     init {
+        NovaConfig.reloadables.add(this)
+        handleUpgradeUpdates()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        
         handleUpgradeUpdates()
     }
     

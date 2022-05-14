@@ -24,6 +24,8 @@ import org.bukkit.potion.PotionData
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.potion.PotionType
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
 import xyz.xenondevs.nova.data.serialization.cbf.element.other.ListElement
@@ -57,24 +59,14 @@ import xyz.xenondevs.nova.util.removeFirstMatching
 import java.awt.Color
 import kotlin.math.roundToInt
 
-private val ENERGY_CAPACITY = NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_capacity")
-private val ENERGY_PER_TICK = NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_per_tick")
-private val FLUID_CAPACITY = NovaConfig[ELECTRIC_BREWING_STAND].getLong("fluid_capacity")
-private val BREW_TIME = NovaConfig[ELECTRIC_BREWING_STAND].getInt("brew_time")
+private val ENERGY_CAPACITY by configReloadable { NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[ELECTRIC_BREWING_STAND].getLong("energy_per_tick") }
+private val FLUID_CAPACITY by configReloadable { NovaConfig[ELECTRIC_BREWING_STAND].getLong("fluid_capacity") }
+private val BREW_TIME by configReloadable { NovaConfig[ELECTRIC_BREWING_STAND].getInt("brew_time") }
 
 private val IGNORE_UPDATE_REASON = object : UpdateReason {}
 
-class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
-    
-    // These values need to be accessed from outside the class
-    companion object {
-        @Suppress("UNCHECKED_CAST")
-        val AVAILABLE_POTION_EFFECTS: Map<PotionEffectType, ElectricBrewingStandRecipe> =
-            (RecipeManager.novaRecipes[RecipeTypes.ELECTRIC_BREWING_STAND]?.values as Iterable<ElectricBrewingStandRecipe>?)
-                ?.associateBy { it.result } ?: emptyMap()
-        
-        val ALLOW_DURATION_AMPLIFIER_MIXING = NovaConfig[ELECTRIC_BREWING_STAND].getBoolean("duration_amplifier_mixing")
-    }
+class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy(::ElectricBrewingStandGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
@@ -108,6 +100,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     private var nextPotion: ItemStack? = null
     
     init {
+        NovaConfig.reloadables.add(this)
         val potionEffects = ArrayList<PotionEffectBuilder>()
         retrieveElementOrNull<ListElement>("potionEffects")?.forEach { potionCompound ->
             potionCompound as CompoundElement
@@ -119,6 +112,14 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         }
         
         updatePotionData(potionType, potionEffects, color)
+        handleUpgradeUpdates()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = ENERGY_CAPACITY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+        fluidTank.capacity = FLUID_CAPACITY
+        
         handleUpgradeUpdates()
     }
     
@@ -267,6 +268,16 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
             
             if (gui.isInitialized()) gui.value.progressItem.percentage = timePassed.toDouble() / maxBrewTime.toDouble()
         }
+    }
+    
+    // These values need to be accessed from outside the class
+    companion object {
+        @Suppress("UNCHECKED_CAST")
+        val AVAILABLE_POTION_EFFECTS: Map<PotionEffectType, ElectricBrewingStandRecipe> =
+            (RecipeManager.novaRecipes[RecipeTypes.ELECTRIC_BREWING_STAND]?.values as Iterable<ElectricBrewingStandRecipe>?)
+                ?.associateBy { it.result } ?: emptyMap()
+        
+        val ALLOW_DURATION_AMPLIFIER_MIXING = NovaConfig[ELECTRIC_BREWING_STAND].getBoolean("duration_amplifier_mixing")
     }
     
     inner class ElectricBrewingStandGUI : TileEntityGUI(GUITextures.ELECTRIC_BREWING_STAND) {

@@ -14,6 +14,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPhysicsEvent
 import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.SPRINKLER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -40,13 +42,13 @@ import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToLong
 
-private val WATER_CAPACITY = NovaConfig[SPRINKLER].getLong("water_capacity")
-private val WATER_PER_MOISTURE_LEVEL = NovaConfig[SPRINKLER].getLong("water_per_moisture_level")
-private val MIN_RANGE = NovaConfig[SPRINKLER].getInt("range.min")
-private val MAX_RANGE = NovaConfig[SPRINKLER].getInt("range.max")
-private val DEFAULT_RANGE = NovaConfig[SPRINKLER].getInt("range.default")
+private val WATER_CAPACITY by configReloadable { NovaConfig[SPRINKLER].getLong("water_capacity") }
+private val WATER_PER_MOISTURE_LEVEL by configReloadable { NovaConfig[SPRINKLER].getLong("water_per_moisture_level") }
+private val MIN_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("range.min") }
+private val MAX_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("range.max") }
+private val DEFAULT_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("range.default") }
 
-class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy(::SprinklerGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.EFFICIENCY, UpgradeType.FLUID, UpgradeType.RANGE)
@@ -65,10 +67,17 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         }
     
     init {
+        NovaConfig.reloadables.add(this)
         handleUpgradeUpdates()
         updateRegion()
         
         sprinklers += this
+    }
+    
+    override fun reload() {
+        tank.capacity = WATER_CAPACITY
+        
+        handleUpgradeUpdates()
     }
     
     override fun handleRemoved(unload: Boolean) {

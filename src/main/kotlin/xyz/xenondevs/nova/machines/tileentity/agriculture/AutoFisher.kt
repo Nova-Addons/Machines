@@ -21,6 +21,8 @@ import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack
 import org.bukkit.enchantments.Enchantment
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.AUTO_FISHER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
@@ -42,11 +44,11 @@ import xyz.xenondevs.nova.util.*
 import xyz.xenondevs.nova.util.item.ToolUtils
 import java.util.*
 
-private val MAX_ENERGY = NovaConfig[AUTO_FISHER].getLong("capacity")
-private val ENERGY_PER_TICK = NovaConfig[AUTO_FISHER].getLong("energy_per_tick")
-private val IDLE_TIME = NovaConfig[AUTO_FISHER].getInt("idle_time")
+private val MAX_ENERGY by configReloadable { NovaConfig[AUTO_FISHER].getLong("capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[AUTO_FISHER].getLong("energy_per_tick") }
+private val IDLE_TIME by configReloadable { NovaConfig[AUTO_FISHER].getInt("idle_time") }
 
-class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     private val inventory = getInventory("inventory", 12, ::handleInventoryUpdate)
     private val fishingRodInventory = getInventory("fishingRod", 1, ::handleFishingRodInventoryUpdate)
@@ -70,6 +72,14 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID.salt(uuid.toString()), "AutoFisher")
     
     init {
+        NovaConfig.reloadables.add(this)
+        handleUpgradeUpdates()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+        
         handleUpgradeUpdates()
     }
     

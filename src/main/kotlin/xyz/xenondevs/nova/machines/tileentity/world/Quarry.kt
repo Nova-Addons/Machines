@@ -20,6 +20,8 @@ import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.QUARRY
@@ -67,23 +69,23 @@ private val FULL_SLIM_VERTICAL = SCAFFOLDING_STACKS[4]
 private val SLIM_VERTICAL_DOWN = SCAFFOLDING_STACKS[5]
 private val DRILL = Items.NETHERITE_DRILL.item.createClientsideItemStack()
 
-private val MIN_SIZE = NovaConfig[QUARRY].getInt("min_size")
-private val MAX_SIZE = NovaConfig[QUARRY].getInt("max_size")
-private val MIN_DEPTH = NovaConfig[QUARRY].getInt("min_depth")
-private val MAX_DEPTH = NovaConfig[QUARRY].getInt("max_depth")
-private val DEFAULT_SIZE_X = NovaConfig[QUARRY].getInt("default_size_x")
-private val DEFAULT_SIZE_Z = NovaConfig[QUARRY].getInt("default_size_z")
-private val DEFAULT_SIZE_Y = NovaConfig[QUARRY].getInt("default_size_y")
+private val MIN_SIZE by configReloadable { NovaConfig[QUARRY].getInt("min_size") }
+private val MAX_SIZE by configReloadable { NovaConfig[QUARRY].getInt("max_size") }
+private val MIN_DEPTH by configReloadable { NovaConfig[QUARRY].getInt("min_depth") }
+private val MAX_DEPTH by configReloadable { NovaConfig[QUARRY].getInt("max_depth") }
+private val DEFAULT_SIZE_X by configReloadable { NovaConfig[QUARRY].getInt("default_size_x") }
+private val DEFAULT_SIZE_Z by configReloadable { NovaConfig[QUARRY].getInt("default_size_z") }
+private val DEFAULT_SIZE_Y by configReloadable { NovaConfig[QUARRY].getInt("default_size_y") }
 
-private val MOVE_SPEED = NovaConfig[QUARRY].getDouble("move_speed")
-private val DRILL_SPEED_MULTIPLIER = NovaConfig[QUARRY].getDouble("drill_speed_multiplier")
-private val DRILL_SPEED_CLAMP = NovaConfig[QUARRY].getDouble("drill_speed_clamp")
+private val MOVE_SPEED by configReloadable { NovaConfig[QUARRY].getDouble("move_speed") }
+private val DRILL_SPEED_MULTIPLIER by configReloadable { NovaConfig[QUARRY].getDouble("drill_speed_multiplier") }
+private val DRILL_SPEED_CLAMP by configReloadable { NovaConfig[QUARRY].getDouble("drill_speed_clamp") }
 
-private val MAX_ENERGY = NovaConfig[QUARRY].getLong("capacity")
-private val BASE_ENERGY_CONSUMPTION = NovaConfig[QUARRY].getInt("base_energy_consumption")
-private val ENERGY_PER_SQUARE_BLOCK = NovaConfig[QUARRY].getInt("energy_consumption_per_square_block")
+private val MAX_ENERGY by configReloadable { NovaConfig[QUARRY].getLong("capacity") }
+private val BASE_ENERGY_CONSUMPTION by configReloadable { NovaConfig[QUARRY].getInt("base_energy_consumption") }
+private val ENERGY_PER_SQUARE_BLOCK by configReloadable { NovaConfig[QUARRY].getInt("energy_consumption_per_square_block") }
 
-class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy { QuarryGUI() }
     private val inventory = getInventory("quarryInventory", 9) {}
@@ -148,6 +150,13 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         get() = drillSpeedMultiplier * energySufficiency
     
     init {
+        NovaConfig.reloadables.add(this)
+        handleUpgradeUpdates()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        
         handleUpgradeUpdates()
     }
     

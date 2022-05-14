@@ -6,6 +6,8 @@ import de.studiocode.invui.gui.builder.guitype.GUIType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.item.behavior.Chargeable
 import xyz.xenondevs.nova.machines.registry.Blocks.WIRELESS_CHARGER
@@ -28,13 +30,13 @@ import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import de.studiocode.invui.item.Item as UIItem
 
-private val MAX_ENERGY = NovaConfig[WIRELESS_CHARGER].getLong("capacity")
-private val CHARGE_SPEED = NovaConfig[WIRELESS_CHARGER].getLong("charge_speed")
-private val MIN_RANGE = NovaConfig[WIRELESS_CHARGER].getInt("range.min")
-private val MAX_RANGE = NovaConfig[WIRELESS_CHARGER].getInt("range.max")
-private val DEFAULT_RANGE = NovaConfig[WIRELESS_CHARGER].getInt("range.default")
+private val MAX_ENERGY by configReloadable { NovaConfig[WIRELESS_CHARGER].getLong("capacity") }
+private val CHARGE_SPEED by configReloadable { NovaConfig[WIRELESS_CHARGER].getLong("charge_speed") }
+private val MIN_RANGE by configReloadable { NovaConfig[WIRELESS_CHARGER].getInt("range.min") }
+private val MAX_RANGE by configReloadable { NovaConfig[WIRELESS_CHARGER].getInt("range.max") }
+private val DEFAULT_RANGE by configReloadable { NovaConfig[WIRELESS_CHARGER].getInt("range.default") }
 
-class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy(::WirelessChargerGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, ::handleUpgradeUpdates, UpgradeType.SPEED, UpgradeType.ENERGY, UpgradeType.RANGE)
@@ -51,6 +53,15 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     private lateinit var region: Region
     
     init {
+        NovaConfig.reloadables.add(this)
+        handleUpgradeUpdates()
+        updateRegion()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyConsumption = CHARGE_SPEED
+        
         handleUpgradeUpdates()
         updateRegion()
     }

@@ -14,6 +14,8 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.recipe.FluidInfuserRecipe
@@ -57,11 +59,11 @@ fun getFluidInfuserExtractRecipeFor(input: ItemStack): FluidInfuserRecipe? {
         }
 }
 
-private val ENERGY_PER_TICK = NovaConfig[FLUID_INFUSER].getLong("energy_per_tick")
-private val ENERGY_CAPACITY = NovaConfig[FLUID_INFUSER].getLong("energy_capacity")
-private val FLUID_CAPACITY = NovaConfig[FLUID_INFUSER].getLong("fluid_capacity")
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[FLUID_INFUSER].getLong("energy_per_tick") }
+private val ENERGY_CAPACITY by configReloadable { NovaConfig[FLUID_INFUSER].getLong("energy_capacity") }
+private val FLUID_CAPACITY by configReloadable { NovaConfig[FLUID_INFUSER].getLong("fluid_capacity") }
 
-class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy(::FluidInfuserGUI)
     override val upgradeHolder = UpgradeHolder(this, gui, UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
@@ -82,6 +84,16 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     private val recipeTime: Int
         get() = (recipe!!.time.toDouble() / upgradeHolder.getValue(UpgradeType.SPEED)).roundToInt()
     private var timePassed = 0
+    
+    init {
+        NovaConfig.reloadables.add(this)
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = ENERGY_CAPACITY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+        tank.capacity = FLUID_CAPACITY
+    }
     
     override fun saveData() {
         super.saveData()

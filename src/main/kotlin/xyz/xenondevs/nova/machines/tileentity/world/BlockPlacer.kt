@@ -5,6 +5,8 @@ import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import org.bukkit.block.BlockFace
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.BLOCK_PLACER
@@ -29,10 +31,10 @@ import xyz.xenondevs.nova.world.block.BlockManager
 import xyz.xenondevs.nova.world.block.context.BlockPlaceContext
 import xyz.xenondevs.nova.world.pos
 
-private val MAX_ENERGY = NovaConfig[BLOCK_PLACER].getLong("capacity")
-private val ENERGY_PER_PLACE = NovaConfig[BLOCK_PLACER].getLong("energy_per_place")
+private val MAX_ENERGY by configReloadable { NovaConfig[BLOCK_PLACER].getLong("capacity") }
+private val ENERGY_PER_PLACE by configReloadable { NovaConfig[BLOCK_PLACER].getLong("energy_per_place") }
 
-class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     private val inventory = getInventory("inventory", 9) {}
     override val gui = lazy { BlockPlacerGUI() }
@@ -42,6 +44,15 @@ class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     
     private val placePos = location.clone().advance(getFace(BlockSide.FRONT)).pos
     private val placeBlock = placePos.block
+    
+    init {
+        NovaConfig.reloadables.add(this)
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_PLACE
+    }
     
     private fun placeBlock(): Boolean {
         for ((index, item) in inventory.items.withIndex()) {

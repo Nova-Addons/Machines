@@ -5,6 +5,8 @@ import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import org.bukkit.Material
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.SOLAR_PANEL
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -22,10 +24,10 @@ import xyz.xenondevs.nova.util.untilHeightLimit
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-private val MAX_ENERGY = NovaConfig[SOLAR_PANEL].getLong("capacity")
-private val ENERGY_PER_TICK = NovaConfig[SOLAR_PANEL].getLong("energy_per_tick")
+private val MAX_ENERGY by configReloadable { NovaConfig[SOLAR_PANEL].getLong("capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[SOLAR_PANEL].getLong("energy_per_tick") }
 
-class SolarPanel(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class SolarPanel(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy { SolarPanelGUI() }
     override val upgradeHolder = UpgradeHolder(this, gui, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
@@ -35,6 +37,15 @@ class SolarPanel(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     
     private val obstructionTask = runTaskTimer(0, 20 * 5, ::checkSkyObstruction)
     private var obstructed = true
+    
+    init {
+        NovaConfig.reloadables.add(this)
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyGeneration = ENERGY_PER_TICK
+    }
     
     private fun checkSkyObstruction() {
         obstructed = false

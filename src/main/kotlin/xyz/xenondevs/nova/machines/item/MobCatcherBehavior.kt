@@ -17,6 +17,7 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.item.behavior.ItemBehavior
 import xyz.xenondevs.nova.machines.registry.Items
@@ -32,7 +33,7 @@ private val DATA_KEY = NamespacedKey(NOVA, "entityData")
 private val TYPE_KEY = NamespacedKey(NOVA, "entityType")
 private val TIME_KEY = NamespacedKey(NOVA, "fillTime")
 
-private val BLACKLISTED_ENTITY_TYPES by lazy { 
+private val BLACKLISTED_ENTITY_TYPES by configReloadable {
     NovaConfig[Items.MOB_CATCHER]
         .getStringList("entity_blacklist")
         .mapTo(HashSet(), EntityType::valueOf)

@@ -7,6 +7,8 @@ import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.NamespacedKey
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.ProgressArrowItem
@@ -32,11 +34,11 @@ import xyz.xenondevs.nova.util.particle
 import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.max
 
-private val MAX_ENERGY = NovaConfig[PULVERIZER].getLong("capacity")
-private val ENERGY_PER_TICK = NovaConfig[PULVERIZER].getLong("energy_per_tick")
-private val PULVERIZE_SPEED = NovaConfig[PULVERIZER].getInt("speed")
+private val MAX_ENERGY by configReloadable { NovaConfig[PULVERIZER].getLong("capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[PULVERIZER].getLong("energy_per_tick") }
+private val PULVERIZE_SPEED by configReloadable { NovaConfig[PULVERIZER].getInt("speed") }
 
-class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy { PulverizerGUI() }
     
@@ -66,8 +68,16 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     ), 6)
     
     init {
+        NovaConfig.reloadables.add(this)
         handleUpgradeUpdates()
         if (currentRecipe == null) timeLeft = 0
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+        
+        handleUpgradeUpdates()
     }
     
     private fun handleUpgradeUpdates() {

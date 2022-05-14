@@ -17,6 +17,8 @@ import org.bukkit.entity.EntityType
 import org.bukkit.entity.ExperienceOrb
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.ProgressArrowItem
 import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_FURNACE
@@ -39,11 +41,11 @@ private fun getRecipe(input: ItemStack, world: World): SmeltingRecipe? {
         .first { it.matches(SimpleContainer(input.nmsStack), world.serverLevel) }
 }
 
-private val MAX_ENERGY = NovaConfig[ELECTRIC_FURNACE].getLong("capacity")
-private val ENERGY_PER_TICK = NovaConfig[ELECTRIC_FURNACE].getLong("energy_per_tick")
-private val COOK_SPEED = NovaConfig[ELECTRIC_FURNACE].getInt("cook_speed")
+private val MAX_ENERGY by configReloadable { NovaConfig[ELECTRIC_FURNACE].getLong("capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[ELECTRIC_FURNACE].getLong("energy_per_tick") }
+private val COOK_SPEED by configReloadable { NovaConfig[ELECTRIC_FURNACE].getInt("cook_speed") }
 
-class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy { ElectricFurnaceGUI() }
     
@@ -74,6 +76,14 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         }
     
     init {
+        NovaConfig.reloadables.add(this)
+        handleUpgradeUpdates()
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+        
         handleUpgradeUpdates()
     }
     

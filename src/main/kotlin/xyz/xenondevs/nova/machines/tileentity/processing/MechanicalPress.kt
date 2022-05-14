@@ -14,6 +14,8 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
+import xyz.xenondevs.nova.data.config.Reloadable
+import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.ConversionNovaRecipe
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.recipe.RecipeType
@@ -37,16 +39,16 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide.FRONT
 import kotlin.math.max
 
-private val MAX_ENERGY = NovaConfig[MECHANICAL_PRESS].getLong("capacity")
-private val ENERGY_PER_TICK = NovaConfig[MECHANICAL_PRESS].getLong("energy_per_tick")
-private val PRESS_SPEED = NovaConfig[MECHANICAL_PRESS].getInt("speed")
+private val MAX_ENERGY by configReloadable { NovaConfig[MECHANICAL_PRESS].getLong("capacity") }
+private val ENERGY_PER_TICK by configReloadable { NovaConfig[MECHANICAL_PRESS].getLong("energy_per_tick") }
+private val PRESS_SPEED by configReloadable { NovaConfig[MECHANICAL_PRESS].getInt("speed") }
 
 private enum class PressType(val recipeType: RecipeType<out ConversionNovaRecipe>) {
     PLATE(RecipeTypes.PLATE_PRESS),
     GEAR(RecipeTypes.GEAR_PRESS)
 }
 
-class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
+class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable, Reloadable {
     
     override val gui = lazy { MechanicalPressGUI() }
     
@@ -69,8 +71,16 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         retrieveOrNull<NamespacedKey>("currentRecipe")?.let { RecipeManager.getRecipe(type.recipeType, it) }
     
     init {
+        NovaConfig.reloadables.add(this)
         handleUpgradeUpdates()
         if (currentRecipe == null) timeLeft = 0
+    }
+    
+    override fun reload() {
+        energyHolder.defaultMaxEnergy = MAX_ENERGY
+        energyHolder.defaultEnergyConsumption = ENERGY_PER_TICK
+        
+        handleUpgradeUpdates()
     }
     
     private fun handleUpgradeUpdates() {
