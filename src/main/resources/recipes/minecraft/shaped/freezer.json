@@ -6,7 +6,7 @@
     "iii"
   ],
   "ingredients": {
-    "t": "nova:basic_fluid_tank",
+    "t": "nova:basic_fluid_tank; minecraft:bucket",
     "s": "minecraft:snowball",
     "i": "nova:iron_plate",
     "f": "nova:advanced_machine_frame",

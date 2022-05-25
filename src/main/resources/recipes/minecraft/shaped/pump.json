@@ -6,7 +6,7 @@
     " i "
   ],
   "ingredients": {
-    "t": "nova:basic_fluid_tank",
+    "t": "nova:basic_fluid_tank; minecraft:bucket",
     "p": "nova:iron_plate",
     "f": "nova:advanced_machine_frame",
     "i": "minecraft:iron_ingot",

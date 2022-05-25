@@ -8,6 +8,6 @@
   "ingredients": {
     "l": "minecraft:lightning_rod",
     "g": "nova:copper_gear",
-    "p": "nova:elite_power_cell"
+    "p": "nova:elite_power_cell; nova:elite_machine_frame"
   }
 }

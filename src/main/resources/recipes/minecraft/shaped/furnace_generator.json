@@ -9,6 +9,6 @@
     "i": "minecraft:iron_ingot",
     "f": "minecraft:furnace",
     "r": "minecraft:redstone",
-    "c": "nova:basic_cable"
+    "c": "nova:basic_cable; minecraft:coal"
   }
 }
