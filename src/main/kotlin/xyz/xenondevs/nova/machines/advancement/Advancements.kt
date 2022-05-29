@@ -17,7 +17,7 @@ private val ROOT = advancement(MACHINES, "root") {
     display {
         icon(Blocks.QUARRY)
         title(TranslatableComponent("advancement.machines.root.title"))
-        description(TranslatableComponent("advancement.machines.root.description"))
+        description("")
         background("minecraft:textures/block/tuff.png")
         
         announceToChat(false)

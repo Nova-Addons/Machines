@@ -134,7 +134,6 @@
   "menu.machines.potion_configurator.potion_type.lingering": "Potion Type: Lingering",
 
   "advancement.machines.root.title": "Machines",
-  "advancement.machines.root.description": "",
   "advancement.machines.block_breaker.title": "Automated Block Breaking",
   "advancement.machines.block_breaker.description": "Craft a Block Breaker",
   "advancement.machines.block_placer.title": "Automated Block Placement",
