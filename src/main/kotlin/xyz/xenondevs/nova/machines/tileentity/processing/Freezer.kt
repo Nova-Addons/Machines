@@ -59,7 +59,7 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     private var mbPerTick = 0L
     private var mbUsed = 0L
     
-    private var mode = retrieveEnum("mode") { Mode.ICE }
+    private var mode = retrieveData("mode") { Mode.ICE }
     
     init {
         reload()

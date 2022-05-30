@@ -49,11 +49,11 @@ import kotlin.random.Random
 
 private const val MAX_STATE = 99
 
-private val ENERGY_CAPACITY = configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_capacity") }
-private val ENERGY_PER_TICK = configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_per_tick") }
-private val WATER_CAPACITY = configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("water_capacity") }
-private val LAVA_CAPACITY = configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("lava_capacity") }
-private val MB_PER_TICK by configReloadable {  NovaConfig[COBBLESTONE_GENERATOR].getLong("mb_per_tick") }
+private val ENERGY_CAPACITY = configReloadable { NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_capacity") }
+private val ENERGY_PER_TICK = configReloadable { NovaConfig[COBBLESTONE_GENERATOR].getLong("energy_per_tick") }
+private val WATER_CAPACITY = configReloadable { NovaConfig[COBBLESTONE_GENERATOR].getLong("water_capacity") }
+private val LAVA_CAPACITY = configReloadable { NovaConfig[COBBLESTONE_GENERATOR].getLong("lava_capacity") }
+private val MB_PER_TICK by configReloadable { NovaConfig[COBBLESTONE_GENERATOR].getLong("mb_per_tick") }
 
 class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
@@ -68,7 +68,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
     override val fluidHolder = NovaFluidHolder(this, waterTank to NetworkConnectionType.BUFFER, lavaTank to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
-    private var mode = retrieveEnum("mode") { Mode.COBBLESTONE }
+    private var mode = retrieveData("mode") { Mode.COBBLESTONE }
     private var mbPerTick = 0L
     
     private var currentMode = mode
@@ -172,10 +172,10 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
         
         override val gui: GUI = GUIBuilder(GUIType.NORMAL)
             .setStructure(
-                "1 - - - - - - - 2" ,
-                "| w l # i # s e |" ,
-                "| w l > i # u e |" ,
-                "| w l # i # m e |" ,
+                "1 - - - - - - - 2",
+                "| w l # i # s e |",
+                "| w l > i # u e |",
+                "| w l # i # m e |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))

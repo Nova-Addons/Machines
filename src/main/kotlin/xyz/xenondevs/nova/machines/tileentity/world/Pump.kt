@@ -63,7 +63,7 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
     private var maxIdleTime = 0
     private var idleTime = 0
     
-    private var mode = retrieveEnum("mode") { PumpMode.REPLACE }
+    private var mode = retrieveData("mode") { PumpMode.REPLACE }
     
     private var maxRange = 0
     private var range = retrieveData("range") { DEFAULT_RANGE }

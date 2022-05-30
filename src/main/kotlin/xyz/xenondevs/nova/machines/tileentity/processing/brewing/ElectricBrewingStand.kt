@@ -26,8 +26,7 @@ import org.bukkit.potion.PotionType
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
-import xyz.xenondevs.nova.data.serialization.cbf.element.CompoundElement
-import xyz.xenondevs.nova.data.serialization.cbf.element.other.ListElement
+import xyz.xenondevs.nova.data.serialization.cbf.Compound
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.BrewProgressItem
 import xyz.xenondevs.nova.machines.recipe.ElectricBrewingStandRecipe
@@ -91,7 +90,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     private var timePassed = 0
     
     private var color = retrieveData("potionColor") { Color(0, 0, 0) }
-    private var potionType = retrieveEnum<PotionBuilder.PotionType>("potionType") { PotionBuilder.PotionType.NORMAL }
+    private var potionType = retrieveData("potionType") { PotionBuilder.PotionType.NORMAL }
     private lateinit var potionEffects: List<PotionEffectBuilder>
     private var requiredItems: List<ItemStack>? = null
     private var requiredItemsStatus: MutableMap<ItemStack, Boolean>? = null
@@ -99,11 +98,10 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     
     init {
         val potionEffects = ArrayList<PotionEffectBuilder>()
-        retrieveElementOrNull<ListElement>("potionEffects")?.forEach { potionCompound ->
-            potionCompound as CompoundElement
+        retrieveOrNull<List<Compound>>("potionEffects")?.forEach { potionCompound ->
             val type = PotionEffectType.getByKey(potionCompound.get<NamespacedKey>("type"))!!
-            val duration: Int = potionCompound.getAsserted("duration")
-            val amplifier: Int = potionCompound.getAsserted("amplifier")
+            val duration: Int = potionCompound["duration"]!!
+            val amplifier: Int = potionCompound["amplifier"]!!
             
             potionEffects += PotionEffectBuilder(type, duration, amplifier)
         }
@@ -115,14 +113,12 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     override fun saveData() {
         super.saveData()
         
-        val list = ListElement()
-        potionEffects.forEach { effect ->
-            val potionCompound = CompoundElement()
-            potionCompound.put("type", effect.type!!.key)
-            potionCompound.put("duration", effect.durationLevel)
-            potionCompound.put("amplifier", effect.amplifierLevel)
-            
-            list += potionCompound
+        val list = potionEffects.map { effect ->
+            Compound().also { 
+                it["type"] = effect.type!!.key
+                it["duration"] = effect.durationLevel
+                it["amplifier"] = effect.amplifierLevel
+            }
         }
         
         storeData("potionEffects", list)

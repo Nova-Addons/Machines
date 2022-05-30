@@ -61,7 +61,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         outputInv to NetworkConnectionType.EXTRACT
     ) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     
-    private var type: PressType = retrieveEnum("pressType") { PressType.PLATE }
+    private var type: PressType = retrieveData("pressType") { PressType.PLATE }
     private var timeLeft: Int = retrieveData("pressTime") { 0 }
     private var pressSpeed = 0
     

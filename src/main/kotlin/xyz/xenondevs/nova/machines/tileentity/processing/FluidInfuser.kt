@@ -76,7 +76,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
         output to NetworkConnectionType.EXTRACT
     ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
-    private var mode = retrieveEnum("mode") { FluidInfuserRecipe.InfuserMode.INSERT }
+    private var mode = retrieveData("mode") { FluidInfuserRecipe.InfuserMode.INSERT }
     
     private var recipe: FluidInfuserRecipe? = null
     private val recipeTime: Int
