@@ -22,7 +22,6 @@ import xyz.xenondevs.nova.machines.registry.Blocks.COBBLESTONE_GENERATOR
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.ItemNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
@@ -98,7 +97,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private fun updateWaterLevel() {
         val item = if (!waterTank.isEmpty()) {
             val state = getFluidState(waterTank)
-            Blocks.COBBLESTONE_GENERATOR_WATER_LEVELS.item.createClientsideItemStack(state)
+            Blocks.COBBLESTONE_GENERATOR_WATER_LEVELS.clientsideProviders[state].get()
         } else null
         waterLevel.setEquipment(EquipmentSlot.HEAD, item, true)
     }
@@ -106,7 +105,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private fun updateLavaLevel() {
         val item = if (!lavaTank.isEmpty()) {
             val state = getFluidState(lavaTank)
-            Blocks.COBBLESTONE_GENERATOR_LAVA_LEVELS.item.createClientsideItemStack(state)
+            Blocks.COBBLESTONE_GENERATOR_LAVA_LEVELS.clientsideProviders[state].get()
         } else null
         lavaLevel.setEquipment(EquipmentSlot.HEAD, item, true)
     }

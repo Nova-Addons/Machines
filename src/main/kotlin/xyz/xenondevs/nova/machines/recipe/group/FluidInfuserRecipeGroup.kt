@@ -21,7 +21,7 @@ private val FLUID_CAPACITY = NovaConfig[Blocks.FLUID_INFUSER].getLong("fluid_cap
 object FluidInfuserRecipeGroup : RecipeGroup() {
     
     override val texture = GUITextures.RECIPE_FLUID_INFUSER
-    override val icon = Blocks.FLUID_INFUSER.basicItemProvider
+    override val icon = Blocks.FLUID_INFUSER.basicClientsideProvider
     override val priority = 6
     
     override fun createGUI(container: RecipeContainer): GUI {

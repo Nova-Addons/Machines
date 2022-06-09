@@ -17,7 +17,6 @@ import xyz.xenondevs.nova.machines.registry.Blocks.STAR_COLLECTOR
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
@@ -64,7 +63,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     private val rod = FakeArmorStand(location.clone().center().apply { y -= 1 }, true) { ast, data ->
         data.marker = true
         data.invisible = true
-        ast.setEquipment(EquipmentSlot.HEAD, material.block.createClientsideItemStack(1), false)
+        ast.setEquipment(EquipmentSlot.HEAD, material.blockProviders[1].get(), false)
     }
     
     private val particleTask = createParticleTask(listOf(
@@ -116,7 +115,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             if (GlobalValues.DROP_EXCESS_ON_GROUND && leftOver != 0) location.dropItem(item)
             
             particleTask.stop()
-            rod.setEquipment(EquipmentSlot.HEAD, material.block.createItemStack(1), true)
+            rod.setEquipment(EquipmentSlot.HEAD, material.blockProviders[1].get(), true)
         } else {
             val percentageCollected = (maxCollectionTime - timeSpentCollecting) / maxCollectionTime.toDouble()
             val particleDistance = percentageCollected * (STAR_PARTICLE_DISTANCE_PER_TICK * maxCollectionTime)
@@ -139,7 +138,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             
             particleTask.start()
             
-            rod.setEquipment(EquipmentSlot.HEAD, material.block.createItemStack(2), true)
+            rod.setEquipment(EquipmentSlot.HEAD, material.blockProviders[2].get(), true)
             
             rodLocation.yaw = rod.location.yaw
             particleVector = Vector(rod.location.yaw, -65F)

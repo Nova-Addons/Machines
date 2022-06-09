@@ -13,7 +13,7 @@ object StarCollectorRecipeGroup : RecipeGroup() {
     
     override val priority = 9
     override val texture = GUITextures.RECIPE_STAR_COLLECTOR
-    override val icon = Blocks.STAR_COLLECTOR.basicItemProvider
+    override val icon = Blocks.STAR_COLLECTOR.basicClientsideProvider
     
     override fun createGUI(container: RecipeContainer): GUI {
         return GUIBuilder(GUIType.NORMAL)

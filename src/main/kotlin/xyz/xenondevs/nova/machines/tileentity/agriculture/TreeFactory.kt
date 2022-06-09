@@ -17,7 +17,6 @@ import xyz.xenondevs.nova.machines.registry.Blocks.TREE_FACTORY
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.ItemNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
@@ -59,7 +58,7 @@ private const val MAX_GROWTH_STAGE = 199
 
 class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    private val inputInventory = getInventory("input", 1, intArrayOf(1), ::handleInputInventoryUpdate)
+    private val inputInventory = getInventory("input", 1, intArrayOf(1), false, ::handleInputInventoryUpdate)
     private val outputInventory = getInventory("output", 9, ::handleOutputInventoryUpdate)
     
     override val gui: Lazy<TileEntityGUI> = lazy(::TreeFactoryGUI)
@@ -136,7 +135,7 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     
     private fun updatePlantArmorStand() {
         val growthStage = (MAX_GROWTH_STAGE * growthProgress).toInt().coerceAtMost(MAX_GROWTH_STAGE)
-        plant.setEquipment(EquipmentSlot.HEAD, plantType?.let { PLANTS[it]!!.miniature.item.createClientsideItemStack(growthStage) }, true)
+        plant.setEquipment(EquipmentSlot.HEAD, plantType?.let { PLANTS[it]!!.miniature.clientsideProviders[growthStage].get() }, true)
     }
     
     private fun handleInputInventoryUpdate(event: ItemUpdateEvent) {

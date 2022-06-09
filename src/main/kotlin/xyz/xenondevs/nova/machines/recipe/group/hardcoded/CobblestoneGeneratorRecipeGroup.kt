@@ -17,7 +17,7 @@ object CobblestoneGeneratorRecipeGroup : RecipeGroup() {
     
     override val priority = 7
     override val texture = GUITextures.RECIPE_COBBLESTONE_GENERATOR
-    override val icon = Blocks.COBBLESTONE_GENERATOR.basicItemProvider
+    override val icon = Blocks.COBBLESTONE_GENERATOR.basicClientsideProvider
     
     override fun createGUI(container: RecipeContainer): GUI {
         val recipe = container.recipe as CobblestoneGeneratorRecipe

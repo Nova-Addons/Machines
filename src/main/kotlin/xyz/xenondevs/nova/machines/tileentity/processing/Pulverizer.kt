@@ -16,7 +16,7 @@ import xyz.xenondevs.nova.machines.recipe.PulverizerRecipe
 import xyz.xenondevs.nova.machines.registry.Blocks.PULVERIZER
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
+import xyz.xenondevs.nova.tileentity.TileEntity.Companion.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder

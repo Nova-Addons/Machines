@@ -64,14 +64,14 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         location.y += 1.0 / 32.0
         
         turbineModel.addModels(Model(
-            WIND_TURBINE.block.createClientsideItemStack(4),
+            WIND_TURBINE.blockProviders[4].get(),
             location,
             Rotations(90f, 0f, 0f)
         ))
         
         for (blade in 0..2) {
             turbineModel.addModels(Model(
-                material.block.createClientsideItemStack(5),
+                material.blockProviders[5].get(),
                 location,
                 Rotations(90f, 0f, blade * 120f)
             ))

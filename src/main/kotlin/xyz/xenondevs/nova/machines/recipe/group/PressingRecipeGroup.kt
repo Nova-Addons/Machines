@@ -6,6 +6,6 @@ import xyz.xenondevs.nova.ui.menu.item.recipes.group.ConversionRecipeGroup
 
 object PressingRecipeGroup : ConversionRecipeGroup() {
     override val priority = 5
-    override val icon = Blocks.MECHANICAL_PRESS.basicItemProvider
+    override val icon = Blocks.MECHANICAL_PRESS.basicClientsideProvider
     override val texture = GUITextures.RECIPE_PRESS
 }

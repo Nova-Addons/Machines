@@ -22,7 +22,6 @@ import xyz.xenondevs.nova.machines.registry.Blocks.FLUID_INFUSER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
@@ -197,7 +196,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
                     GUIMaterials.FLUID_PROGRESS_LEFT_RIGHT
                 else GUIMaterials.FLUID_PROGRESS_RIGHT_LEFT
                 
-                return material.item.createItemBuilder("", (percentage * 16).roundToInt())
+                return material.item.createItemBuilder((percentage * 16).roundToInt())
             }
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) = Unit
