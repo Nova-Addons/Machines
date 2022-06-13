@@ -221,6 +221,11 @@
       "block/tree_miniature/dark_oak/%s": [0, 199]
     }
   },
+  "mangrove_tree_miniature": {
+    "block": {
+      "block/tree_miniature/mangrove/%s": [0, 199]
+    }
+  },
   "crimson_tree_miniature": {
     "block": {
       "block/tree_miniature/crimson/%s": [0, 199]

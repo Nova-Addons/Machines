@@ -64,6 +64,7 @@ object Blocks {
     val JUNGLE_TREE_MINIATURE = registerItem(MACHINES, "jungle_tree_miniature")
     val ACACIA_TREE_MINIATURE = registerItem(MACHINES, "acacia_tree_miniature")
     val DARK_OAK_TREE_MINIATURE = registerItem(MACHINES, "dark_oak_tree_miniature")
+    val MANGROVE_TREE_MINIATURE = registerItem(MACHINES, "mangrove_tree_miniature")
     val CRIMSON_TREE_MINIATURE = registerItem(MACHINES, "crimson_tree_miniature")
     val WARPED_TREE_MINIATURE = registerItem(MACHINES, "warped_tree_miniature")
     val GIANT_RED_MUSHROOM_MINIATURE = registerItem(MACHINES, "giant_red_mushroom_miniature")

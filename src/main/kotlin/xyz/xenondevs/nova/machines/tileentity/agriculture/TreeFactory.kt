@@ -43,6 +43,7 @@ private val PLANTS = mapOf(
     Material.JUNGLE_SAPLING to PlantConfiguration(Blocks.JUNGLE_TREE_MINIATURE, ItemStack(Material.JUNGLE_LOG), Color(51, 127, 43)),
     Material.ACACIA_SAPLING to PlantConfiguration(Blocks.ACACIA_TREE_MINIATURE, ItemStack(Material.ACACIA_LOG), Color(113, 125, 75)),
     Material.DARK_OAK_SAPLING to PlantConfiguration(Blocks.DARK_OAK_TREE_MINIATURE, ItemStack(Material.DARK_OAK_LOG), Color(26, 65, 17)),
+    Material.MANGROVE_PROPAGULE to PlantConfiguration(Blocks.MANGROVE_TREE_MINIATURE, ItemStack(Material.MANGROVE_LOG), Color(32, 47, 14)),
     Material.CRIMSON_FUNGUS to PlantConfiguration(Blocks.CRIMSON_TREE_MINIATURE, ItemStack(Material.CRIMSON_STEM), Color(121, 0, 0)),
     Material.WARPED_FUNGUS to PlantConfiguration(Blocks.WARPED_TREE_MINIATURE, ItemStack(Material.WARPED_STEM), Color(22, 124, 132)),
     Material.RED_MUSHROOM to PlantConfiguration(Blocks.GIANT_RED_MUSHROOM_MINIATURE, ItemStack(Material.RED_MUSHROOM, 3), Color(192, 39, 37)),
