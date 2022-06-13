@@ -4,3 +4,4 @@ entity_blacklist:
   - WITHER
   - ENDER_DRAGON
   - ELDER_GUARDIAN
+  - WARDEN
