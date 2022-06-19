@@ -1,17 +1,14 @@
 package xyz.xenondevs.nova.machines.advancement
 
 import net.md_5.bungee.api.chat.TranslatableComponent
-import org.bukkit.Bukkit
-import org.bukkit.NamespacedKey
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerJoinEvent
 import xyz.xenondevs.kadvancements.adapter.version.AdvancementLoader
-import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.machines.MACHINES
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.Items
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.advancement
+import xyz.xenondevs.nova.util.icon
+import xyz.xenondevs.nova.util.obtainNovaItemAdvancement
+import xyz.xenondevs.nova.util.obtainNovaItemsAdvancement
 
 private val ROOT = advancement(MACHINES, "root") {
     display {
@@ -24,7 +21,7 @@ private val ROOT = advancement(MACHINES, "root") {
         showToast(false)
     }
     
-    criteria { impossible() }
+    criteria { tick("tick") {} }
 }
 
 //<editor-fold desc="Power Generation" defaultstate="collapsed">
@@ -116,16 +113,7 @@ private val WIRELESS_CHARGER = obtainNovaItemAdvancement(MACHINES, CHARGER, Bloc
 private val AUTO_FISHER = obtainNovaItemAdvancement(MACHINES, ROOT, Blocks.AUTO_FISHER)
 //</editor-fold>
 
-object Advancements : Listener {
-    
-    init {
-        Bukkit.getPluginManager().registerEvents(this, NOVA)
-    }
-    
-    @EventHandler
-    private fun handleJoin(event: PlayerJoinEvent) {
-        event.player.awardAdvancement(NamespacedKey.fromString(ROOT.id)!!)
-    }
+object Advancements {
     
     fun register() {
         AdvancementLoader.registerAdvancements(
