@@ -9,12 +9,10 @@ import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import java.util.logging.Logger
 
 lateinit var LOGGER: Logger
-lateinit var MACHINES: Machines
 
-class Machines : Addon() {
+object Machines : Addon() {
     
     override fun init() {
-        MACHINES = this
         LOGGER = logger
         
         Blocks.init()

@@ -15,6 +15,7 @@
         <dir>${project.build.directory}</dir>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <nova.version>0.9</nova.version>
     </properties>
 
     <repositories>
@@ -81,7 +82,7 @@
         <dependency>
             <groupId>xyz.xenondevs.nova</groupId>
             <artifactId>Nova</artifactId>
-            <version>0.9-SNAPSHOT</version>
+            <version>${nova.version}</version>
         </dependency>
     </dependencies>
 
