@@ -3,6 +3,7 @@ package xyz.xenondevs.nova.machines.tileentity.world
 import de.studiocode.invui.gui.GUI
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
+import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.Material
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
 import xyz.xenondevs.nova.data.config.GlobalValues
@@ -12,7 +13,6 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.BLOCK_BREAKER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.TileEntity.Companion.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
@@ -37,7 +37,7 @@ private val BREAK_SPEED_CLAMP by configReloadable { NovaConfig[BLOCK_BREAKER].ge
 
 class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    private val inventory = getInventory("inventory", 9) { if (it.isAdd && it.updateReason != SELF_UPDATE_REASON) it.isCancelled = true }
+    private val inventory = getInventory("inventory", 9, ::handleInventoryUpdate)
     override val gui = lazy { BlockBreakerGUI() }
     override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
@@ -54,6 +54,11 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     override fun saveData() {
         super.saveData()
         storeData("breakProgress", breakProgress)
+    }
+    
+    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
+        if (event.isAdd && event.updateReason != SELF_UPDATE_REASON)
+            event.isCancelled = true
     }
     
     override fun handleTick() {
