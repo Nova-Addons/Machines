@@ -12,9 +12,8 @@ import xyz.xenondevs.nova.machines.tileentity.processing.*
 import xyz.xenondevs.nova.machines.tileentity.processing.brewing.ElectricBrewingStand
 import xyz.xenondevs.nova.machines.tileentity.world.*
 import xyz.xenondevs.nova.material.BlockOptions
-import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerEnergyTileEntity
-import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerItem
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerTileEntity
+import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerItem
 import xyz.xenondevs.nova.util.SoundEffect
 import xyz.xenondevs.nova.util.item.ToolCategory
 import xyz.xenondevs.nova.util.item.ToolLevel
@@ -26,34 +25,34 @@ object Blocks {
     private val LIGHT_METAL = BlockOptions(0.5, ToolCategory.PICKAXE, ToolLevel.WOODEN, false, Material.BARRIER, SoundEffect(Sound.BLOCK_METAL_PLACE), SoundEffect(Sound.BLOCK_METAL_BREAK), Material.IRON_BLOCK)
     private val METAL = BlockOptions(5.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, Material.BARRIER, SoundEffect(Sound.BLOCK_METAL_PLACE), SoundEffect(Sound.BLOCK_METAL_BREAK), Material.IRON_BLOCK)
     
-    val AUTO_FISHER = registerEnergyTileEntity(Machines, "auto_fisher", STONE, ::AutoFisher)
-    val FERTILIZER = registerEnergyTileEntity(Machines, "fertilizer", STONE, ::Fertilizer)
-    val HARVESTER = registerEnergyTileEntity(Machines, "harvester", STONE, ::Harvester)
-    val PLANTER = registerEnergyTileEntity(Machines, "planter", STONE, ::Planter)
-    val TREE_FACTORY = registerEnergyTileEntity(Machines, "tree_factory", STONE, ::TreeFactory)
-    val CHARGER = registerEnergyTileEntity(Machines, "charger", STONE, ::Charger)
-    val WIRELESS_CHARGER = registerEnergyTileEntity(Machines, "wireless_charger", STONE, ::WirelessCharger)
-    val BREEDER = registerEnergyTileEntity(Machines, "breeder", STONE, ::Breeder)
-    val MOB_DUPLICATOR = registerEnergyTileEntity(Machines, "mob_duplicator", STONE, ::MobDuplicator)
-    val MOB_KILLER = registerEnergyTileEntity(Machines, "mob_killer", STONE, ::MobKiller)
-    val COBBLESTONE_GENERATOR = registerEnergyTileEntity(Machines, "cobblestone_generator", STONE, ::CobblestoneGenerator)
-    val ELECTRIC_FURNACE = registerEnergyTileEntity(Machines, "electric_furnace", STONE, ::ElectricFurnace)
-    val MECHANICAL_PRESS = registerEnergyTileEntity(Machines, "mechanical_press", STONE, ::MechanicalPress)
-    val PULVERIZER = registerEnergyTileEntity(Machines, "pulverizer", STONE, ::Pulverizer)
-    val BLOCK_BREAKER = registerEnergyTileEntity(Machines, "block_breaker", STONE, ::BlockBreaker)
-    val BLOCK_PLACER = registerEnergyTileEntity(Machines, "block_placer", STONE, ::BlockPlacer)
-    val STAR_COLLECTOR = registerEnergyTileEntity(Machines, "star_collector", STONE, ::StarCollector)
-    val CHUNK_LOADER = registerEnergyTileEntity(Machines, "chunk_loader", STONE, ::ChunkLoader)
-    val QUARRY = registerEnergyTileEntity(Machines, "quarry", STONE, ::Quarry, Quarry::canPlace)
+    val AUTO_FISHER = registerTileEntity(Machines, "auto_fisher", STONE, ::AutoFisher)
+    val FERTILIZER = registerTileEntity(Machines, "fertilizer", STONE, ::Fertilizer)
+    val HARVESTER = registerTileEntity(Machines, "harvester", STONE, ::Harvester)
+    val PLANTER = registerTileEntity(Machines, "planter", STONE, ::Planter)
+    val TREE_FACTORY = registerTileEntity(Machines, "tree_factory", STONE, ::TreeFactory)
+    val CHARGER = registerTileEntity(Machines, "charger", STONE, ::Charger)
+    val WIRELESS_CHARGER = registerTileEntity(Machines, "wireless_charger", STONE, ::WirelessCharger)
+    val BREEDER = registerTileEntity(Machines, "breeder", STONE, ::Breeder)
+    val MOB_DUPLICATOR = registerTileEntity(Machines, "mob_duplicator", STONE, ::MobDuplicator)
+    val MOB_KILLER = registerTileEntity(Machines, "mob_killer", STONE, ::MobKiller)
+    val COBBLESTONE_GENERATOR = registerTileEntity(Machines, "cobblestone_generator", STONE, ::CobblestoneGenerator)
+    val ELECTRIC_FURNACE = registerTileEntity(Machines, "electric_furnace", STONE, ::ElectricFurnace)
+    val MECHANICAL_PRESS = registerTileEntity(Machines, "mechanical_press", STONE, ::MechanicalPress)
+    val PULVERIZER = registerTileEntity(Machines, "pulverizer", STONE, ::Pulverizer)
+    val BLOCK_BREAKER = registerTileEntity(Machines, "block_breaker", STONE, ::BlockBreaker)
+    val BLOCK_PLACER = registerTileEntity(Machines, "block_placer", STONE, ::BlockPlacer)
+    val STAR_COLLECTOR = registerTileEntity(Machines, "star_collector", STONE, ::StarCollector)
+    val CHUNK_LOADER = registerTileEntity(Machines, "chunk_loader", STONE, ::ChunkLoader)
+    val QUARRY = registerTileEntity(Machines, "quarry", STONE, ::Quarry, Quarry::canPlace)
     val ELECTRIC_BREWING_STAND = registerTileEntity(Machines, "electric_brewing_stand", STONE, ::ElectricBrewingStand)
     val PUMP = registerTileEntity(Machines, "pump", STONE, ::Pump)
     val FREEZER = registerTileEntity(Machines, "freezer", STONE, ::Freezer)
     val FLUID_INFUSER = registerTileEntity(Machines, "fluid_infuser", STONE, ::FluidInfuser)
     val SPRINKLER = registerTileEntity(Machines, "sprinkler", LIGHT_METAL, ::Sprinkler)
-    val SOLAR_PANEL = registerEnergyTileEntity(Machines, "solar_panel", STONE, ::SolarPanel)
-    val LIGHTNING_EXCHANGER = registerEnergyTileEntity(Machines, "lightning_exchanger", STONE, ::LightningExchanger)
-    val WIND_TURBINE = registerEnergyTileEntity(Machines, "wind_turbine", METAL, ::WindTurbine, WindTurbine::canPlace, multiBlockLoader = WindTurbine::loadMultiBlock)
-    val FURNACE_GENERATOR = registerEnergyTileEntity(Machines, "furnace_generator", STONE, ::FurnaceGenerator)
+    val SOLAR_PANEL = registerTileEntity(Machines, "solar_panel", STONE, ::SolarPanel)
+    val LIGHTNING_EXCHANGER = registerTileEntity(Machines, "lightning_exchanger", STONE, ::LightningExchanger)
+    val WIND_TURBINE = registerTileEntity(Machines, "wind_turbine", METAL, ::WindTurbine, WindTurbine::canPlace, multiBlockLoader = WindTurbine::loadMultiBlock)
+    val FURNACE_GENERATOR = registerTileEntity(Machines, "furnace_generator", STONE, ::FurnaceGenerator)
     val LAVA_GENERATOR = registerTileEntity(Machines, "lava_generator", STONE, ::LavaGenerator)
     val INFINITE_WATER_SOURCE = registerTileEntity(Machines, "infinite_water_source", SANDSTONE, ::InfiniteWaterSource)
     
