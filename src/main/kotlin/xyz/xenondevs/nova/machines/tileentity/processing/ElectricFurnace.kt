@@ -35,7 +35,7 @@ import xyz.xenondevs.nova.util.*
 
 private fun getRecipe(input: ItemStack, world: World): SmeltingRecipe? {
     return minecraftServer.recipeManager.getAllRecipesFor(RecipeType.SMELTING)
-        .first { it.matches(SimpleContainer(input.nmsStack), world.serverLevel) }
+        .firstOrNull { it.matches(SimpleContainer(input.nmsStack), world.serverLevel) }
 }
 
 private val MAX_ENERGY = configReloadable { NovaConfig[ELECTRIC_FURNACE].getLong("capacity") }
