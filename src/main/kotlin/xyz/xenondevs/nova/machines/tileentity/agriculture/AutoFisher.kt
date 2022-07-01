@@ -69,6 +69,10 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private val itemDropLocation = location.clone().add(0.0, 1.0, 0.0)
     private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID.salt(uuid.toString()), "AutoFisher")
     
+    init {
+        reload()
+    }
+    
     override fun reload() {
         super.reload()
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
