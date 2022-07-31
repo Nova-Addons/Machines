@@ -18,6 +18,8 @@ import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
+import xyz.xenondevs.nova.data.serialization.persistentdata.getLegacy
+import xyz.xenondevs.nova.data.serialization.persistentdata.set
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.item.behavior.ItemBehavior
 import xyz.xenondevs.nova.machines.registry.Items
@@ -29,9 +31,13 @@ import xyz.xenondevs.nova.util.getTargetLocation
 import xyz.xenondevs.nova.util.item.retrieveData
 import xyz.xenondevs.nova.util.item.storeData
 
-private val DATA_KEY = NamespacedKey(NOVA, "entityData")
-private val TYPE_KEY = NamespacedKey(NOVA, "entityType")
-private val TIME_KEY = NamespacedKey(NOVA, "fillTime")
+private val LEGACY_DATA_KEY = NamespacedKey(NOVA, "entityData")
+private val LEGACY_TYPE_KEY = NamespacedKey(NOVA, "entityType")
+private val LEGACY_TIME_KEY = NamespacedKey(NOVA, "fillTime")
+
+private val DATA_KEY = NamespacedKey(NOVA, "entityData1")
+private val TYPE_KEY = NamespacedKey(NOVA, "entityType1")
+private val TIME_KEY = NamespacedKey(NOVA, "fillTime1")
 
 private val BLACKLISTED_ENTITY_TYPES by configReloadable {
     NovaConfig[Items.MOB_CATCHER]
@@ -42,6 +48,8 @@ private val BLACKLISTED_ENTITY_TYPES by configReloadable {
 object MobCatcherBehavior : ItemBehavior() {
     
     override fun handleEntityInteract(player: Player, itemStack: ItemStack, clicked: Entity, event: PlayerInteractAtEntityEvent) {
+        convertLegacyData(itemStack)
+        
         if (clicked is Mob
             && clicked.type !in BLACKLISTED_ENTITY_TYPES
             && ProtectionManager.canInteractWithEntity(player, clicked, itemStack).get()
@@ -67,6 +75,8 @@ object MobCatcherBehavior : ItemBehavior() {
     }
     
     override fun handleInteract(player: Player, itemStack: ItemStack, action: Action, event: PlayerInteractEvent) {
+        convertLegacyData(itemStack)
+        
         if (action == Action.RIGHT_CLICK_BLOCK) {
             // Adds a small delay to prevent players from spamming the item
             if (System.currentTimeMillis() - (itemStack.retrieveData<Long>(TIME_KEY) ?: -1) < 50) return
@@ -108,6 +118,38 @@ object MobCatcherBehavior : ItemBehavior() {
             "item.machines.mob_catcher.type",
             localized(ChatColor.YELLOW, entity)
         )).get().itemMeta
+    }
+    
+    private fun convertLegacyData(itemStack: ItemStack) {
+        val itemMeta = itemStack.itemMeta ?: return
+        val container = itemMeta.persistentDataContainer
+        
+        var changed = false
+        
+        val data = container.getLegacy<ByteArray>(LEGACY_DATA_KEY)
+        if (data != null) {
+            container.remove(LEGACY_DATA_KEY)
+            container.set(DATA_KEY, data)
+            changed = true
+        }
+        
+        val type = container.getLegacy<EntityType>(LEGACY_TYPE_KEY)
+        if (type != null) {
+            container.remove(LEGACY_TYPE_KEY)
+            container.set(TYPE_KEY, type)
+            changed = true
+        }
+        
+        val time = container.getLegacy<Long>(LEGACY_TIME_KEY)
+        if (time != null) {
+            container.remove(LEGACY_TIME_KEY)
+            container.set(TIME_KEY, time)
+            changed = true
+        }
+        
+        if (changed) {
+            itemStack.itemMeta = itemMeta
+        }
     }
     
 }
