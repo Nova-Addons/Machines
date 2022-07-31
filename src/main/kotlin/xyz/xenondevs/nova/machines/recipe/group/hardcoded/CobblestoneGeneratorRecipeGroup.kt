@@ -23,7 +23,7 @@ object CobblestoneGeneratorRecipeGroup : RecipeGroup() {
         val recipe = container.recipe as CobblestoneGeneratorRecipe
         
         val progressItem = GUIMaterials.TP_FLUID_PROGRESS_LEFT_RIGHT
-            .createBasicItemBuilder()
+            .createClientsideItemBuilder()
             .setDisplayName(TranslatableComponent("menu.machines.recipe.cobblestone_generator.${recipe.mode.name.lowercase()}"))
         
         return GUIBuilder(GUIType.NORMAL)
@@ -32,7 +32,7 @@ object CobblestoneGeneratorRecipeGroup : RecipeGroup() {
                 ". w l . > . r . .",
                 ". w l . m . . . .")
             .addIngredient('r', createRecipeChoiceItem(listOf(container.result!!)))
-            .addIngredient('m', recipe.mode.uiItem.itemProvider)
+            .addIngredient('m', recipe.mode.uiItem.clientsideProvider)
             .addIngredient('>', progressItem)
             .addIngredient('w', StaticFluidBar(FluidType.WATER, 1000, 1000, 3))
             .addIngredient('l', StaticFluidBar(FluidType.LAVA, 1000, 1000, 3))

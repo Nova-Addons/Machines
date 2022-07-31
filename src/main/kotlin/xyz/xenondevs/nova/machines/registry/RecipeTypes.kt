@@ -2,11 +2,25 @@ package xyz.xenondevs.nova.machines.registry
 
 import xyz.xenondevs.nova.data.recipe.RecipeTypeRegistry.register
 import xyz.xenondevs.nova.machines.Machines
-import xyz.xenondevs.nova.machines.recipe.*
+import xyz.xenondevs.nova.machines.recipe.ElectricBrewingStandRecipe
+import xyz.xenondevs.nova.machines.recipe.ElectricBrewingStandRecipeDeserializer
+import xyz.xenondevs.nova.machines.recipe.FluidInfuserRecipe
+import xyz.xenondevs.nova.machines.recipe.FluidInfuserRecipeDeserializer
+import xyz.xenondevs.nova.machines.recipe.GearPressRecipe
+import xyz.xenondevs.nova.machines.recipe.GearPressRecipeDeserializer
+import xyz.xenondevs.nova.machines.recipe.PlatePressRecipe
+import xyz.xenondevs.nova.machines.recipe.PlatePressRecipeDeserializer
+import xyz.xenondevs.nova.machines.recipe.PulverizerRecipe
+import xyz.xenondevs.nova.machines.recipe.PulverizerRecipeDeserializer
 import xyz.xenondevs.nova.machines.recipe.group.FluidInfuserRecipeGroup
 import xyz.xenondevs.nova.machines.recipe.group.PressingRecipeGroup
 import xyz.xenondevs.nova.machines.recipe.group.PulverizingRecipeGroup
-import xyz.xenondevs.nova.machines.recipe.group.hardcoded.*
+import xyz.xenondevs.nova.machines.recipe.group.hardcoded.CobblestoneGeneratorRecipe
+import xyz.xenondevs.nova.machines.recipe.group.hardcoded.CobblestoneGeneratorRecipeGroup
+import xyz.xenondevs.nova.machines.recipe.group.hardcoded.FreezerRecipe
+import xyz.xenondevs.nova.machines.recipe.group.hardcoded.FreezerRecipeGroup
+import xyz.xenondevs.nova.machines.recipe.group.hardcoded.StarCollectorRecipe
+import xyz.xenondevs.nova.machines.recipe.group.hardcoded.StarCollectorRecipeGroup
 
 object RecipeTypes {
     

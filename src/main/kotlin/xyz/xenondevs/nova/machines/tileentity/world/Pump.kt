@@ -34,8 +34,14 @@ import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.HORIZONTAL_FACES
+import xyz.xenondevs.nova.util.VERTICAL_FACES
+import xyz.xenondevs.nova.util.advance
+import xyz.xenondevs.nova.util.isSourceFluid
 import xyz.xenondevs.nova.util.item.playPlaceSoundEffect
+import xyz.xenondevs.nova.util.rotateRight
+import xyz.xenondevs.nova.util.sourceFluidType
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import java.util.*
@@ -243,7 +249,7 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
         private inner class PumpModeItem : BaseItem() {
             
             override fun getItemProvider() =
-                (if (mode == PumpMode.PUMP) GUIMaterials.PUMP_MODE_BTN else GUIMaterials.PUMP_REPLACE_MODE_BTN).itemProvider
+                (if (mode == PumpMode.PUMP) GUIMaterials.PUMP_MODE_BTN else GUIMaterials.PUMP_REPLACE_MODE_BTN).clientsideProvider
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
                 mode = if (mode == PumpMode.PUMP) PumpMode.REPLACE else PumpMode.PUMP

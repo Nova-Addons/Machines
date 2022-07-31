@@ -12,6 +12,7 @@ import org.bukkit.util.Vector
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
+import xyz.xenondevs.nova.data.resources.model.data.ArmorStandBlockModelData
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.STAR_COLLECTOR
 import xyz.xenondevs.nova.machines.registry.Items
@@ -27,8 +28,15 @@ import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.Vector
+import xyz.xenondevs.nova.util.calculateYaw
+import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.data.localized
+import xyz.xenondevs.nova.util.dropItem
+import xyz.xenondevs.nova.util.isFull
+import xyz.xenondevs.nova.util.particle
+import xyz.xenondevs.nova.util.particleBuilder
 import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
 import java.awt.Color
@@ -63,7 +71,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     private val rod = FakeArmorStand(location.clone().center().apply { y -= 1 }, true) { ast, data ->
         data.marker = true
         data.invisible = true
-        ast.setEquipment(EquipmentSlot.HEAD, material.blockProviders[1].get(), false)
+        ast.setEquipment(EquipmentSlot.HEAD, (material.block as ArmorStandBlockModelData)[1].get(), false)
     }
     
     private val particleTask = createParticleTask(listOf(
@@ -115,7 +123,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             if (GlobalValues.DROP_EXCESS_ON_GROUND && leftOver != 0) location.dropItem(item)
             
             particleTask.stop()
-            rod.setEquipment(EquipmentSlot.HEAD, material.blockProviders[1].get(), true)
+            rod.setEquipment(EquipmentSlot.HEAD, (material.block as ArmorStandBlockModelData)[1].get(), true)
         } else {
             val percentageCollected = (maxCollectionTime - timeSpentCollecting) / maxCollectionTime.toDouble()
             val particleDistance = percentageCollected * (STAR_PARTICLE_DISTANCE_PER_TICK * maxCollectionTime)
@@ -138,7 +146,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             
             particleTask.start()
             
-            rod.setEquipment(EquipmentSlot.HEAD, material.blockProviders[2].get(), true)
+            rod.setEquipment(EquipmentSlot.HEAD, (material.block as ArmorStandBlockModelData)[2].get(), true)
             
             rodLocation.yaw = rod.location.yaw
             particleVector = Vector(rod.location.yaw, -65F)

@@ -9,6 +9,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
+import xyz.xenondevs.nova.data.resources.model.data.ArmorStandBlockModelData
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.WIND_TURBINE
@@ -64,14 +65,14 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         location.y += 1.0 / 32.0
         
         turbineModel.addModels(Model(
-            WIND_TURBINE.blockProviders[4].get(),
+            (material.block as ArmorStandBlockModelData)[4].get(),
             location,
             Rotations(90f, 0f, 0f)
         ))
         
         for (blade in 0..2) {
             turbineModel.addModels(Model(
-                material.blockProviders[5].get(),
+                (material.block as ArmorStandBlockModelData)[5].get(),
                 location,
                 Rotations(90f, 0f, blade * 120f)
             ))

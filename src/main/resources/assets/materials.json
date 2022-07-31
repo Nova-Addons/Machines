@@ -28,59 +28,79 @@
   "gui_sapling_placeholder": "gui/placeholder/sapling",
   "gui_arrow_progress": {
     "item": {
-      "gui/progress/arrow/%s": [0, 16]
+      "models": {
+        "gui/progress/arrow/%s": [0, 16]
+      }
     }
   },
   "gui_energy_progress": {
     "item": {
-      "gui/progress/energy/%s": [0, 16]
+      "models": {
+        "gui/progress/energy/%s": [0, 16]
+      }
     }
   },
   "gui_pulverizer_progress": {
     "item": {
-      "gui/progress/pulverizer/%s": [0, 14]
+      "models": {
+        "gui/progress/pulverizer/%s": [0, 14]
+      }
     }
   },
   "gui_press_progress": {
     "item": {
-      "gui/progress/press/%s": [0, 8]
+      "models": {
+        "gui/progress/press/%s": [0, 8]
+      }
     }
   },
   "gui_brew_progress": {
     "item": {
-      "gui/progress/brew/%s": [0, 16]
+      "models": {
+        "gui/progress/brew/%s": [0, 16]
+      }
     }
   },
   "gui_fluid_progress_left_right": {
     "item": {
-      "gui/progress/fluid/left_right/%s": [0, 16]
+      "models": {
+        "gui/progress/fluid/left_right/%s": [0, 16]
+      }
     }
   },
   "gui_fluid_progress_right_left": {
     "item": {
-      "gui/progress/fluid/right_left/%s": [0, 16]
+      "models": {
+        "gui/progress/fluid/right_left/%s": [0, 16]
+      }
     }
   },
   "gui_tp_fluid_progress_left_right": {
     "item": {
-      "gui/progress/tp_fluid/left_right/%s": [0, 16]
+      "models": {
+        "gui/progress/tp_fluid/left_right/%s": [0, 16]
+      }
     }
   },
   "gui_tp_fluid_progress_right_left": {
     "item": {
-      "gui/progress/tp_fluid/right_left/%s": [0, 16]
+      "models": {
+        "gui/progress/tp_fluid/right_left/%s": [0, 16]
+      }
     }
   },
   "scaffolding": {
-    "item": [
-      "item/scaffolding",
-      "block/scaffolding/full_horizontal",
-      "block/scaffolding/full_vertical",
-      "block/scaffolding/corner_down",
-      "block/scaffolding/small_horizontal",
-      "block/scaffolding/full_slim_vertical",
-      "block/scaffolding/slim_vertical_down"
-    ]
+    "item": {
+      "models": [
+        "item/scaffolding",
+        "block/scaffolding/full_horizontal",
+        "block/scaffolding/full_vertical",
+        "block/scaffolding/corner_down",
+        "block/scaffolding/small_horizontal",
+        "block/scaffolding/full_slim_vertical",
+        "block/scaffolding/slim_vertical_down"
+      ]
+    }
   },
   "mob_catcher": "item/mob_catcher",
   "iron_plate": "item/iron_plate",
@@ -116,134 +136,284 @@
   "creative_machine_frame": "block/machine_frame/creative",
   "solar_cell": "item/solar_cell",
   "netherite_drill": "block/netherite_drill",
-  "auto_fisher": "block/auto_fisher",
-  "fertilizer": "block/fertilizer",
-  "harvester": "block/harvester",
-  "planter": "block/planter",
   "tree_factory": "block/tree_factory",
-  "charger": "block/charger",
-  "wireless_charger": "block/wireless_charger",
-  "breeder": "block/breeder",
-  "mob_duplicator": "block/mob_duplicator",
-  "mob_killer": "block/mob_killer",
   "cobblestone_generator": "block/cobblestone_generator",
-  "mechanical_press": "block/mechanical_press",
-  "pulverizer": "block/pulverizer",
-  "block_breaker": "block/block_breaker",
-  "block_placer": "block/block_placer",
-  "chunk_loader": "block/chunk_loader",
-  "quarry": "block/quarry",
   "electric_brewing_stand": "block/electric_brewing_stand",
   "pump": "block/pump",
-  "freezer": "block/freezer",
-  "fluid_infuser": "block/fluid_infuser",
   "sprinkler": "block/sprinkler",
   "solar_panel": "block/solar_panel",
   "lightning_exchanger": "block/lightning_exchanger",
-  "infinite_water_source": "block/infinite_water_source",
+  "auto_fisher": {
+    "item": "block/auto_fisher",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "fertilizer": {
+    "item": "block/fertilizer",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "harvester": {
+    "item": "block/harvester",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "planter": {
+    "item": "block/planter",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "charger": {
+    "item": "block/charger",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "wireless_charger": {
+    "item": "block/wireless_charger",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "breeder": {
+    "item": "block/breeder",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "mob_duplicator": {
+    "item": "block/mob_duplicator",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "mob_killer": {
+    "item": "block/mob_killer",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "mechanical_press": {
+    "item": "block/mechanical_press",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "pulverizer": {
+    "item": "block/pulverizer",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "block_breaker": {
+    "item": "block/block_breaker",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "block_placer": {
+    "item": "block/block_placer",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "chunk_loader": {
+    "item": "block/chunk_loader",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "quarry": {
+    "item": "block/quarry",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "freezer": {
+    "item": "block/freezer",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "fluid_infuser": {
+    "item": "block/fluid_infuser",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
+  "infinite_water_source": {
+    "item": "block/infinite_water_source",
+    "block": {
+      "type": "solid",
+      "directions": "nesw"
+    }
+  },
   "furnace_generator": {
     "item": "block/furnace_generator_off",
-    "block": [
-      "block/furnace_generator_off",
-      "block/furnace_generator_on"
-    ]
-  },
-  "wind_turbine": {
-    "item": "item/wind_turbine",
-    "block": [
-      "block/wind_turbine/0",
-      "block/wind_turbine/1",
-      "block/wind_turbine/2",
-      "block/wind_turbine/3",
-      "block/wind_turbine/rotor_middle",
-      "block/wind_turbine/rotor_blade"
-    ]
+    "block": {
+      "type": "solid",
+      "directions": "nesw",
+      "models": [
+        "block/furnace_generator_off",
+        "block/furnace_generator_on"
+      ]
+    }
   },
   "lava_generator": {
-    "block": [
-      "block/lava_generator_off",
-      "block/lava_generator_on"
-    ]
+    "item": "block/lava_generator_off",
+    "block": {
+      "type": "solid",
+      "directions": "nesw",
+      "models": [
+        "block/lava_generator_off",
+        "block/lava_generator_on"
+      ]
+    }
   },
   "electric_furnace": {
-    "block": [
-      "block/electric_furnace_off",
-      "block/electric_furnace_on"
-    ]
+    "item": "block/electric_furnace_off",
+    "block": {
+      "type": "solid",
+      "directions": "nesw",
+      "models": [
+        "block/electric_furnace_off",
+        "block/electric_furnace_on"
+      ]
+    }
   },
   "star_collector": {
     "item": "block/star_collector/base",
-    "block": [
-      "block/star_collector/base",
-      "block/star_collector/rod_off",
-      "block/star_collector/rod_on"
-    ]
-  },
-  "cobblestone_generator_water_levels": {
-    "block_type": "translucent",
     "block": {
-      "block/fluid_levels/cobblestone_generator/water/%s": [0, 99]
+      "models": [
+        "block/star_collector/base",
+        "block/star_collector/rod_off",
+        "block/star_collector/rod_on"
+      ]
     }
   },
-  "cobblestone_generator_lava_levels": {
-    "block_type": "translucent",
+  "wind_turbine": {
+    "item": "item/wind_turbine",
     "block": {
-      "block/fluid_levels/cobblestone_generator/lava/%s": [0, 99]
-    }
-  },
-  "oak_tree_miniature": {
-    "block": {
-      "block/tree_miniature/oak/%s": [0, 199]
-    }
-  },
-  "spruce_tree_miniature": {
-    "block": {
-      "block/tree_miniature/spruce/%s": [0, 199]
-    }
-  },
-  "birch_tree_miniature": {
-    "block": {
-      "block/tree_miniature/birch/%s": [0, 199]
-    }
-  },
-  "jungle_tree_miniature": {
-    "block": {
-      "block/tree_miniature/jungle/%s": [0, 199]
-    }
-  },
-  "acacia_tree_miniature": {
-    "block": {
-      "block/tree_miniature/acacia/%s": [0, 199]
-    }
-  },
-  "dark_oak_tree_miniature": {
-    "block": {
-      "block/tree_miniature/dark_oak/%s": [0, 199]
-    }
-  },
-  "mangrove_tree_miniature": {
-    "block": {
-      "block/tree_miniature/mangrove/%s": [0, 199]
-    }
-  },
-  "crimson_tree_miniature": {
-    "block": {
-      "block/tree_miniature/crimson/%s": [0, 199]
-    }
-  },
-  "warped_tree_miniature": {
-    "block": {
-      "block/tree_miniature/warped/%s": [0, 199]
-    }
-  },
-  "giant_red_mushroom_miniature": {
-    "block": {
-      "block/tree_miniature/red_mushroom/%s": [0, 199]
-    }
-  },
-  "giant_brown_mushroom_miniature": {
-    "block": {
-      "block/tree_miniature/brown_mushroom/%s": [0, 199]
+      "models": [
+        "block/wind_turbine/0",
+        "block/wind_turbine/1",
+        "block/wind_turbine/2",
+        "block/wind_turbine/3",
+        "block/wind_turbine/rotor_middle",
+        "block/wind_turbine/rotor_blade"
+      ]
+    },
+    "cobblestone_generator_water_levels": {
+      "item": {
+        "models": {
+          "block/fluid_levels/cobblestone_generator/water/%s": [0, 99]
+        }
+      }
+    },
+    "cobblestone_generator_lava_levels": {
+      "item": {
+        "models": {
+          "block/fluid_levels/cobblestone_generator/lava/%s": [0, 99]
+        }
+      }
+    },
+    "oak_tree_miniature": {
+      "item": {
+        "models": {
+          "block/tree_miniature/oak/%s": [0, 199]
+        }
+      }
+    },
+    "spruce_tree_miniature": {
+      "item": {
+        "models": {
+          "block/tree_miniature/spruce/%s": [0, 199]
+        }
+      }
+    },
+    "birch_tree_miniature": {
+      "item": {
+        "models": {
+          "block/tree_miniature/birch/%s": [0, 199]
+        }
+      }
+    },
+    "jungle_tree_miniature": {
+      "item": {
+        "models": {
+          "block/tree_miniature/jungle/%s": [0, 199]
+        }
+      }
+    },
+    "acacia_tree_miniature": {
+      "item": {
+        "models": {
+          "block/tree_miniature/acacia/%s": [0, 199]
+        }
+      }
+    },
+    "dark_oak_tree_miniature": {
+      "item": {
+        "models": {
+          "block/tree_miniature/dark_oak/%s": [0, 199]
+        }
+      }
+    },
+    "mangrove_tree_miniature": {
+      "item": {
+        "models": {
+          "block/tree_miniature/mangrove/%s": [0, 199]
+        }
+      }
+    },
+    "crimson_tree_miniature": {
+      "item": {
+        "models": {
+          "block/tree_miniature/crimson/%s": [0, 199]
+        }
+      }
+    },
+    "warped_tree_miniature": {
+      "item": {
+        "models": {
+          "block/tree_miniature/warped/%s": [0, 199]
+        }
+      }
+    },
+    "giant_red_mushroom_miniature": {
+      "item": {
+        "models": {
+          "block/tree_miniature/red_mushroom/%s": [0, 199]
+        }
+      }
+    },
+    "giant_brown_mushroom_miniature": {
+      "item": {
+        "models": {
+          "block/tree_miniature/brown_mushroom/%s": [0, 199]
+        }
+      }
     }
   }
 }

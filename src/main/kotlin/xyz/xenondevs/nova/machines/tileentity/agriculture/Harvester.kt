@@ -19,7 +19,6 @@ import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.HARVESTER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.TileEntity.Companion.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
@@ -33,8 +32,16 @@ import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
-import xyz.xenondevs.nova.util.*
-import xyz.xenondevs.nova.util.item.*
+import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.addAll
+import xyz.xenondevs.nova.util.callEvent
+import xyz.xenondevs.nova.util.dropItemsNaturally
+import xyz.xenondevs.nova.util.isFull
+import xyz.xenondevs.nova.util.item.PlantUtils
+import xyz.xenondevs.nova.util.item.ToolUtils
+import xyz.xenondevs.nova.util.item.isAxe
+import xyz.xenondevs.nova.util.item.isHoe
+import xyz.xenondevs.nova.util.item.isLeaveLike
 import xyz.xenondevs.nova.world.block.context.BlockBreakContext
 import xyz.xenondevs.nova.world.pos
 import xyz.xenondevs.nova.world.region.Region
@@ -244,9 +251,9 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
             .addIngredient('i', inventory)
             .addIngredient('c', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('v', VisualizeRegionItem(uuid) { harvestRegion })
-            .addIngredient('s', VISlotElement(shearInventory, 0, GUIMaterials.SHEARS_PLACEHOLDER.createBasicItemBuilder()))
-            .addIngredient('a', VISlotElement(axeInventory, 0, GUIMaterials.AXE_PLACEHOLDER.createBasicItemBuilder()))
-            .addIngredient('h', VISlotElement(hoeInventory, 0, GUIMaterials.HOE_PLACEHOLDER.createBasicItemBuilder()))
+            .addIngredient('s', VISlotElement(shearInventory, 0, GUIMaterials.SHEARS_PLACEHOLDER.clientsideProvider))
+            .addIngredient('a', VISlotElement(axeInventory, 0, GUIMaterials.AXE_PLACEHOLDER.clientsideProvider))
+            .addIngredient('h', VISlotElement(hoeInventory, 0, GUIMaterials.HOE_PLACEHOLDER.clientsideProvider))
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))

@@ -31,7 +31,14 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.bukkitStack
+import xyz.xenondevs.nova.util.intValue
+import xyz.xenondevs.nova.util.minecraftServer
+import xyz.xenondevs.nova.util.namespacedKey
+import xyz.xenondevs.nova.util.nmsStack
+import xyz.xenondevs.nova.util.resourceLocation
+import xyz.xenondevs.nova.util.serverLevel
 
 private fun getRecipe(input: ItemStack, world: World): SmeltingRecipe? {
     return minecraftServer.recipeManager.getAllRecipesFor(RecipeType.SMELTING)

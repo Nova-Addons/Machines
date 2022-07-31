@@ -53,7 +53,7 @@ object FluidInfuserRecipeGroup : RecipeGroup() {
             .addIngredient('p', progressItem)
             .addIngredient('f', StaticFluidBar(recipe.fluidType, recipe.fluidAmount, FLUID_CAPACITY, 3))
             .addIngredient('t', CoreGUIMaterial.TP_STOPWATCH
-                .createBasicItemBuilder()
+                .createClientsideItemBuilder()
                 .setDisplayName(TranslatableComponent("menu.nova.recipe.time", recipe.time / 20.0))
             )
             .build()

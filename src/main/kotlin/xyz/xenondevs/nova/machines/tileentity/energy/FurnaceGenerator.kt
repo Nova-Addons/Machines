@@ -20,10 +20,14 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.BlockSide.FRONT
+import xyz.xenondevs.nova.util.advance
+import xyz.xenondevs.nova.util.axis
+import xyz.xenondevs.nova.util.intValue
 import xyz.xenondevs.nova.util.item.fuel
 import xyz.xenondevs.nova.util.item.toItemStack
+import xyz.xenondevs.nova.util.particle
 import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToInt

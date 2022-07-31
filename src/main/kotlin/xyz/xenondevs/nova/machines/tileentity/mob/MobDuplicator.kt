@@ -40,11 +40,15 @@ import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.EntityUtils
+import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.data.NBTUtils
 import xyz.xenondevs.nova.util.data.isString
 import xyz.xenondevs.nova.util.data.localized
+import xyz.xenondevs.nova.util.isBetweenXZ
 import xyz.xenondevs.nova.util.item.novaMaterial
+import xyz.xenondevs.nova.util.nmsEntity
 import java.io.IOException
 import java.net.URL
 import kotlin.random.Random
@@ -174,7 +178,7 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
                 "| u # # # # p e |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
-            .addIngredient('i', VISlotElement(inventory, 0, GUIMaterials.MOB_CATCHER_PLACEHOLDER.createBasicItemBuilder()))
+            .addIngredient('i', VISlotElement(inventory, 0, GUIMaterials.MOB_CATCHER_PLACEHOLDER.clientsideProvider))
             .addIngredient('n', ToggleNBTModeItem())
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
@@ -188,7 +192,7 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         private inner class ToggleNBTModeItem : BaseItem() {
             
             override fun getItemProvider(): ItemProvider {
-                return (if (keepNbt) GUIMaterials.NBT_BTN_ON else GUIMaterials.NBT_BTN_OFF).itemProvider
+                return (if (keepNbt) GUIMaterials.NBT_BTN_ON else GUIMaterials.NBT_BTN_OFF).clientsideProvider
             }
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
