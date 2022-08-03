@@ -129,7 +129,7 @@
   "advancement.machines.block_breaker.description": "Создайте разрушитель блоков",
   "advancement.machines.block_placer.title": "Автоматический установщик блоков",
   "advancement.machines.block_placer.description": "Создайте установщик блоков",
-  "advancement.machines.charger.title": "Делайте зарядку!",
+  "advancement.machines.charger.title": "На зарядку становись!",
   "advancement.machines.charger.description": "Сделайте зарядник",
   "advancement.machines.furnace_generator.title": "Производство энергии",
   "advancement.machines.furnace_generator.description": "Сделайте угольный генератор",
@@ -196,5 +196,9 @@
   "advancement.machines.fluid_infuser.title": "Преобразование жидкостей",
   "advancement.machines.fluid_infuser.description": "Создайте Жидкостный Преобразователь",
   "advancement.machines.sprinkler.title": "Капля дождя в пустыне",
-  "advancement.machines.sprinkler.description": "Создайте Разбрызгиватель"
+  "advancement.machines.sprinkler.description": "Создайте Разбрызгиватель",
+  "menu.machines.mob_duplicator.nbt.off": "Сохранять NBT: Нет",
+  "menu.machines.mob_duplicator.nbt.on": "Сохранять NBT: Да",
+  "menu.machines.planter.autotill.off": "Автоматически вспахивать: Нет",
+  "menu.machines.planter.autotill.on": "Автоматически вспахивать: Да"
 }
