@@ -191,5 +191,10 @@
   "advancement.machines.fluid_infuser.title": "Infuseren met vloeistoffen",
   "advancement.machines.fluid_infuser.description": "Maak een Vloeistofinfuser",
   "advancement.machines.sprinkler.title": "Een druppel regen in de woestijn",
-  "advancement.machines.sprinkler.description": "Maak een Sproeier"
+  "advancement.machines.sprinkler.description": "Maak een Sproeier",
+  "menu.machines.mob_duplicator.nbt.off": "Gebruik NBT-Data: Nee",
+  "item.machines.elite_machine_frame": "Elite Machine Frame",
+  "menu.machines.items.category.machines": "Machines",
+  "menu.machines.recipe.extract_fluid": "Extract %s mB %s",
+  "menu.machines.mob_duplicator.nbt.on": "Gebruik NBT-Data: Ja"
 }
