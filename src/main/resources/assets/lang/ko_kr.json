@@ -192,5 +192,6 @@
   "advancement.machines.fluid_infuser.title": "액체 주입",
   "advancement.machines.fluid_infuser.description": "유체 주입기 제작",
   "advancement.machines.sprinkler.title": "사막에 내리는 비",
-  "advancement.machines.sprinkler.description": "스크링클러 제작"
+  "advancement.machines.sprinkler.description": "스크링클러 제작",
+  "advancement.machines.wind_turbine.description": "풍력 발전기 제작"
 }
