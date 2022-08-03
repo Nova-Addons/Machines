@@ -323,96 +323,96 @@
         "block/wind_turbine/rotor_middle",
         "block/wind_turbine/rotor_blade"
       ]
-    },
-    "cobblestone_generator_water_levels": {
-      "item": {
-        "models": {
-          "block/fluid_levels/cobblestone_generator/water/%s": [0, 99]
-        }
+    }
+  },
+  "cobblestone_generator_water_levels": {
+    "item": {
+      "models": {
+        "block/fluid_levels/cobblestone_generator/water/%s": [0, 99]
       }
-    },
-    "cobblestone_generator_lava_levels": {
-      "item": {
-        "models": {
-          "block/fluid_levels/cobblestone_generator/lava/%s": [0, 99]
-        }
+    }
+  },
+  "cobblestone_generator_lava_levels": {
+    "item": {
+      "models": {
+        "block/fluid_levels/cobblestone_generator/lava/%s": [0, 99]
       }
-    },
-    "oak_tree_miniature": {
-      "item": {
-        "models": {
-          "block/tree_miniature/oak/%s": [0, 199]
-        }
+    }
+  },
+  "oak_tree_miniature": {
+    "item": {
+      "models": {
+        "block/tree_miniature/oak/%s": [0, 199]
       }
-    },
-    "spruce_tree_miniature": {
-      "item": {
-        "models": {
-          "block/tree_miniature/spruce/%s": [0, 199]
-        }
+    }
+  },
+  "spruce_tree_miniature": {
+    "item": {
+      "models": {
+        "block/tree_miniature/spruce/%s": [0, 199]
       }
-    },
-    "birch_tree_miniature": {
-      "item": {
-        "models": {
-          "block/tree_miniature/birch/%s": [0, 199]
-        }
+    }
+  },
+  "birch_tree_miniature": {
+    "item": {
+      "models": {
+        "block/tree_miniature/birch/%s": [0, 199]
       }
-    },
-    "jungle_tree_miniature": {
-      "item": {
-        "models": {
-          "block/tree_miniature/jungle/%s": [0, 199]
-        }
+    }
+  },
+  "jungle_tree_miniature": {
+    "item": {
+      "models": {
+        "block/tree_miniature/jungle/%s": [0, 199]
       }
-    },
-    "acacia_tree_miniature": {
-      "item": {
-        "models": {
-          "block/tree_miniature/acacia/%s": [0, 199]
-        }
+    }
+  },
+  "acacia_tree_miniature": {
+    "item": {
+      "models": {
+        "block/tree_miniature/acacia/%s": [0, 199]
       }
-    },
-    "dark_oak_tree_miniature": {
-      "item": {
-        "models": {
-          "block/tree_miniature/dark_oak/%s": [0, 199]
-        }
+    }
+  },
+  "dark_oak_tree_miniature": {
+    "item": {
+      "models": {
+        "block/tree_miniature/dark_oak/%s": [0, 199]
       }
-    },
-    "mangrove_tree_miniature": {
-      "item": {
-        "models": {
-          "block/tree_miniature/mangrove/%s": [0, 199]
-        }
+    }
+  },
+  "mangrove_tree_miniature": {
+    "item": {
+      "models": {
+        "block/tree_miniature/mangrove/%s": [0, 199]
       }
-    },
-    "crimson_tree_miniature": {
-      "item": {
-        "models": {
-          "block/tree_miniature/crimson/%s": [0, 199]
-        }
+    }
+  },
+  "crimson_tree_miniature": {
+    "item": {
+      "models": {
+        "block/tree_miniature/crimson/%s": [0, 199]
       }
-    },
-    "warped_tree_miniature": {
-      "item": {
-        "models": {
-          "block/tree_miniature/warped/%s": [0, 199]
-        }
+    }
+  },
+  "warped_tree_miniature": {
+    "item": {
+      "models": {
+        "block/tree_miniature/warped/%s": [0, 199]
       }
-    },
-    "giant_red_mushroom_miniature": {
-      "item": {
-        "models": {
-          "block/tree_miniature/red_mushroom/%s": [0, 199]
-        }
+    }
+  },
+  "giant_red_mushroom_miniature": {
+    "item": {
+      "models": {
+        "block/tree_miniature/red_mushroom/%s": [0, 199]
       }
-    },
-    "giant_brown_mushroom_miniature": {
-      "item": {
-        "models": {
-          "block/tree_miniature/brown_mushroom/%s": [0, 199]
-        }
+    }
+  },
+  "giant_brown_mushroom_miniature": {
+    "item": {
+      "models": {
+        "block/tree_miniature/brown_mushroom/%s": [0, 199]
       }
     }
   }
