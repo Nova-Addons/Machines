@@ -100,19 +100,19 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         val potionEffects = ArrayList<PotionEffectBuilder>()
         
         if (legacyData != null) {
-            retrieveOrNull<List<LegacyCompound>>("potionEffects")?.forEach { potionCompound ->
+            retrieveDataOrNull<List<LegacyCompound>>("potionEffects")?.forEach { potionCompound ->
                 val type = PotionEffectType.getByKey(potionCompound.get<NamespacedKey>("type"))!!
                 val duration: Int = potionCompound["duration"]!!
                 val amplifier: Int = potionCompound["amplifier"]!!
-                
+        
                 potionEffects += PotionEffectBuilder(type, duration, amplifier)
             }
         } else {
-            retrieveOrNull<List<Compound>>("potionEffects")?.forEach { potionCompound ->
+            retrieveDataOrNull<List<Compound>>("potionEffects")?.forEach { potionCompound ->
                 val type = PotionEffectType.getByKey(potionCompound.get<NamespacedKey>("type"))!!
                 val duration: Int = potionCompound["duration"]!!
                 val amplifier: Int = potionCompound["amplifier"]!!
-                
+        
                 potionEffects += PotionEffectBuilder(type, duration, amplifier)
             }
         }

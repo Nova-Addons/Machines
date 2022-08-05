@@ -29,6 +29,7 @@ import xyz.xenondevs.nova.util.data.addLoreLines
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.getTargetLocation
 import xyz.xenondevs.nova.util.item.retrieveData
+import xyz.xenondevs.nova.util.item.retrieveDataOrNull
 import xyz.xenondevs.nova.util.item.storeData
 
 private val LEGACY_DATA_KEY = NamespacedKey(NOVA, "entityData")
@@ -79,7 +80,7 @@ object MobCatcherBehavior : ItemBehavior() {
         
         if (action == Action.RIGHT_CLICK_BLOCK) {
             // Adds a small delay to prevent players from spamming the item
-            if (System.currentTimeMillis() - (itemStack.retrieveData<Long>(TIME_KEY) ?: -1) < 50) return
+            if (System.currentTimeMillis() - (itemStack.retrieveData<Long>(TIME_KEY) { -1 }) < 50) return
             
             val data = getEntityData(itemStack)
             if (data != null) {
@@ -99,9 +100,9 @@ object MobCatcherBehavior : ItemBehavior() {
         }
     }
     
-    fun getEntityData(itemStack: ItemStack): ByteArray? = itemStack.retrieveData(DATA_KEY)
+    fun getEntityData(itemStack: ItemStack): ByteArray? = itemStack.retrieveDataOrNull(DATA_KEY)
     
-    fun getEntityType(itemStack: ItemStack): EntityType? = itemStack.retrieveData<String>(TYPE_KEY)?.let { EntityType.valueOf(it) }
+    fun getEntityType(itemStack: ItemStack): EntityType? = itemStack.retrieveDataOrNull<String>(TYPE_KEY)?.let { EntityType.valueOf(it) }
     
     private fun setEntityData(itemStack: ItemStack, type: EntityType, data: ByteArray) {
         itemStack.storeData(DATA_KEY, data)

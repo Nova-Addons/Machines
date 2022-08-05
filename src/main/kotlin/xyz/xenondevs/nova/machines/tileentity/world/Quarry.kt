@@ -148,7 +148,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     private lateinit var lastPointerLocation: Location
     private lateinit var pointerLocation: Location
-    private var pointerDestination: Location? = retrieveOrNull("pointerDestination")
+    private var pointerDestination: Location? = retrieveDataOrNull("pointerDestination")
     
     private var drillProgress = retrieveData("drillProgress") { 0.0 }
     private var drilling = retrieveData("drilling") { false }
@@ -169,10 +169,10 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     override fun handleInitialized(first: Boolean) {
         super.handleInitialized(first)
-        
+    
         updateBounds(first)
-        pointerLocation = retrieveOrNull("pointerLocation") ?: Location(world, minX + 1.5, y - 2.0, minZ + 1.5)
-        lastPointerLocation = retrieveOrNull("lastPointerLocation") ?: Location(world, 0.0, 0.0, 0.0)
+        pointerLocation = retrieveDataOrNull("pointerLocation") ?: Location(world, minX + 1.5, y - 2.0, minZ + 1.5)
+        lastPointerLocation = retrieveDataOrNull("lastPointerLocation") ?: Location(world, 0.0, 0.0, 0.0)
         createScaffolding()
     }
     

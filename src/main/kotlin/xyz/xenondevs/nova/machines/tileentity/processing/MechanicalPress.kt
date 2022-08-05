@@ -65,7 +65,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     private var pressSpeed = 0
     
     private var currentRecipe: ConversionNovaRecipe? =
-        retrieveOrNull<NamespacedKey>("currentRecipe")?.let { RecipeManager.getRecipe(type.recipeType, it) }
+        retrieveDataOrNull<NamespacedKey>("currentRecipe")?.let { RecipeManager.getRecipe(type.recipeType, it) }
     
     init {
         reload()

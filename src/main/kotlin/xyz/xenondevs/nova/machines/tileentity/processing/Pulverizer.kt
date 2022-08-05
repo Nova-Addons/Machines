@@ -54,7 +54,7 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private var pulverizeSpeed = 0
     
     private var currentRecipe: PulverizerRecipe? =
-        retrieveOrNull<NamespacedKey>("currentRecipe")?.let { RecipeManager.getRecipe(RecipeTypes.PULVERIZER, it) }
+        retrieveDataOrNull<NamespacedKey>("currentRecipe")?.let { RecipeManager.getRecipe(RecipeTypes.PULVERIZER, it) }
     
     private val particleTask = createParticleTask(listOf(
         particle(ParticleEffect.SMOKE_NORMAL) {

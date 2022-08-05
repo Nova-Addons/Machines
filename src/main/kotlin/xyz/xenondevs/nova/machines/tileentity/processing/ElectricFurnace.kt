@@ -64,7 +64,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         outputInventory to NetworkConnectionType.EXTRACT
     ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
-    private var currentRecipe: SmeltingRecipe? = retrieveOrNull<NamespacedKey>("currentRecipe")
+    private var currentRecipe: SmeltingRecipe? = retrieveDataOrNull<NamespacedKey>("currentRecipe")
         ?.let { minecraftServer.recipeManager.byKey(it.resourceLocation).orElse(null) as SmeltingRecipe? }
     private var timeCooked = retrieveData("timeCooked") { 0 }
     private var experience = retrieveData("exp") { 0f }
