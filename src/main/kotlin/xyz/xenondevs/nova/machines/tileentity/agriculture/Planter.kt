@@ -22,7 +22,6 @@ import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.PLANTER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.TileEntity.Companion.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
@@ -237,7 +236,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 "| i i i # f m e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inputInventory)
-            .addIngredient('h', VISlotElement(hoesInventory, 0, GUIMaterials.HOE_PLACEHOLDER.createBasicItemBuilder()))
+            .addIngredient('h', VISlotElement(hoesInventory, 0, GUIMaterials.HOE_PLACEHOLDER.clientsideProvider))
             .addIngredient('v', VisualizeRegionItem(uuid) { plantRegion })
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('f', AutoTillingItem())
@@ -253,7 +252,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         private inner class AutoTillingItem : BaseItem() {
             
             override fun getItemProvider() =
-                (if (autoTill) GUIMaterials.HOE_BTN_ON else GUIMaterials.HOE_BTN_OFF).itemProvider
+                (if (autoTill) GUIMaterials.HOE_BTN_ON else GUIMaterials.HOE_BTN_OFF).clientsideProvider
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
                 autoTill = !autoTill

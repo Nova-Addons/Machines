@@ -1,7 +1,7 @@
 package xyz.xenondevs.nova.machines.advancement
 
 import net.md_5.bungee.api.chat.TranslatableComponent
-import xyz.xenondevs.kadvancements.adapter.version.AdvancementLoader
+import xyz.xenondevs.nmsutils.advancement.AdvancementLoader
 import xyz.xenondevs.nova.machines.Machines
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.Items

@@ -19,7 +19,11 @@ import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.advance
+import xyz.xenondevs.nova.util.axis
+import xyz.xenondevs.nova.util.intValue
+import xyz.xenondevs.nova.util.particle
 import xyz.xenondevs.particle.ParticleEffect
 
 private val ENERGY_CAPACITY = configReloadable { NovaConfig[LAVA_GENERATOR].getLong("energy_capacity") }

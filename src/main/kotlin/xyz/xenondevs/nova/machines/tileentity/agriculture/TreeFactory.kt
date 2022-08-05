@@ -177,7 +177,7 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
                 "| # i # o o o e |",
                 "| # # # o o o e |",
                 "3 - - - - - - - 4")
-            .addIngredient('i', VISlotElement(inputInventory, 0, GUIMaterials.SAPLING_PLACEHOLDER.itemProvider))
+            .addIngredient('i', VISlotElement(inputInventory, 0, GUIMaterials.SAPLING_PLACEHOLDER.clientsideProvider))
             .addIngredient('o', outputInventory)
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))

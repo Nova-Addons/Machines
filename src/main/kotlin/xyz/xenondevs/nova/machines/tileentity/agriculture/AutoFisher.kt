@@ -38,8 +38,12 @@ import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.EntityUtils
+import xyz.xenondevs.nova.util.hasEmptySlot
 import xyz.xenondevs.nova.util.item.ToolUtils
+import xyz.xenondevs.nova.util.salt
+import xyz.xenondevs.nova.util.serverLevel
 import java.util.*
 
 private val MAX_ENERGY = configReloadable { NovaConfig[AUTO_FISHER].getLong("capacity") }
@@ -170,7 +174,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
-            .addIngredient('f', VISlotElement(fishingRodInventory, 0, GUIMaterials.FISHING_ROD_PLACEHOLDER.createBasicItemBuilder()))
+            .addIngredient('f', VISlotElement(fishingRodInventory, 0, GUIMaterials.FISHING_ROD_PLACEHOLDER.clientsideProvider))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .addIngredient('p', idleBar)

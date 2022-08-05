@@ -24,7 +24,6 @@ import xyz.xenondevs.nova.machines.registry.Blocks.MECHANICAL_PRESS
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.TileEntity.Companion.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
@@ -66,7 +65,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     private var pressSpeed = 0
     
     private var currentRecipe: ConversionNovaRecipe? =
-        retrieveOrNull<NamespacedKey>("currentRecipe")?.let { RecipeManager.getRecipe(type.recipeType, it) }
+        retrieveDataOrNull<NamespacedKey>("currentRecipe")?.let { RecipeManager.getRecipe(type.recipeType, it) }
     
     init {
         reload()
@@ -173,10 +172,10 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             override fun getItemProvider(): ItemProvider {
                 return if (type == PressType.PLATE) {
                     if (this@MechanicalPress.type == PressType.PLATE) GUIMaterials.PLATE_BTN_OFF.createItemBuilder()
-                    else GUIMaterials.PLATE_BTN_ON.itemProvider
+                    else GUIMaterials.PLATE_BTN_ON.clientsideProvider
                 } else {
                     if (this@MechanicalPress.type == PressType.GEAR) GUIMaterials.GEAR_BTN_OFF.createItemBuilder()
-                    else GUIMaterials.GEAR_BTN_ON.itemProvider
+                    else GUIMaterials.GEAR_BTN_ON.clientsideProvider
                 }
             }
             

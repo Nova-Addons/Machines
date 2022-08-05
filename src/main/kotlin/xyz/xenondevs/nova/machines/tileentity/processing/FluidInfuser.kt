@@ -141,8 +141,8 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
         private val changeModeItem = CycleItem.withStateChangeHandler(
             ::changeMode,
             mode.ordinal,
-            GUIMaterials.FLUID_LEFT_RIGHT_BTN.itemProvider,
-            GUIMaterials.FLUID_RIGHT_LEFT_BTN.itemProvider
+            GUIMaterials.FLUID_LEFT_RIGHT_BTN.clientsideProvider,
+            GUIMaterials.FLUID_RIGHT_LEFT_BTN.clientsideProvider
         )
         
         private val sideConfigGUI = SideConfigGUI(
@@ -166,7 +166,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
             .addIngredient('o', output)
             .addIngredient('p', progressItem)
             .addIngredient('m', changeModeItem)
-            .addIngredient('>', SimpleItem(GUIMaterials.ARROW_PROGRESS.itemProvider))
+            .addIngredient('>', SimpleItem(GUIMaterials.ARROW_PROGRESS.clientsideProvider))
             .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('f', FluidBar(3, fluidHolder, tank))

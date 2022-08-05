@@ -41,11 +41,27 @@ import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
-import xyz.xenondevs.nova.util.*
+import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.LocationUtils
+import xyz.xenondevs.nova.util.blockLocation
+import xyz.xenondevs.nova.util.breakTexture
+import xyz.xenondevs.nova.util.callEvent
+import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.concurrent.CombinedBooleanFuture
 import xyz.xenondevs.nova.util.data.addLoreLines
 import xyz.xenondevs.nova.util.data.localized
+import xyz.xenondevs.nova.util.getAllDrops
+import xyz.xenondevs.nova.util.getFullCuboid
+import xyz.xenondevs.nova.util.getNextBlockBelow
+import xyz.xenondevs.nova.util.getRectangle
+import xyz.xenondevs.nova.util.getStraightLine
+import xyz.xenondevs.nova.util.hardness
 import xyz.xenondevs.nova.util.item.ToolUtils
+import xyz.xenondevs.nova.util.particleBuilder
+import xyz.xenondevs.nova.util.positionEquals
+import xyz.xenondevs.nova.util.remove
+import xyz.xenondevs.nova.util.serverTick
+import xyz.xenondevs.nova.util.setBreakStage
 import xyz.xenondevs.nova.world.block.BlockManager
 import xyz.xenondevs.nova.world.block.context.BlockBreakContext
 import xyz.xenondevs.nova.world.pos
@@ -132,7 +148,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     private lateinit var lastPointerLocation: Location
     private lateinit var pointerLocation: Location
-    private var pointerDestination: Location? = retrieveOrNull("pointerDestination")
+    private var pointerDestination: Location? = retrieveDataOrNull("pointerDestination")
     
     private var drillProgress = retrieveData("drillProgress") { 0.0 }
     private var drilling = retrieveData("drilling") { false }
@@ -153,10 +169,10 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     override fun handleInitialized(first: Boolean) {
         super.handleInitialized(first)
-        
+    
         updateBounds(first)
-        pointerLocation = retrieveOrNull("pointerLocation") ?: Location(world, minX + 1.5, y - 2.0, minZ + 1.5)
-        lastPointerLocation = retrieveOrNull("lastPointerLocation") ?: Location(world, 0.0, 0.0, 0.0)
+        pointerLocation = retrieveDataOrNull("pointerLocation") ?: Location(world, minX + 1.5, y - 2.0, minZ + 1.5)
+        lastPointerLocation = retrieveDataOrNull("lastPointerLocation") ?: Location(world, 0.0, 0.0, 0.0)
         createScaffolding()
     }
     

@@ -188,9 +188,8 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
         
         private inner class ChangeModeItem : BaseItem() {
             
-            override fun getItemProvider(): ItemProvider {
-                return mode.uiItem.itemProvider
-            }
+            override fun getItemProvider(): ItemProvider =
+                mode.uiItem.clientsideProvider
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
                 if (clickType == ClickType.LEFT || clickType == ClickType.RIGHT) {

@@ -20,7 +20,6 @@ import xyz.xenondevs.nova.machines.registry.Blocks.FREEZER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.ItemNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.TileEntity.Companion.SELF_UPDATE_REASON
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
@@ -136,9 +135,8 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         
         private inner class ChangeModeItem : BaseItem() {
             
-            override fun getItemProvider(): ItemProvider {
-                return mode.uiItem.itemProvider
-            }
+            override fun getItemProvider(): ItemProvider =
+                mode.uiItem.clientsideProvider
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
                 if (clickType == ClickType.LEFT || clickType == ClickType.RIGHT) {
