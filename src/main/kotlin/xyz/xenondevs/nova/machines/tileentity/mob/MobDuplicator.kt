@@ -83,7 +83,6 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     private var entityData: ByteArray? = null
     private var keepNbt = retrieveData("keepNbt") { false }
     
-    
     init {
         reload()
         updateEntityData(inventory.getItemStack(0))
@@ -94,6 +93,11 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         idleTimeNBT = (IDLE_TIME_NBT / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         idleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
         if (timePassed > totalIdleTime) timePassed = totalIdleTime
+    }
+    
+    override fun saveData() {
+        super.saveData()
+        storeData("keepNbt", keepNbt)
     }
     
     override fun handleTick() {
