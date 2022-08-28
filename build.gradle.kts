@@ -48,6 +48,10 @@ remapStrings {
     ))
 }
 
+generateWailaTextures {
+    filter.set { !it.name.contains(Regex("\\d"))}
+}
+
 tasks {
     register<Copy>("addonJar") {
         group = "build"
