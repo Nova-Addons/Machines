@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package xyz.xenondevs.nova.machines.item
 
 import de.studiocode.invui.item.builder.ItemBuilder
@@ -15,16 +17,17 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
-import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.serialization.persistentdata.getLegacy
 import xyz.xenondevs.nova.data.serialization.persistentdata.set
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.item.behavior.ItemBehavior
+import xyz.xenondevs.nova.machines.Machines
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.addPrioritized
+import xyz.xenondevs.nova.util.data.NamespacedKey
 import xyz.xenondevs.nova.util.data.addLoreLines
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.getTargetLocation
@@ -32,13 +35,13 @@ import xyz.xenondevs.nova.util.item.retrieveData
 import xyz.xenondevs.nova.util.item.retrieveDataOrNull
 import xyz.xenondevs.nova.util.item.storeData
 
-private val LEGACY_DATA_KEY = NamespacedKey(NOVA, "entityData")
-private val LEGACY_TYPE_KEY = NamespacedKey(NOVA, "entityType")
-private val LEGACY_TIME_KEY = NamespacedKey(NOVA, "fillTime")
+private val LEGACY_DATA_KEY = NamespacedKey("nova", "entityData1")
+private val LEGACY_TYPE_KEY = NamespacedKey("nova", "entityType1")
+private val LEGACY_TIME_KEY = NamespacedKey("nova", "fillTime1")
 
-private val DATA_KEY = NamespacedKey(NOVA, "entityData1")
-private val TYPE_KEY = NamespacedKey(NOVA, "entityType1")
-private val TIME_KEY = NamespacedKey(NOVA, "fillTime1")
+private val DATA_KEY = NamespacedKey(Machines, "entityData")
+private val TYPE_KEY = NamespacedKey(Machines, "entityType")
+private val TIME_KEY = NamespacedKey(Machines, "fillTime")
 
 private val BLACKLISTED_ENTITY_TYPES by configReloadable {
     NovaConfig[Items.MOB_CATCHER]

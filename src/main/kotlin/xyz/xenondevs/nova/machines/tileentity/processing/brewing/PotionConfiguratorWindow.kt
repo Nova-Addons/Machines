@@ -30,7 +30,7 @@ import xyz.xenondevs.nova.ui.item.clickableItem
 import xyz.xenondevs.nova.ui.menu.ColorPickerWindow
 import xyz.xenondevs.nova.ui.menu.ColorPreviewItem
 import xyz.xenondevs.nova.ui.menu.OpenColorPickerWindowItem
-import xyz.xenondevs.nova.ui.overlay.CoreGUITexture
+import xyz.xenondevs.nova.ui.overlay.character.gui.CoreGUITexture
 import xyz.xenondevs.nova.util.data.addLoreLines
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.playClickSound

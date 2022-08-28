@@ -4,7 +4,6 @@ import de.studiocode.invui.gui.GUI
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.item.Item
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.data.type.Farmland
@@ -12,7 +11,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPhysicsEvent
-import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -34,6 +32,7 @@ import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.particleBuilder
+import xyz.xenondevs.nova.util.registerEvents
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import xyz.xenondevs.particle.ParticleEffect
@@ -135,7 +134,7 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         private val sprinklers = ArrayList<Sprinkler>()
         
         init {
-            Bukkit.getPluginManager().registerEvents(this, NOVA)
+            registerEvents()
         }
         
         @EventHandler

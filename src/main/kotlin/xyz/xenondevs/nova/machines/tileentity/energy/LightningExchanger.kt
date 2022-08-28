@@ -3,14 +3,12 @@ package xyz.xenondevs.nova.machines.tileentity.energy
 import de.studiocode.invui.gui.GUI
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.weather.LightningStrikeEvent
 import org.bukkit.event.weather.LightningStrikeEvent.Cause
-import xyz.xenondevs.nova.NOVA
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -25,6 +23,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
+import xyz.xenondevs.nova.util.registerEvents
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -84,7 +83,7 @@ class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(
     private companion object LightningHandler : Listener {
         
         init {
-            Bukkit.getServer().pluginManager.registerEvents(this, NOVA)
+            registerEvents()
         }
         
         @EventHandler

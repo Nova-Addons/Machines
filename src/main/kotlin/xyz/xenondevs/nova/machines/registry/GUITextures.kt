@@ -1,7 +1,7 @@
 package xyz.xenondevs.nova.machines.registry
 
 import xyz.xenondevs.nova.machines.Machines
-import xyz.xenondevs.nova.ui.overlay.GUITexture
+import xyz.xenondevs.nova.ui.overlay.character.gui.GUITexture
 
 object GUITextures {
     

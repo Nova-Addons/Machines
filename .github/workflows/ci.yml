@@ -23,8 +23,11 @@ jobs:
       - name: Run BuildTools
         run: . .github/scripts/buildtools.sh
 
-      - name: Build With Maven
-        run: mvn -B clean test package "-Ddir=artifacts/" --file pom.xml
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Build Spigot-Mapped
+        run: ./gradlew addonJar "-DoutDir=artifacts/"
 
       - name: Upload Artifacts
         id: upload
