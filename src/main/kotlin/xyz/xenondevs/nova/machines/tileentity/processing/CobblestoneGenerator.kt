@@ -39,7 +39,7 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.axis
 import xyz.xenondevs.nova.util.particleBuilder
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
+import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -73,8 +73,8 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private var currentMode = mode
     private var mbUsed = 0L
     
-    private val waterLevel = FakeArmorStand(centerLocation) { _, data -> data.invisible = true; data.marker = true }
-    private val lavaLevel = FakeArmorStand(centerLocation) { _, data -> data.invisible = true; data.marker = true }
+    private val waterLevel = FakeArmorStand(centerLocation) { _, data -> data.isInvisible = true; data.isMarker = true }
+    private val lavaLevel = FakeArmorStand(centerLocation) { _, data -> data.isInvisible = true; data.isMarker = true }
     
     private val particleEffect = particleBuilder(ParticleEffect.SMOKE_LARGE) {
         location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })

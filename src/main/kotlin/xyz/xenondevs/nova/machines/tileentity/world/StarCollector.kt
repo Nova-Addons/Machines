@@ -37,7 +37,7 @@ import xyz.xenondevs.nova.util.dropItem
 import xyz.xenondevs.nova.util.isFull
 import xyz.xenondevs.nova.util.particle
 import xyz.xenondevs.nova.util.particleBuilder
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
+import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
 import java.awt.Color
 
@@ -69,8 +69,8 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     
     private val rodLocation = location.clone().center().apply { y += 0.7 }
     private val rod = FakeArmorStand(location.clone().center().apply { y -= 1 }, true) { ast, data ->
-        data.marker = true
-        data.invisible = true
+        data.isMarker = true
+        data.isInvisible = true
         ast.setEquipment(EquipmentSlot.HEAD, (material.block as ArmorStandBlockModelData)[1].get(), false)
     }
     

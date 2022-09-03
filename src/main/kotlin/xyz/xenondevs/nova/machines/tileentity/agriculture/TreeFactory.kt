@@ -30,7 +30,7 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.dropItem
 import xyz.xenondevs.nova.util.particleBuilder
-import xyz.xenondevs.nova.world.armorstand.FakeArmorStand
+import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
 import xyz.xenondevs.particle.ParticleEffect
 import java.awt.Color
 
@@ -85,8 +85,8 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     init {
         val plantLocation = location.clone().center().apply { y += 1 / 16.0 }
         plant = FakeArmorStand(plantLocation, true) { _, data ->
-            data.invisible = true
-            data.marker = true
+            data.isInvisible = true
+            data.isMarker = true
         }
         reload()
     }
