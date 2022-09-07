@@ -35,13 +35,13 @@ import xyz.xenondevs.nova.util.item.retrieveData
 import xyz.xenondevs.nova.util.item.retrieveDataOrNull
 import xyz.xenondevs.nova.util.item.storeData
 
-private val LEGACY_DATA_KEY = NamespacedKey("nova", "entityData1")
-private val LEGACY_TYPE_KEY = NamespacedKey("nova", "entityType1")
-private val LEGACY_TIME_KEY = NamespacedKey("nova", "fillTime1")
+private val LEGACY_DATA_KEY = NamespacedKey("nova", "entitydata1")
+private val LEGACY_TYPE_KEY = NamespacedKey("nova", "entitytype1")
+private val LEGACY_TIME_KEY = NamespacedKey("nova", "filltime1")
 
-private val DATA_KEY = NamespacedKey(Machines, "entityData")
-private val TYPE_KEY = NamespacedKey(Machines, "entityType")
-private val TIME_KEY = NamespacedKey(Machines, "fillTime")
+private val DATA_KEY = NamespacedKey(Machines, "entitydata")
+private val TYPE_KEY = NamespacedKey(Machines, "entitytype")
+private val TIME_KEY = NamespacedKey(Machines, "filltime")
 
 private val BLACKLISTED_ENTITY_TYPES by configReloadable {
     NovaConfig[Items.MOB_CATCHER]
