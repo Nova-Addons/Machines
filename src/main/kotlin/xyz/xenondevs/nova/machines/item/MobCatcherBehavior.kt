@@ -2,8 +2,10 @@
 
 package xyz.xenondevs.nova.machines.item
 
-import de.studiocode.invui.item.builder.ItemBuilder
 import net.md_5.bungee.api.ChatColor
+import net.md_5.bungee.api.chat.BaseComponent
+import net.minecraft.core.Registry
+import net.minecraft.resources.ResourceLocation
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
@@ -28,7 +30,6 @@ import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.addPrioritized
 import xyz.xenondevs.nova.util.data.NamespacedKey
-import xyz.xenondevs.nova.util.data.addLoreLines
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.getTargetLocation
 import xyz.xenondevs.nova.util.item.retrieveData
@@ -116,12 +117,19 @@ object MobCatcherBehavior : ItemBehavior() {
     private fun absorbEntity(itemStack: ItemStack, entity: Entity) {
         val data = EntityUtils.serialize(entity, true)
         setEntityData(itemStack, entity.type, data)
+    }
+    
+    override fun getLore(itemStack: ItemStack): List<Array<BaseComponent>>? {
+        val type = getEntityType(itemStack) ?: return null
+        val nmsType = Registry.ENTITY_TYPE.get(ResourceLocation("minecraft", type.key.key))
         
-        itemStack.itemMeta = ItemBuilder(itemStack).addLoreLines(localized(
-            ChatColor.DARK_GRAY,
-            "item.machines.mob_catcher.type",
-            localized(ChatColor.YELLOW, entity)
-        )).get().itemMeta
+        return listOf(
+            arrayOf(localized(
+                ChatColor.DARK_GRAY,
+                "item.machines.mob_catcher.type",
+                localized(ChatColor.YELLOW, nmsType.descriptionId)
+            ))
+        )
     }
     
     private fun convertLegacyData(itemStack: ItemStack) {
