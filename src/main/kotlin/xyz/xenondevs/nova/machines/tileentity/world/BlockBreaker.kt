@@ -123,8 +123,12 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
                 // send break state
                 block.setBreakStage(entityId, (breakProgress * 9).roundToInt())
             }
-            
         }
+    }
+    
+    override fun handleRemoved(unload: Boolean) {
+        super.handleRemoved(unload)
+        block.setBreakStage(entityId, -1)
     }
     
     inner class BlockBreakerGUI : TileEntityGUI() {
