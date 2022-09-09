@@ -9,7 +9,7 @@ plugins {
     kotlin("jvm") version "1.7.10"
     id("xyz.xenondevs.specialsource-gradle-plugin") version "1.0.0"
     id("xyz.xenondevs.string-remapper-gradle-plugin") version "1.0.0"
-    id("xyz.xenondevs.nova.nova-gradle-plugin") version "0.11-SNAPSHOT"
+    id("xyz.xenondevs.nova.nova-gradle-plugin") version "0.11"
 }
 
 repositories {
