@@ -49,7 +49,7 @@ import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.isBetweenXZ
 import xyz.xenondevs.nova.util.item.novaMaterial
 import xyz.xenondevs.nova.util.nmsEntity
-import java.io.IOException
+import xyz.xenondevs.nova.util.runAsyncTask
 import java.net.URL
 import kotlin.random.Random
 import kotlin.random.nextInt
@@ -146,8 +146,8 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         if (NERF_MOBS && nmsEntity is Mob)
             nmsEntity.aware = false
         
-        if (PATRON_SKULLS.isNotEmpty() && entity is LivingEntity && Random.nextInt(1..1000) == 1) {
-            entity.equipment?.setHelmet(PATRON_SKULLS.random().get(), true)
+        if (patreonSkulls.isNotEmpty() && entity is LivingEntity && Random.nextInt(1..1000) == 1) {
+            entity.equipment?.setHelmet(patreonSkulls.random().get(), true)
         }
     }
     
@@ -214,21 +214,21 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     }
     
     private companion object PatronSkulls {
+        
         private const val PATRON_SKULLS_URL = "https://xenondevs.xyz/nova/patron_skulls.json"
+        val patreonSkulls = ArrayList<SkullBuilder>()
         
-        val PATRON_SKULLS = loadPatreonSkulls()
-        
-        private fun loadPatreonSkulls(): List<SkullBuilder> {
-            val url = URL(PATRON_SKULLS_URL)
-            try {
+        init {
+            runAsyncTask {
+                val url = URL(PATRON_SKULLS_URL)
                 val array = url.openConnection().getInputStream().bufferedReader().use(JsonParser::parseReader)
-                if (array !is JsonArray)
-                    return emptyList()
-                return array.filter(JsonElement::isString).map {
-                    return@map SkullBuilder(HeadTexture(it.asString))
+                if (array is JsonArray) {
+                    array.asSequence()
+                        .filter(JsonElement::isString)
+                        .forEach {
+                            patreonSkulls += SkullBuilder(HeadTexture(it.asString))
+                        }
                 }
-            } catch (ex: IOException) {
-                return emptyList()
             }
         }
         
