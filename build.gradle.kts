@@ -1,7 +1,7 @@
 import org.gradle.configurationcache.extensions.capitalized
 
 group = "xyz.xenondevs"
-version = "0.2"
+version = "0.2.1"
 
 val mojangMapped = System.getProperty("mojang-mapped") != null
 
