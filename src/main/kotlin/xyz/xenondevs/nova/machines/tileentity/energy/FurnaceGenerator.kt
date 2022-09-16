@@ -139,7 +139,7 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
         
         private val sideConfigGUI = SideConfigGUI(
             this@FurnaceGenerator,
-            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.fuel"),
+            listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.machines.fuel"),
             ::openWindow
         )
         

@@ -131,7 +131,7 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         
         private val sideConfigGUI = SideConfigGUI(
             this@Fertilizer,
-            listOf(itemHolder.getNetworkedInventory(fertilizerInventory) to "inventory.nova.fertilizer"),
+            listOf(itemHolder.getNetworkedInventory(fertilizerInventory) to "inventory.machines.fertilizer"),
             ::openWindow
         )
         

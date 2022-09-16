@@ -221,7 +221,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
             this@Planter,
             listOf(
                 itemHolder.getNetworkedInventory(inputInventory) to "inventory.nova.input",
-                itemHolder.getNetworkedInventory(hoesInventory) to "inventory.nova.hoes",
+                itemHolder.getNetworkedInventory(hoesInventory) to "inventory.machines.hoes",
             ),
             ::openWindow
         )

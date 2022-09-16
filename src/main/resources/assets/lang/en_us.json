@@ -67,6 +67,7 @@
     "item.machines.solar_cell": "Solar Cell",
     "item_info.machines.star_shards": "Star Shards can be found in all loot chests like the ones in mineshafts, desert temples or dungeons.",
     "item_info.machines.infinite_water_source": "The Infinite Water Source can be found in desert temples.",
+    "inventory.machines.fuel": "Fuel Inventory",
     "inventory.machines.hoes": "Hoes Inventory",
     "inventory.machines.shears": "Shears Inventory",
     "inventory.machines.axes": "Axes Inventory",

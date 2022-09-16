@@ -154,7 +154,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
             this@AutoFisher,
             listOf(
                 itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default",
-                itemHolder.getNetworkedInventory(fishingRodInventory) to "inventory.nova.fishing_rod"
+                itemHolder.getNetworkedInventory(fishingRodInventory) to "inventory.machines.fishing_rod"
             ),
             ::openWindow
         )

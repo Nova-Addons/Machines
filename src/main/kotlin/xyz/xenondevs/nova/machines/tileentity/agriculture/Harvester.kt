@@ -231,9 +231,9 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
             this@Harvester,
             listOf(
                 itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output",
-                itemHolder.getNetworkedInventory(shearInventory) to "inventory.nova.shears",
-                itemHolder.getNetworkedInventory(axeInventory) to "inventory.nova.axes",
-                itemHolder.getNetworkedInventory(hoeInventory) to "inventory.nova.hoes",
+                itemHolder.getNetworkedInventory(shearInventory) to "inventory.machines.shears",
+                itemHolder.getNetworkedInventory(axeInventory) to "inventory.machines.axes",
+                itemHolder.getNetworkedInventory(hoeInventory) to "inventory.machines.hoes",
             ),
             ::openWindow
         )

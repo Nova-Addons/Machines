@@ -282,7 +282,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         private val sideConfigGUI = SideConfigGUI(
             this@ElectricBrewingStand,
             listOf(
-                itemHolder.getNetworkedInventory(ingredientsInventory) to "inventory.nova.ingredients",
+                itemHolder.getNetworkedInventory(ingredientsInventory) to "inventory.machines.ingredients",
                 itemHolder.getNetworkedInventory(outputInventory) to "inventory.nova.output",
             ),
             listOf(fluidTank to "container.nova.fluid_tank"),
