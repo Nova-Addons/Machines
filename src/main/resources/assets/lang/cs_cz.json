@@ -200,5 +200,6 @@
   "menu.machines.mob_duplicator.nbt.off": "Použít NBT-Data: Ne",
   "menu.machines.mob_duplicator.nbt.on": "Použít NBT-Data: Ano",
   "menu.machines.planter.autotill.off": "Automaticky orat půdu: Ne",
-  "menu.machines.planter.autotill.on": "Automaticky orat půdu: Ano"
+  "menu.machines.planter.autotill.on": "Automaticky orat půdu: Ano",
+  "inventory.machines.fuel": "Palivový Inventář"
 }
