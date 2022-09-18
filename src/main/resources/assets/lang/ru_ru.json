@@ -200,5 +200,6 @@
   "menu.machines.mob_duplicator.nbt.off": "Сохранять NBT: Нет",
   "menu.machines.mob_duplicator.nbt.on": "Сохранять NBT: Да",
   "menu.machines.planter.autotill.off": "Автоматически вспахивать: Нет",
-  "menu.machines.planter.autotill.on": "Автоматически вспахивать: Да"
+  "menu.machines.planter.autotill.on": "Автоматически вспахивать: Да",
+  "inventory.machines.fuel": "Слот для Топлива"
 }
