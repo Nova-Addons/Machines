@@ -200,5 +200,6 @@
   "menu.machines.mob_duplicator.nbt.off": "使用NBT資料: 否",
   "menu.machines.mob_duplicator.nbt.on": "使用NBT資料: 是",
   "menu.machines.planter.autotill.off": "自動耕地: 否",
-  "menu.machines.planter.autotill.on": "自動耕地: 是"
+  "menu.machines.planter.autotill.on": "自動耕地: 是",
+  "inventory.machines.fuel": "燃料庫存"
 }
