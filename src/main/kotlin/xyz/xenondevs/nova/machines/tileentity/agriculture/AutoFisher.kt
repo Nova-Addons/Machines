@@ -41,7 +41,7 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.hasEmptySlot
-import xyz.xenondevs.nova.util.item.ToolUtils
+import xyz.xenondevs.nova.util.item.DamageableUtils
 import xyz.xenondevs.nova.util.salt
 import xyz.xenondevs.nova.util.serverLevel
 import java.util.*
@@ -137,7 +137,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     
     private fun useRod() {
         val itemStack = fishingRodInventory.getItemStack(0)!!
-        fishingRodInventory.setItemStack(SELF_UPDATE_REASON, 0, ToolUtils.damageTool(itemStack))
+        fishingRodInventory.setItemStack(SELF_UPDATE_REASON, 0, DamageableUtils.damageItem(itemStack))
     }
     
     private fun handleInventoryUpdate(event: ItemUpdateEvent) {

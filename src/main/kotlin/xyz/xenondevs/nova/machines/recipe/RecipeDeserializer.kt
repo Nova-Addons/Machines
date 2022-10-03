@@ -7,6 +7,8 @@ import org.bukkit.inventory.RecipeChoice
 import org.bukkit.potion.PotionEffectType
 import xyz.xenondevs.nova.data.serialization.json.ConversionRecipeDeserializer
 import xyz.xenondevs.nova.data.serialization.json.RecipeDeserializer
+import xyz.xenondevs.nova.data.serialization.json.RecipeDeserializer.Companion.getRecipeKey
+import xyz.xenondevs.nova.data.serialization.json.RecipeDeserializer.Companion.parseRecipeChoice
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.util.data.getDeserialized
 import xyz.xenondevs.nova.util.data.getDouble

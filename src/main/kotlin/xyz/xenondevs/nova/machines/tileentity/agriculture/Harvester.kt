@@ -16,6 +16,7 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
+import xyz.xenondevs.nova.item.tool.ToolCategory
 import xyz.xenondevs.nova.machines.registry.Blocks.HARVESTER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -37,10 +38,8 @@ import xyz.xenondevs.nova.util.addAll
 import xyz.xenondevs.nova.util.callEvent
 import xyz.xenondevs.nova.util.dropItemsNaturally
 import xyz.xenondevs.nova.util.isFull
+import xyz.xenondevs.nova.util.item.DamageableUtils
 import xyz.xenondevs.nova.util.item.PlantUtils
-import xyz.xenondevs.nova.util.item.ToolUtils
-import xyz.xenondevs.nova.util.item.isAxe
-import xyz.xenondevs.nova.util.item.isHoe
 import xyz.xenondevs.nova.util.item.isLeaveLike
 import xyz.xenondevs.nova.world.block.context.BlockBreakContext
 import xyz.xenondevs.nova.world.pos
@@ -184,7 +183,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                             continue
                         }
                         
-                        toolInventory.setItemStack(SELF_UPDATE_REASON, 0, ToolUtils.damageTool(tool))
+                        toolInventory.setItemStack(SELF_UPDATE_REASON, 0, DamageableUtils.damageItem(tool))
                     }
                     
                     // harvest the plant
@@ -213,11 +212,11 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     }
     
     private fun handleAxeInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.newItemStack != null && !event.newItemStack.type.isAxe()
+        event.isCancelled = event.newItemStack != null && ToolCategory.ofItem(event.newItemStack) != ToolCategory.AXE
     }
     
     private fun handleHoeInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.newItemStack != null && !event.newItemStack.type.isHoe()
+        event.isCancelled = event.newItemStack != null && ToolCategory.ofItem(event.newItemStack) != ToolCategory.HOE
     }
     
     override fun handleRemoved(unload: Boolean) {

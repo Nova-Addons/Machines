@@ -19,6 +19,7 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
+import xyz.xenondevs.nova.item.tool.ToolCategory
 import xyz.xenondevs.nova.machines.registry.Blocks.PLANTER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -37,9 +38,8 @@ import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
+import xyz.xenondevs.nova.util.item.DamageableUtils
 import xyz.xenondevs.nova.util.item.PlantUtils
-import xyz.xenondevs.nova.util.item.ToolUtils
-import xyz.xenondevs.nova.util.item.isHoe
 import xyz.xenondevs.nova.util.item.isTillable
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
@@ -191,7 +191,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     }
     
     private fun handleHoeUpdate(event: ItemUpdateEvent) {
-        if ((event.isAdd || event.isSwap) && !event.newItemStack.type.isHoe())
+        if ((event.isAdd || event.isSwap) && ToolCategory.ofItem(event.newItemStack) != ToolCategory.HOE)
             event.isCancelled = true
     }
     
@@ -201,7 +201,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     }
     
     private fun useHoe() {
-        hoesInventory.setItemStack(null, 0, ToolUtils.damageTool(hoesInventory.items[0]))
+        hoesInventory.setItemStack(null, 0, DamageableUtils.damageItem(hoesInventory.items[0]))
     }
     
     override fun handleRemoved(unload: Boolean) {
