@@ -105,7 +105,7 @@
   "advancement.machines.quarry.description": "pagamink mechaninę kasimo mašiną",
   "advancement.machines.solar_panel.title": "Švari energija",
   "advancement.machines.solar_panel.description": "Pagamink saulės elementą",
-  "advancement.machines.mob_catcher.description": "Pagamink mobų gaudyklę",
+  "advancement.machines.mob_catcher.description": "",
   "block.machines.mechanical_press": "Mechaninis presas",
   "block.machines.quarry": "Mechaninė kasykla",
   "block.machines.block_breaker": "Blokų griautuvas",
@@ -181,5 +181,6 @@
   "advancement.machines.fluid_infuser.description": "Pagamink skysčių maišyklę",
   "advancement.machines.sprinkler.title": "Lašiukas lietaus dykumoje",
   "advancement.machines.fertilizer.title": "Automatinis tręšimas",
-  "advancement.machines.wireless_charger.description": "Pagamink belielio ryšio pakrovėją"
+  "advancement.machines.wireless_charger.description": "Pagamink belielio ryšio pakrovėją",
+  "advancement.machines.fertilizer.description": "Pagamink trąšų mašina"
 }
