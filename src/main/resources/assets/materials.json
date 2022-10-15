@@ -103,6 +103,11 @@
     }
   },
   "mob_catcher": "item/mob_catcher",
+  "star_sword": "item/star_sword",
+  "star_shovel": "item/star_shovel",
+  "star_pickaxe": "item/star_pickaxe",
+  "star_axe": "item/star_axe",
+  "star_hoe": "item/star_hoe",
   "iron_plate": "item/iron_plate",
   "gold_plate": "item/gold_plate",
   "diamond_plate": "item/diamond_plate",
@@ -129,6 +134,14 @@
   "coal_dust": "item/coal_dust",
   "star_dust": "item/star_dust",
   "star_shards": "item/star_shards",
+  "star_crystal": "item/star_crystal",
+  "star_dust_block": {
+    "item": "block/star_dust_block",
+    "block": {
+      "type": "solid",
+      "priority": 1000
+    }
+  },
   "basic_machine_frame": "block/machine_frame/basic",
   "advanced_machine_frame": "block/machine_frame/advanced",
   "elite_machine_frame": "block/machine_frame/elite",
@@ -136,6 +149,7 @@
   "creative_machine_frame": "block/machine_frame/creative",
   "solar_cell": "item/solar_cell",
   "netherite_drill": "block/netherite_drill",
+  "crystallizer": "block/crystallizer",
   "tree_factory": "block/tree_factory",
   "cobblestone_generator": "block/cobblestone_generator",
   "electric_brewing_stand": "block/electric_brewing_stand",

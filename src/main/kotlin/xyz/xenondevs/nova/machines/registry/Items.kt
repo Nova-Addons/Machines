@@ -1,12 +1,23 @@
 package xyz.xenondevs.nova.machines.registry
 
+import xyz.xenondevs.nova.item.behavior.Damageable
+import xyz.xenondevs.nova.item.behavior.Enchantable
+import xyz.xenondevs.nova.item.behavior.Tool
 import xyz.xenondevs.nova.machines.Machines
 import xyz.xenondevs.nova.machines.item.MobCatcherBehavior
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerDefaultItem
 
+@Suppress("unused")
 object Items {
     
     val MOB_CATCHER = registerDefaultItem(Machines, "mob_catcher", MobCatcherBehavior)
+    
+    // Tools
+    val STAR_SWORD = registerDefaultItem(Machines, "star_sword", Tool, Damageable, Enchantable)
+    val STAR_SHOVEL = registerDefaultItem(Machines, "star_shovel", Tool, Damageable, Enchantable)
+    val STAR_PICKAXE = registerDefaultItem(Machines, "star_pickaxe", Tool, Damageable, Enchantable)
+    val STAR_AXE = registerDefaultItem(Machines, "star_axe", Tool, Damageable, Enchantable)
+    val STAR_HOE = registerDefaultItem(Machines, "star_hoe", Tool, Damageable, Enchantable)
     
     // Plates
     val IRON_PLATE = registerDefaultItem(Machines, "iron_plate")
@@ -41,6 +52,7 @@ object Items {
     
     // Crafting components
     val STAR_SHARDS = registerDefaultItem(Machines, "star_shards")
+    val STAR_CRYSTAL = registerDefaultItem(Machines, "star_crystal")
     val BASIC_MACHINE_FRAME = registerDefaultItem(Machines, "basic_machine_frame")
     val ADVANCED_MACHINE_FRAME = registerDefaultItem(Machines, "advanced_machine_frame")
     val ELITE_MACHINE_FRAME = registerDefaultItem(Machines, "elite_machine_frame")
