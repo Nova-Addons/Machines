@@ -42,8 +42,8 @@ class Charger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         val chargeable = currentItem?.novaMaterial?.novaItem?.getBehavior(Chargeable::class)
         if (chargeable != null) {
             val itemCharge = chargeable.getEnergy(currentItem)
-            if (itemCharge < chargeable.maxEnergy) {
-                val chargeEnergy = minOf(energyHolder.energyConsumption, energyHolder.energy, chargeable.maxEnergy - itemCharge)
+            if (itemCharge < chargeable.options.maxEnergy) {
+                val chargeEnergy = minOf(energyHolder.energyConsumption, energyHolder.energy, chargeable.options.maxEnergy - itemCharge)
                 chargeable.addEnergy(currentItem, chargeEnergy)
                 energyHolder.energy -= chargeEnergy
                 
