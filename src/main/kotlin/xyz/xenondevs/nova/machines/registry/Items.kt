@@ -57,11 +57,6 @@ object Items {
     // Crafting components
     val STAR_SHARDS = registerDefaultItem(Machines, "star_shards")
     val STAR_CRYSTAL = registerDefaultItem(Machines, "star_crystal")
-    val BASIC_MACHINE_FRAME = registerDefaultItem(Machines, "basic_machine_frame")
-    val ADVANCED_MACHINE_FRAME = registerDefaultItem(Machines, "advanced_machine_frame")
-    val ELITE_MACHINE_FRAME = registerDefaultItem(Machines, "elite_machine_frame")
-    val ULTIMATE_MACHINE_FRAME = registerDefaultItem(Machines, "ultimate_machine_frame")
-    val CREATIVE_MACHINE_FRAME = registerDefaultItem(Machines, "creative_machine_frame")
     val NETHERITE_DRILL = registerDefaultItem(Machines, "netherite_drill")
     val SCAFFOLDING = registerDefaultItem(Machines, "scaffolding")
     val SOLAR_CELL = registerDefaultItem(Machines, "solar_cell")

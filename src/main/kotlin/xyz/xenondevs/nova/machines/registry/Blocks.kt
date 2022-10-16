@@ -51,6 +51,7 @@ object Blocks {
     private val STONE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundEffect(Sound.BLOCK_STONE_PLACE), SoundEffect(Sound.BLOCK_STONE_BREAK), Material.NETHERITE_BLOCK)
     private val LIGHT_METAL = BlockOptions(0.5, ToolCategory.PICKAXE, null, false, SoundEffect(Sound.BLOCK_METAL_PLACE), SoundEffect(Sound.BLOCK_METAL_BREAK), Material.IRON_BLOCK)
     private val METAL = BlockOptions(5.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundEffect(Sound.BLOCK_METAL_PLACE), SoundEffect(Sound.BLOCK_METAL_BREAK), Material.IRON_BLOCK)
+    private val MACHINE_FRAME = BlockOptions(2.0, ToolCategory.PICKAXE, null, true, SoundEffect(Sound.BLOCK_METAL_PLACE), SoundEffect(Sound.BLOCK_METAL_BREAK), Material.STONE)
     
     // TileEntities
     val AUTO_FISHER = registerTileEntity(Machines, "auto_fisher", STONE, ::AutoFisher, properties = listOf(Directional.NORMAL))
@@ -87,6 +88,11 @@ object Blocks {
     
     // Normal blocks
     val STAR_DUST_BLOCK = registerBlock(Machines, "star_dust_block", SAND)
+    val BASIC_MACHINE_FRAME = registerBlock(Machines, "basic_machine_frame", MACHINE_FRAME)
+    val ADVANCED_MACHINE_FRAME = registerBlock(Machines, "advanced_machine_frame", MACHINE_FRAME)
+    val ELITE_MACHINE_FRAME = registerBlock(Machines, "elite_machine_frame", MACHINE_FRAME)
+    val ULTIMATE_MACHINE_FRAME = registerBlock(Machines, "ultimate_machine_frame", MACHINE_FRAME)
+    val CREATIVE_MACHINE_FRAME = registerBlock(Machines, "creative_machine_frame", MACHINE_FRAME)
     
     // Tree Miniatures
     val OAK_TREE_MINIATURE = registerItem(Machines, "oak_tree_miniature")
