@@ -1,0 +1,25 @@
+{
+  "feature": "machines:ore_star_shards",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 5
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:trapezoid",
+        "plateau": 30,
+        "max_inclusive": {
+          "below_top": -50
+        },
+        "min_inclusive": {
+          "absolute": 60
+        }
+      }
+    }
+  ]
+}

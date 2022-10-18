@@ -38,6 +38,7 @@ import xyz.xenondevs.nova.machines.tileentity.world.Quarry
 import xyz.xenondevs.nova.machines.tileentity.world.Sprinkler
 import xyz.xenondevs.nova.machines.tileentity.world.StarCollector
 import xyz.xenondevs.nova.material.BlockOptions
+import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerBlock
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerItem
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerTileEntity
 import xyz.xenondevs.nova.util.SoundEffect
@@ -46,6 +47,7 @@ object Blocks {
     
     private val SANDSTONE = BlockOptions(0.8, ToolCategory.PICKAXE, null, true, SoundEffect(Sound.BLOCK_STONE_PLACE), SoundEffect(Sound.BLOCK_STONE_BREAK), Material.SANDSTONE)
     private val STONE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundEffect(Sound.BLOCK_STONE_PLACE), SoundEffect(Sound.BLOCK_STONE_BREAK), Material.NETHERITE_BLOCK)
+    private val DEEPSLATE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundEffect(Sound.BLOCK_DEEPSLATE_PLACE), SoundEffect(Sound.BLOCK_DEEPSLATE_BREAK), Material.DEEPSLATE)
     private val LIGHT_METAL = BlockOptions(0.5, ToolCategory.PICKAXE, null, false, SoundEffect(Sound.BLOCK_METAL_PLACE), SoundEffect(Sound.BLOCK_METAL_BREAK), Material.IRON_BLOCK)
     private val METAL = BlockOptions(5.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundEffect(Sound.BLOCK_METAL_PLACE), SoundEffect(Sound.BLOCK_METAL_BREAK), Material.IRON_BLOCK)
     
@@ -79,6 +81,10 @@ object Blocks {
     val FURNACE_GENERATOR = registerTileEntity(Machines, "furnace_generator", STONE, ::FurnaceGenerator, properties = listOf(Directional.NORMAL))
     val LAVA_GENERATOR = registerTileEntity(Machines, "lava_generator", STONE, ::LavaGenerator, properties = listOf(Directional.NORMAL))
     val INFINITE_WATER_SOURCE = registerTileEntity(Machines, "infinite_water_source", SANDSTONE, ::InfiniteWaterSource, properties = listOf(LegacyDirectional))
+    
+    // Ores
+    val STAR_SHARDS_ORE = registerBlock(Machines, "star_shards_ore", STONE)
+    val DEEPSLATE_STAR_SHARDS_ORE = registerBlock(Machines, "deepslate_star_shards_ore", DEEPSLATE)
     
     // Tree Miniatures
     val OAK_TREE_MINIATURE = registerItem(Machines, "oak_tree_miniature")

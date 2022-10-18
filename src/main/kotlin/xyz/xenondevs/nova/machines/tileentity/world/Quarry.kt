@@ -559,7 +559,8 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             return CombinedBooleanFuture(minLoc.getFullCuboid(maxLoc).map { ProtectionManager.canPlace(player, item, it) })
         }
         
-        private fun canBreak(owner: OfflinePlayer, location: Location, positions: IntArray): CompletableFuture<Boolean> {
+        private fun canBreak(owner: OfflinePlayer?, location: Location, positions: IntArray): CompletableFuture<Boolean> {
+            if(owner == null) return CompletableFuture.completedFuture(true)
             val minLoc = Location(location.world, positions[0].toDouble(), location.y, positions[1].toDouble())
             val maxLoc = Location(location.world, positions[2].toDouble(), location.y, positions[3].toDouble())
             return CombinedBooleanFuture(minLoc.getFullCuboid(maxLoc).map { ProtectionManager.canBreak(owner, null, it) })

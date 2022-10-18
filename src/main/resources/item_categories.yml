@@ -80,6 +80,14 @@ crafting:
     - machines:scaffolding
     - machines:netherite_drill
 
+resources:
+  icon: machines:star_shards_ore
+  name: "menu.machines.items.category.resources"
+  priority: 2
+  items:
+    - machines:star_shards_ore
+    - machines:deepslate_star_shards_ore
+
 misc:
   icon: nova:wrench
   name: "menu.nova.items.category.misc"

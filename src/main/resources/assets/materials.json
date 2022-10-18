@@ -325,6 +325,18 @@
       ]
     }
   },
+  "star_shards_ore": {
+    "item": "block/star_shards_ore",
+    "block": {
+      "type": "solid"
+    }
+  },
+  "deepslate_star_shards_ore": {
+    "item": "block/deepslate_star_shards_ore",
+    "block": {
+      "type": "solid"
+    }
+  },
   "cobblestone_generator_water_levels": {
     "item": {
       "models": {

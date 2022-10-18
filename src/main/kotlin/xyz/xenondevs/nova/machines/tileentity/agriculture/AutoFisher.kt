@@ -71,7 +71,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private val level = world.serverLevel
     private val position = Vec3(centerLocation.x, location.y - 0.5, centerLocation.z)
     private val itemDropLocation = location.clone().add(0.0, 1.0, 0.0)
-    private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID.salt(uuid.toString()), "AutoFisher")
+    private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID?.salt(uuid.toString()) ?: UUID.randomUUID(), "AutoFisher")
     
     init {
         reload()

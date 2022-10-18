@@ -29,6 +29,8 @@
     "block.machines.furnace_generator": "Furnace Generator",
     "block.machines.solar_panel": "Solar Panel",
     "block.machines.infinite_water_source": "Infinite Water Source",
+    "block.machines.star_shards_ore": "Star Shards Ore",
+    "block.machines.deepslate_star_shards_ore": "Deepslate Star Shards Ore",
     "item.machines.iron_plate": "Iron Plate",
     "item.machines.gold_plate": "Gold Plate",
     "item.machines.diamond_plate": "Diamond Plate",
