@@ -42,7 +42,6 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.hasEmptySlot
 import xyz.xenondevs.nova.util.item.DamageableUtils
-import xyz.xenondevs.nova.util.salt
 import xyz.xenondevs.nova.util.serverLevel
 import java.util.*
 
@@ -71,7 +70,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private val level = world.serverLevel
     private val position = Vec3(centerLocation.x, location.y - 0.5, centerLocation.z)
     private val itemDropLocation = location.clone().add(0.0, 1.0, 0.0)
-    private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID.salt(uuid.toString()), "AutoFisher")
+    private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID ?: UUID.randomUUID(), "AutoFisher")
     
     init {
         reload()
