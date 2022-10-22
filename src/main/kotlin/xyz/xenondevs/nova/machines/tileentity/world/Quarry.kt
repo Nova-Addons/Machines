@@ -195,7 +195,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         
         updateEnergyPerTick()
         
-        if (checkPermission && !canBreak(owner, location, positions).get()) {
+        if (owner == null || (checkPermission && !canBreak(owner!!, location, positions).get())) {
             if (sizeX == MIN_SIZE && sizeZ == MIN_SIZE) {
                 BlockManager.breakBlock(BlockBreakContext(pos, this, location))
                 return false

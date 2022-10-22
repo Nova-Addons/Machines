@@ -31,6 +31,7 @@ import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
+import java.util.*
 import kotlin.math.min
 
 private val MAX_ENERGY = configReloadable { NovaConfig[MOB_KILLER].getLong("capacity") }
@@ -48,7 +49,7 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     override val gui = lazy { MobCrusherGUI() }
     override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_DAMAGE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
-    private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID, "Mob Killer").bukkitEntity
+    private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID ?: UUID.randomUUID(), "Mob Killer").bukkitEntity
     
     private var timePassed = 0
     private var maxIdleTime = 0
