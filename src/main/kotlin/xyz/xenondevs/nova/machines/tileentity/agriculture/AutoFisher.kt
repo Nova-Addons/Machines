@@ -42,7 +42,6 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.hasEmptySlot
 import xyz.xenondevs.nova.util.item.DamageableUtils
-import xyz.xenondevs.nova.util.salt
 import xyz.xenondevs.nova.util.serverLevel
 import java.util.*
 
