@@ -32,8 +32,6 @@ import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import java.util.*
-import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.min
 
 private val MAX_ENERGY = configReloadable { NovaConfig[MOB_KILLER].getLong("capacity") }

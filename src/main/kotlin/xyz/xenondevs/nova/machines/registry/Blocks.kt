@@ -46,6 +46,8 @@ object Blocks {
     
     private val SANDSTONE = BlockOptions(0.8, ToolCategory.PICKAXE, null, true, SoundGroup.STONE, Material.SANDSTONE)
     private val STONE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundGroup.STONE, Material.NETHERITE_BLOCK)
+    private val STONE_ORE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundGroup.STONE, Material.STONE)
+    private val DEEPSLATE_ORE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundGroup.DEEPSLATE, Material.STONE)
     private val LIGHT_METAL = BlockOptions(0.5, ToolCategory.PICKAXE, null, false, SoundGroup.METAL, Material.IRON_BLOCK)
     private val METAL = BlockOptions(5.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundGroup.METAL, Material.IRON_BLOCK)
     
@@ -81,8 +83,8 @@ object Blocks {
     val INFINITE_WATER_SOURCE = registerTileEntity(Machines, "infinite_water_source", SANDSTONE, ::InfiniteWaterSource, properties = listOf(LegacyDirectional))
     
     // Ores
-    val STAR_SHARDS_ORE = registerBlock(Machines, "star_shards_ore", STONE)
-    val DEEPSLATE_STAR_SHARDS_ORE = registerBlock(Machines, "deepslate_star_shards_ore", DEEPSLATE)
+    val STAR_SHARDS_ORE = registerBlock(Machines, "star_shards_ore", STONE_ORE)
+    val DEEPSLATE_STAR_SHARDS_ORE = registerBlock(Machines, "deepslate_star_shards_ore", DEEPSLATE_ORE)
     
     // Tree Miniatures
     val OAK_TREE_MINIATURE = registerItem(Machines, "oak_tree_miniature")
