@@ -10,11 +10,8 @@ import de.studiocode.invui.virtualinventory.event.PlayerUpdateReason
 import net.minecraft.world.SimpleContainer
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.item.crafting.SmeltingRecipe
-import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.World
-import org.bukkit.entity.EntityType
-import org.bukkit.entity.ExperienceOrb
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -39,6 +36,7 @@ import xyz.xenondevs.nova.util.namespacedKey
 import xyz.xenondevs.nova.util.nmsStack
 import xyz.xenondevs.nova.util.resourceLocation
 import xyz.xenondevs.nova.util.serverLevel
+import xyz.xenondevs.nova.util.spawnExpOrb
 
 private fun getRecipe(input: ItemStack, world: World): SmeltingRecipe? {
     return minecraftServer.recipeManager.getAllRecipesFor(RecipeType.SMELTING)
@@ -110,25 +108,19 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             if (updateReason is PlayerUpdateReason) {
                 val player = updateReason.player
                 if (event.newItemStack == null) { // took all items
-                    spawnExperienceOrb(player.location, experience)
-                    experience = 0f
+                    experience -= pos.block.spawnExpOrb(experience.toInt(), player.location)
                 } else {
                     val amount = event.removedAmount
                     val experiencePerItem = experience / event.previousItemStack.amount
                     val experience = amount * experiencePerItem
-                    spawnExperienceOrb(player.location, experience)
-                    this.experience -= experience
+                    
+                    this.experience -= pos.block.spawnExpOrb(experience.toInt(), player.location)
                 }
             }
         } else event.isCancelled = true
     }
     
-    private fun spawnExperienceOrb(location: Location, experience: Float) {
-        if (experience == 0f) return
-        
-        val orb = location.world!!.spawnEntity(location, EntityType.EXPERIENCE_ORB) as ExperienceOrb
-        orb.experience += experience.toInt()
-    }
+    override fun getExp(): Int = experience.toInt()
     
     override fun handleTick() {
         if (energyHolder.energy >= energyHolder.energyConsumption) {
@@ -160,12 +152,6 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 if (gui.isInitialized()) gui.value.updateProgress()
             }
         } else active = false
-    }
-    
-    override fun handleRemoved(unload: Boolean) {
-        super.handleRemoved(unload)
-        if (!unload)
-            spawnExperienceOrb(centerLocation, experience)
     }
     
     inner class ElectricFurnaceGUI : TileEntityGUI() {
