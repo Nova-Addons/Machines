@@ -15,6 +15,7 @@ import org.bukkit.World
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
+import xyz.xenondevs.nova.data.provider.map
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.ProgressArrowItem
 import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_FURNACE
@@ -62,10 +63,12 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         outputInventory to NetworkConnectionType.EXTRACT
     ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
-    private var currentRecipe: SmeltingRecipe? = retrieveDataOrNull<NamespacedKey>("currentRecipe")
-        ?.let { minecraftServer.recipeManager.byKey(it.resourceLocation).orElse(null) as SmeltingRecipe? }
-    private var timeCooked = retrieveData("timeCooked") { 0 }
-    private var experience = retrieveData("exp") { 0f }
+    private var currentRecipe: SmeltingRecipe? by storedValue<NamespacedKey>("currentRecipe").map(
+        { minecraftServer.recipeManager.byKey(it.resourceLocation).orElse(null) as? SmeltingRecipe },
+        { it.id.namespacedKey }
+    )
+    private var timeCooked: Int by storedValue("timeCooked") { 0 }
+    private var experience: Float by storedValue("experience") { 0f }
     
     private var cookSpeed = 0
     
@@ -79,13 +82,6 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     
     init {
         reload()
-    }
-    
-    override fun saveData() {
-        super.saveData()
-        storeData("currentRecipe", currentRecipe?.id?.namespacedKey)
-        storeData("timeCooked", timeCooked)
-        storeData("experience", experience)
     }
     
     override fun reload() {
