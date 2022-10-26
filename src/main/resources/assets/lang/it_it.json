@@ -200,5 +200,6 @@
   "menu.machines.planter.autotill.off": "Zappa terreno automaticamente: No",
   "menu.machines.mob_duplicator.nbt.on": "Considera dati NBT: si",
   "menu.machines.planter.autotill.on": "Zappa terreno automaticamente: Si",
-  "advancement.machines.fluid_infuser.title": "Infusione di liquidi"
+  "advancement.machines.fluid_infuser.title": "Infusione di liquidi",
+  "inventory.machines.fuel": "Inventario per il Carburante"
 }
