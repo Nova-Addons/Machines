@@ -102,7 +102,6 @@
   "item.machines.mob_catcher.type": "種類: %s",
   "item.machines.scaffolding": "採掘機用足場",
   "item.machines.star_shards": "星のかけら",
-  "item.machines.ultimate_machine_frame": "究極マシンフレーム",
   "item.machines.solar_cell": "光電池セル",
   "menu.machines.breeder.idle": "次の給餌まで %s tick",
   "menu.machines.mechanical_press.press_plates": "プレス加工(プレート)",

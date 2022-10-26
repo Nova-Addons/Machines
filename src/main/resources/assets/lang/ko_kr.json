@@ -74,7 +74,6 @@
   "item.machines.mob_catcher": "몬스터볼",
   "item.machines.mob_catcher.type": "타입: %s",
   "item.machines.scaffolding": "채굴기 비계",
-  "item.machines.advanced_machine_frame": "고급 기계 프레임",
   "item.machines.creative_machine_frame": "크리에이티브 기계 프레임",
   "item_info.machines.infinite_water_source": "무한 수원 장치는 사막 사원에서 찾을 수 있습니다.",
   "inventory.machines.shears": "가위 인벤토리",
