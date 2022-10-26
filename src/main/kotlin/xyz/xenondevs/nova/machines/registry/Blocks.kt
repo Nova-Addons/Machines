@@ -1,9 +1,10 @@
 package xyz.xenondevs.nova.machines.registry
 
 import org.bukkit.Material
-import org.bukkit.Sound
 import xyz.xenondevs.nova.data.world.block.property.Directional
 import xyz.xenondevs.nova.data.world.block.property.LegacyDirectional
+import xyz.xenondevs.nova.item.tool.ToolCategory
+import xyz.xenondevs.nova.item.tool.ToolLevel
 import xyz.xenondevs.nova.machines.Machines
 import xyz.xenondevs.nova.machines.tileentity.agriculture.AutoFisher
 import xyz.xenondevs.nova.machines.tileentity.agriculture.Fertilizer
@@ -21,6 +22,7 @@ import xyz.xenondevs.nova.machines.tileentity.mob.Breeder
 import xyz.xenondevs.nova.machines.tileentity.mob.MobDuplicator
 import xyz.xenondevs.nova.machines.tileentity.mob.MobKiller
 import xyz.xenondevs.nova.machines.tileentity.processing.CobblestoneGenerator
+import xyz.xenondevs.nova.machines.tileentity.processing.Crystallizer
 import xyz.xenondevs.nova.machines.tileentity.processing.ElectricFurnace
 import xyz.xenondevs.nova.machines.tileentity.processing.FluidInfuser
 import xyz.xenondevs.nova.machines.tileentity.processing.Freezer
@@ -36,19 +38,21 @@ import xyz.xenondevs.nova.machines.tileentity.world.Quarry
 import xyz.xenondevs.nova.machines.tileentity.world.Sprinkler
 import xyz.xenondevs.nova.machines.tileentity.world.StarCollector
 import xyz.xenondevs.nova.material.BlockOptions
+import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerBlock
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerItem
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerTileEntity
-import xyz.xenondevs.nova.util.SoundEffect
-import xyz.xenondevs.nova.util.item.ToolCategory
-import xyz.xenondevs.nova.util.item.ToolLevel
+import xyz.xenondevs.nova.world.block.sound.SoundGroup
 
 object Blocks {
     
-    private val SANDSTONE = BlockOptions(0.8, ToolCategory.PICKAXE, ToolLevel.WOODEN, true, SoundEffect(Sound.BLOCK_STONE_PLACE), SoundEffect(Sound.BLOCK_STONE_BREAK), Material.SANDSTONE)
-    private val STONE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundEffect(Sound.BLOCK_STONE_PLACE), SoundEffect(Sound.BLOCK_STONE_BREAK), Material.NETHERITE_BLOCK)
-    private val LIGHT_METAL = BlockOptions(0.5, ToolCategory.PICKAXE, ToolLevel.WOODEN, false, SoundEffect(Sound.BLOCK_METAL_PLACE), SoundEffect(Sound.BLOCK_METAL_BREAK), Material.IRON_BLOCK)
-    private val METAL = BlockOptions(5.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundEffect(Sound.BLOCK_METAL_PLACE), SoundEffect(Sound.BLOCK_METAL_BREAK), Material.IRON_BLOCK)
+    private val SAND = BlockOptions(0.5, ToolCategory.SHOVEL, null, false, SoundGroup.SAND, Material.PURPLE_CONCRETE_POWDER)
+    private val SANDSTONE = BlockOptions(0.8, ToolCategory.PICKAXE, null, true, SoundGroup.STONE, Material.SANDSTONE)
+    private val STONE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundGroup.STONE, Material.NETHERITE_BLOCK)
+    private val LIGHT_METAL = BlockOptions(0.5, ToolCategory.PICKAXE, null, false, SoundGroup.METAL, Material.IRON_BLOCK)
+    private val METAL = BlockOptions(5.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundGroup.METAL, Material.IRON_BLOCK)
+    private val MACHINE_FRAME = BlockOptions(2.0, ToolCategory.PICKAXE, null, true, SoundGroup.METAL, Material.STONE)
     
+    // TileEntities
     val AUTO_FISHER = registerTileEntity(Machines, "auto_fisher", STONE, ::AutoFisher, properties = listOf(Directional.NORMAL))
     val FERTILIZER = registerTileEntity(Machines, "fertilizer", STONE, ::Fertilizer, properties = listOf(Directional.NORMAL))
     val HARVESTER = registerTileEntity(Machines, "harvester", STONE, ::Harvester, properties = listOf(Directional.NORMAL))
@@ -79,6 +83,15 @@ object Blocks {
     val FURNACE_GENERATOR = registerTileEntity(Machines, "furnace_generator", STONE, ::FurnaceGenerator, properties = listOf(Directional.NORMAL))
     val LAVA_GENERATOR = registerTileEntity(Machines, "lava_generator", STONE, ::LavaGenerator, properties = listOf(Directional.NORMAL))
     val INFINITE_WATER_SOURCE = registerTileEntity(Machines, "infinite_water_source", SANDSTONE, ::InfiniteWaterSource, properties = listOf(LegacyDirectional))
+    val CRYSTALLIZER = registerTileEntity(Machines, "crystallizer", STONE, ::Crystallizer)
+    
+    // Normal blocks
+    val STAR_DUST_BLOCK = registerBlock(Machines, "star_dust_block", SAND)
+    val BASIC_MACHINE_FRAME = registerBlock(Machines, "basic_machine_frame", MACHINE_FRAME)
+    val ADVANCED_MACHINE_FRAME = registerBlock(Machines, "advanced_machine_frame", MACHINE_FRAME)
+    val ELITE_MACHINE_FRAME = registerBlock(Machines, "elite_machine_frame", MACHINE_FRAME)
+    val ULTIMATE_MACHINE_FRAME = registerBlock(Machines, "ultimate_machine_frame", MACHINE_FRAME)
+    val CREATIVE_MACHINE_FRAME = registerBlock(Machines, "creative_machine_frame", MACHINE_FRAME)
     
     // Tree Miniatures
     val OAK_TREE_MINIATURE = registerItem(Machines, "oak_tree_miniature")

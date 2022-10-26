@@ -1,4 +1,5 @@
 import org.gradle.configurationcache.extensions.capitalized
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "xyz.xenondevs"
 version = "0.2.1"
@@ -9,7 +10,7 @@ plugins {
     kotlin("jvm") version "1.7.10"
     id("xyz.xenondevs.specialsource-gradle-plugin") version "1.0.0"
     id("xyz.xenondevs.string-remapper-gradle-plugin") version "1.0.0"
-    id("xyz.xenondevs.nova.nova-gradle-plugin") version "0.11"
+    id("xyz.xenondevs.nova.nova-gradle-plugin") version "0.12"
 }
 
 repositories {
@@ -49,10 +50,16 @@ remapStrings {
 }
 
 generateWailaTextures {
-    filter.set { !it.name.contains(Regex("\\d"))}
+    filter.set { !it.name.contains(Regex("\\d")) }
 }
 
 tasks {
+    withType<KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
+    
     register<Copy>("addonJar") {
         group = "build"
         dependsOn("addon", if (mojangMapped) "jar" else "remapObfToSpigot")

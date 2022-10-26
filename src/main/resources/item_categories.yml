@@ -26,6 +26,7 @@ machines:
     - machines:sprinkler
     - machines:pump
     - machines:star_collector
+    - machines:crystallizer
     - machines:tree_factory
     - machines:infinite_water_source
 
@@ -45,8 +46,10 @@ crafting:
   name: "menu.machines.items.category.crafting"
   priority: 3
   items:
+    - machines:star_dust_block
     - machines:star_shards
     - machines:star_dust
+    - machines:star_crystal
     - machines:coal_dust
     - machines:lapis_dust
     - machines:iron_dust
@@ -79,6 +82,17 @@ crafting:
     - machines:solar_cell
     - machines:scaffolding
     - machines:netherite_drill
+
+tools:
+  icon: machines:star_axe
+  name: "menu.machines.items.category.tools"
+  priority: 4
+  items:
+    - machines:star_sword
+    - machines:star_shovel
+    - machines:star_pickaxe
+    - machines:star_axe
+    - machines:star_hoe
 
 misc:
   icon: nova:wrench

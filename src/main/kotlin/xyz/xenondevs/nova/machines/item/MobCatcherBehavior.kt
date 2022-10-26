@@ -3,7 +3,6 @@
 package xyz.xenondevs.nova.machines.item
 
 import net.md_5.bungee.api.ChatColor
-import net.md_5.bungee.api.chat.BaseComponent
 import net.minecraft.core.Registry
 import net.minecraft.resources.ResourceLocation
 import org.bukkit.Bukkit
@@ -24,6 +23,7 @@ import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.serialization.persistentdata.getLegacy
 import xyz.xenondevs.nova.data.serialization.persistentdata.set
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
+import xyz.xenondevs.nova.item.PacketItemData
 import xyz.xenondevs.nova.item.behavior.ItemBehavior
 import xyz.xenondevs.nova.machines.Machines
 import xyz.xenondevs.nova.machines.registry.Items
@@ -119,17 +119,17 @@ object MobCatcherBehavior : ItemBehavior() {
         setEntityData(itemStack, entity.type, data)
     }
     
-    override fun getLore(itemStack: ItemStack): List<Array<BaseComponent>>? {
-        val type = getEntityType(itemStack) ?: return null
+    override fun updatePacketItemData(itemStack: ItemStack, itemData: PacketItemData) {
+        val type = getEntityType(itemStack) ?: return
         val nmsType = Registry.ENTITY_TYPE.get(ResourceLocation("minecraft", type.key.key))
         
-        return listOf(
+        itemData.addLore(listOf(
             arrayOf(localized(
                 ChatColor.DARK_GRAY,
                 "item.machines.mob_catcher.type",
                 localized(ChatColor.YELLOW, nmsType.descriptionId)
             ))
-        )
+        ))
     }
     
     private fun convertLegacyData(itemStack: ItemStack) {
