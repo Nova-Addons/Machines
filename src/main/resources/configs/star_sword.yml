@@ -5,7 +5,7 @@ attack_damage: 6
 attack_speed: 2.0
 can_sweep_attack: true
 can_break_blocks_in_creative: false
-max_durability: 125
+max_durability: 250
 item_damage_on_attack_entity: 1
 item_damage_on_break_block: 2
 enchantment_value: 10

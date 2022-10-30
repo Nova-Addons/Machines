@@ -1,11 +1,11 @@
 tool_level: minecraft:iron
 tool_category: minecraft:hoe
-break_speed: 14
+break_speed: 20
 attack_damage: 1
 attack_speed: 3.8
 can_sweep_attack: false
 can_break_blocks_in_creative: true
-max_durability: 125
+max_durability: 250
 item_damage_on_attack_entity: 2
 item_damage_on_break_block: 1
 enchantment_value: 10
