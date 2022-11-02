@@ -189,7 +189,7 @@
   "advancement.machines.electric_brewing_stand.title": "Автоматизированная алхимия",
   "advancement.machines.electric_brewing_stand.description": "Создайте Электрическую Зельеварку",
   "advancement.machines.fluid_infuser.title": "Автоматизация ведер",
-  "advancement.machines.fluid_infuser.description": "Создайте Жидкостный Преобразователь",
+  "advancement.machines.fluid_infuser.description": "Создайте Жидкостный Наполнитель",
   "advancement.machines.sprinkler.title": "Дождь в пустыне",
   "advancement.machines.sprinkler.description": "Создайте Спринклер",
   "menu.machines.mob_duplicator.nbt.off": "Сохранять NBT: Нет",
