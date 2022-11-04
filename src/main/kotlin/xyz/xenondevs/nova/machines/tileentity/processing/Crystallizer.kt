@@ -91,6 +91,11 @@ class Crystallizer(
         progressPerTick = upgradeHolder.getValue(UpgradeType.SPEED)
     }
     
+    override fun handleRemoved(unload: Boolean) {
+        super.handleRemoved(unload)
+        itemDisplay.remove()
+    }
+    
     private fun handleInventoryUpdate(event: ItemUpdateEvent) {
         progress = 0.0
         
