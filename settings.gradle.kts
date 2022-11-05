@@ -4,7 +4,7 @@ enableFeaturePreview("VERSION_CATALOGS")
 dependencyResolutionManagement {
     versionCatalogs {
         create("deps") {
-            version("nova", "0.12")
+            version("nova", "0.12-rc5")
             version("spigot", "1.19.2-R0.1-SNAPSHOT")
             
             library("nova", "xyz.xenondevs.nova", "nova").versionRef("nova")
