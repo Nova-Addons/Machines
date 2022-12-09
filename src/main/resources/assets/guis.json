@@ -1,10 +1,10 @@
 {
-  "configure_potion": "gui/guis/configure_potion",
-  "electric_brewing_stand": "gui/guis/electric_brewing_stand",
-  "recipe_pulverizer": "gui/guis/recipe/pulverizer",
-  "recipe_press": "gui/guis/recipe/press",
-  "recipe_fluid_infuser": "gui/guis/recipe/fluid_infuser",
-  "recipe_freezer": "gui/guis/recipe/freezer",
-  "recipe_star_collector": "gui/guis/recipe/star_collector",
-  "recipe_cobblestone_generator": "gui/guis/recipe/cobblestone_generator"
+  "configure_potion": "gui/configure_potion",
+  "electric_brewing_stand": "gui/electric_brewing_stand",
+  "recipe_pulverizer": "gui/recipe/pulverizer",
+  "recipe_press": "gui/recipe/press",
+  "recipe_fluid_infuser": "gui/recipe/fluid_infuser",
+  "recipe_freezer": "gui/recipe/freezer",
+  "recipe_star_collector": "gui/recipe/star_collector",
+  "recipe_cobblestone_generator": "gui/recipe/cobblestone_generator"
 }
