@@ -3,7 +3,7 @@
 package xyz.xenondevs.nova.machines.item
 
 import net.md_5.bungee.api.ChatColor
-import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
@@ -121,7 +121,7 @@ object MobCatcherBehavior : ItemBehavior() {
     
     override fun updatePacketItemData(itemStack: ItemStack, itemData: PacketItemData) {
         val type = getEntityType(itemStack) ?: return
-        val nmsType = Registry.ENTITY_TYPE.get(ResourceLocation("minecraft", type.key.key))
+        val nmsType = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation("minecraft", type.key.key))
         
         itemData.addLore(listOf(
             arrayOf(localized(
