@@ -6,6 +6,7 @@ import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.item.ItemProvider
 import de.studiocode.invui.item.impl.BaseItem
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
+import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.entity.EquipmentSlot
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -13,6 +14,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -38,9 +40,8 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.axis
-import xyz.xenondevs.nova.util.particleBuilder
+import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
-import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -76,7 +77,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private val waterLevel = FakeArmorStand(centerLocation) { _, data -> data.isInvisible = true; data.isMarker = true }
     private val lavaLevel = FakeArmorStand(centerLocation) { _, data -> data.isInvisible = true; data.isMarker = true }
     
-    private val particleEffect = particleBuilder(ParticleEffect.SMOKE_LARGE) {
+    private val particleEffect = particle(ParticleTypes.LARGE_SMOKE) {
         location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
         offset(getFace(BlockSide.RIGHT).axis, 0.15f)
         amount(5)
@@ -136,7 +137,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
                 currentMode = mode
                 
                 playSoundEffect(Sound.BLOCK_LAVA_EXTINGUISH, 0.1f, Random.nextDouble(0.5, 1.95).toFloat())
-                particleEffect.display(getViewers())
+                particleEffect.sendTo(getViewers())
             }
             
             if (gui.isInitialized()) gui.value.progressItem.percentage = mbUsed / 1000.0

@@ -4,6 +4,7 @@ import de.studiocode.invui.gui.GUI
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.item.Item
+import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.data.type.Farmland
@@ -11,6 +12,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPhysicsEvent
+import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -31,11 +33,10 @@ import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.center
-import xyz.xenondevs.nova.util.particleBuilder
 import xyz.xenondevs.nova.util.registerEvents
+import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
-import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToLong
 
@@ -165,11 +166,11 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         }
         
         private fun showWaterParticles(block: Block, players: List<Player>) {
-            particleBuilder(ParticleEffect.WATER_SPLASH, block.location.apply { add(0.5, 1.0, 0.5) }) {
+            particle(ParticleTypes.SPLASH, block.location.apply { add(0.5, 1.0, 0.5) }) {
                 offset(0.2, 0.1, 0.2)
                 speed(1f)
                 amount(20)
-            }.display(players)
+            }.sendTo(players)
         }
         
     }

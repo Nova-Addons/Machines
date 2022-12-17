@@ -7,7 +7,10 @@ import de.studiocode.invui.item.builder.ItemBuilder
 import de.studiocode.invui.virtualinventory.event.InventoryUpdatedEvent
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import net.md_5.bungee.api.ChatColor
+import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.block.BlockFace
+import xyz.xenondevs.nmsutils.particle.particle
+import xyz.xenondevs.nmsutils.particle.vibration
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
@@ -16,7 +19,7 @@ import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.TileEntityParticleTask
+import xyz.xenondevs.nova.tileentity.TileEntityPacketTask
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
@@ -31,10 +34,7 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.nmsCopy
-import xyz.xenondevs.nova.util.particleBuilder
 import xyz.xenondevs.nova.world.fakeentity.impl.FakeItem
-import xyz.xenondevs.particle.ParticleEffect
-import xyz.xenondevs.particle.data.VibrationData
 
 private val MAX_ENERGY = configReloadable { NovaConfig[Blocks.CRYSTALLIZER].getLong("capacity") }
 private val ENERGY_PER_TICK = configReloadable { NovaConfig[Blocks.CRYSTALLIZER].getLong("energy_per_tick") }
@@ -59,7 +59,7 @@ class Crystallizer(
     private var progress by storedValue("progress") { 0.0 }
     private var recipe = inventory.getItemStack(0)?.let { RecipeManager.getConversionRecipeFor(RecipeTypes.CRYSTALLIZER, it) }
     
-    private val particleTask: TileEntityParticleTask
+    private val particleTask: TileEntityPacketTask
     private var displayState: Boolean
     private val itemDisplay: FakeItem
     
@@ -78,12 +78,12 @@ class Crystallizer(
         val centerLocation = location.add(.5, .5, .5)
         val packets = listOf(BlockFace.NORTH, BlockFace.WEST, BlockFace.SOUTH, BlockFace.EAST).map {
             val startLocation = location.add(.5, .8, .5).advance(it, .4)
-            particleBuilder(ParticleEffect.VIBRATION, startLocation) {
-                data(VibrationData(startLocation, centerLocation, 10))
-            }.packet
+            particle(ParticleTypes.VIBRATION, startLocation) {
+                vibration(centerLocation, 10)
+            }
         }
         
-        particleTask = createParticleTask(packets, 9)
+        particleTask = createPacketTask(packets, 9)
     }
     
     override fun reload() {
