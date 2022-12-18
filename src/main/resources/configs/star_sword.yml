@@ -1,4 +1,4 @@
-tool_level: minecraft:iron
+tool_tier: minecraft:iron
 tool_category: minecraft:sword
 break_speed: 1.5
 attack_damage: 6

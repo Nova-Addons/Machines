@@ -4,7 +4,7 @@ import org.bukkit.Material
 import xyz.xenondevs.nova.data.world.block.property.Directional
 import xyz.xenondevs.nova.data.world.block.property.LegacyDirectional
 import xyz.xenondevs.nova.item.tool.ToolCategory
-import xyz.xenondevs.nova.item.tool.ToolLevel
+import xyz.xenondevs.nova.item.tool.ToolTier
 import xyz.xenondevs.nova.machines.Machines
 import xyz.xenondevs.nova.machines.tileentity.agriculture.AutoFisher
 import xyz.xenondevs.nova.machines.tileentity.agriculture.Fertilizer
@@ -36,20 +36,20 @@ import xyz.xenondevs.nova.machines.tileentity.world.InfiniteWaterSource
 import xyz.xenondevs.nova.machines.tileentity.world.Pump
 import xyz.xenondevs.nova.machines.tileentity.world.Quarry
 import xyz.xenondevs.nova.machines.tileentity.world.Sprinkler
-import xyz.xenondevs.nova.material.BlockOptions
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.block
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerUnnamedItem
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.tileEntity
+import xyz.xenondevs.nova.material.options.BlockOptions
 import xyz.xenondevs.nova.world.block.sound.SoundGroup
 
 object Blocks {
     
-    private val SAND = BlockOptions(0.5, ToolCategory.SHOVEL, null, false, SoundGroup.SAND, Material.PURPLE_CONCRETE_POWDER)
-    private val SANDSTONE = BlockOptions(0.8, ToolCategory.PICKAXE, null, true, SoundGroup.STONE, Material.SANDSTONE)
-    private val STONE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundGroup.STONE, Material.NETHERITE_BLOCK)
-    private val LIGHT_METAL = BlockOptions(0.5, ToolCategory.PICKAXE, null, false, SoundGroup.METAL, Material.IRON_BLOCK)
-    private val METAL = BlockOptions(5.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundGroup.METAL, Material.IRON_BLOCK)
-    private val MACHINE_FRAME = BlockOptions(2.0, ToolCategory.PICKAXE, null, true, SoundGroup.METAL, Material.STONE)
+    private val SAND = BlockOptions(0.5, ToolCategory.SHOVEL, ToolTier.WOOD, false, SoundGroup.SAND, Material.PURPLE_CONCRETE_POWDER)
+    private val SANDSTONE = BlockOptions(0.8, ToolCategory.PICKAXE, ToolTier.WOOD, true, SoundGroup.STONE, Material.SANDSTONE)
+    private val STONE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolTier.WOOD, true, SoundGroup.STONE, Material.NETHERITE_BLOCK)
+    private val LIGHT_METAL = BlockOptions(0.5, ToolCategory.PICKAXE, ToolTier.WOOD, false, SoundGroup.METAL, Material.IRON_BLOCK)
+    private val METAL = BlockOptions(5.0, ToolCategory.PICKAXE, ToolTier.WOOD, true, SoundGroup.METAL, Material.IRON_BLOCK)
+    private val MACHINE_FRAME = BlockOptions(2.0, ToolCategory.PICKAXE, ToolTier.WOOD, true, SoundGroup.METAL, Material.STONE)
     
     // TileEntities
     val AUTO_FISHER = tileEntity(Machines, "auto_fisher", ::AutoFisher).blockOptions(STONE).properties(Directional.NORMAL).register()
