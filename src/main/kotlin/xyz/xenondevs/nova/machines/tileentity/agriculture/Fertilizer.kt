@@ -48,7 +48,7 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     override val gui = lazy(::FertilizerGUI)
     override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_FERTILIZE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
-    override val itemHolder = NovaItemHolder(this, fertilizerInventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    override val itemHolder = NovaItemHolder(this, fertilizerInventory to NetworkConnectionType.INSERT) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
     private var maxIdleTime = 0
     private var timePassed = 0

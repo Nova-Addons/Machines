@@ -59,8 +59,8 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     override val itemHolder = NovaItemHolder(
         this,
         inventory to NetworkConnectionType.EXTRACT,
-        fishingRodInventory to NetworkConnectionType.BUFFER
-    ) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM) }
+        fishingRodInventory to NetworkConnectionType.INSERT
+    ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.BOTTOM) }
     
     private var timePassed = 0
     private var maxIdleTime = 0

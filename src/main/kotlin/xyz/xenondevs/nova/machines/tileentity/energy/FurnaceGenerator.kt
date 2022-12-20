@@ -42,7 +42,7 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
     private val inventory = getInventory("fuel", 1, ::handleInventoryUpdate)
     override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder) { createSideConfig(NetworkConnectionType.EXTRACT, FRONT) }
-    override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
+    override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.INSERT) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     
     private var burnTimeMultiplier = BURN_TIME_MULTIPLIER
     private var burnTime: Int = retrieveData("burnTime") { 0 }

@@ -72,8 +72,8 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     override val itemHolder = NovaItemHolder(
         this,
         outputInventory to NetworkConnectionType.EXTRACT,
-        inputInventory to NetworkConnectionType.BUFFER,
-    ) { createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM, BlockSide.BACK) }
+        inputInventory to NetworkConnectionType.INSERT,
+    ) { createExclusiveSideConfig(NetworkConnectionType.BUFFER, BlockSide.BOTTOM, BlockSide.BACK) }
     
     private var plantType = inputInventory.getItemStack(0)?.type
     private val plant: FakeArmorStand

@@ -71,9 +71,9 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     override val fluidHolder = NovaFluidHolder(this, tank to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
-        input to NetworkConnectionType.BUFFER,
+        input to NetworkConnectionType.INSERT,
         output to NetworkConnectionType.EXTRACT
-    ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     
     private var mode = retrieveData("mode") { FluidInfuserRecipe.InfuserMode.INSERT }
     

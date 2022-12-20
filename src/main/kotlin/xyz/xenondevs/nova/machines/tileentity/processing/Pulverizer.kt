@@ -46,9 +46,9 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
-        inputInv to NetworkConnectionType.BUFFER,
+        inputInv to NetworkConnectionType.INSERT,
         outputInv to NetworkConnectionType.EXTRACT
-    ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     
     private var timeLeft = retrieveData("pulverizerTime") { 0 }
     private var pulverizeSpeed = 0

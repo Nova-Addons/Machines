@@ -59,9 +59,9 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
-        inputInventory to NetworkConnectionType.BUFFER,
+        inputInventory to NetworkConnectionType.INSERT,
         outputInventory to NetworkConnectionType.EXTRACT
-    ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     
     private var currentRecipe: SmeltingRecipe? by storedValue<NamespacedKey>("currentRecipe").map(
         { minecraftServer.recipeManager.byKey(it.resourceLocation).orElse(null) as? SmeltingRecipe },

@@ -37,7 +37,7 @@ class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     override val gui = lazy { BlockPlacerGUI() }
     override val upgradeHolder = getUpgradeHolder(UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_PLACE, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
-    override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.INSERT) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
     private val placePos = location.clone().advance(getFace(BlockSide.FRONT)).pos
     private val placeBlock = placePos.block

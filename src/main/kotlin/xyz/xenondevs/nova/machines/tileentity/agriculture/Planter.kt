@@ -61,8 +61,8 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_PLANT, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
-        inputInventory to NetworkConnectionType.BUFFER,
-        hoesInventory to NetworkConnectionType.BUFFER
+        inputInventory to NetworkConnectionType.INSERT,
+        hoesInventory to NetworkConnectionType.INSERT
     ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
     private var autoTill = retrieveData("autoTill") { true }

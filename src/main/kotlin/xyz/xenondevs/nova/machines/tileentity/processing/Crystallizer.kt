@@ -23,6 +23,7 @@ import xyz.xenondevs.nova.tileentity.TileEntityPacketTask
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
+import xyz.xenondevs.nova.tileentity.network.item.inventory.NetworkedVirtualInventory
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
@@ -97,10 +98,15 @@ class Crystallizer(
     }
     
     private fun handleInventoryUpdate(event: ItemUpdateEvent) {
-        progress = 0.0
-        
         if (event.isRemove) {
+            // prevent item networks from extracting items that are currently being processed
+            if (event.updateReason == NetworkedVirtualInventory.UPDATE_REASON && recipe != null) {
+                event.isCancelled = true
+                return
+            }
+            
             this.recipe = null
+            progress = 0.0
             return
         }
         
@@ -109,6 +115,7 @@ class Crystallizer(
             event.isCancelled = true
         } else {
             this.recipe = recipe
+            progress = 0.0
         }
     }
     

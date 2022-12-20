@@ -56,9 +56,9 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
-        inputInv to NetworkConnectionType.BUFFER,
+        inputInv to NetworkConnectionType.INSERT,
         outputInv to NetworkConnectionType.EXTRACT
-    ) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
+    ) { createSideConfig(NetworkConnectionType.BUFFER, FRONT) }
     
     private var type: PressType = retrieveData("pressType") { PressType.PLATE }
     private var timeLeft: Int = retrieveData("pressTime") { 0 }
