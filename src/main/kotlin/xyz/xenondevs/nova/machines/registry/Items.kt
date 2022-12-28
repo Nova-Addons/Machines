@@ -26,10 +26,10 @@ object Items {
     val STAR_HOE = registerItem(Machines, "star_hoe", Tool, Damageable, Enchantable, Tilling)
     
     // Armor
-    val STAR_HELMET = registerItem(Machines, "star_helmet", Wearable(ArmorType.HELMET))
-    val STAR_CHESTPLATE = registerItem(Machines, "star_chestplate", Wearable(ArmorType.CHESTPLATE))
-    val STAR_LEGGINGS = registerItem(Machines, "star_leggings", Wearable(ArmorType.LEGGINGS))
-    val STAR_BOOTS = registerItem(Machines, "star_boots", Wearable(ArmorType.BOOTS))
+    val STAR_HELMET = registerItem(Machines, "star_helmet", Wearable(ArmorType.HELMET), Damageable)
+    val STAR_CHESTPLATE = registerItem(Machines, "star_chestplate", Wearable(ArmorType.CHESTPLATE), Damageable)
+    val STAR_LEGGINGS = registerItem(Machines, "star_leggings", Wearable(ArmorType.LEGGINGS), Damageable)
+    val STAR_BOOTS = registerItem(Machines, "star_boots", Wearable(ArmorType.BOOTS), Damageable)
     
     // Plates
     val IRON_PLATE = registerItem(Machines, "iron_plate")
