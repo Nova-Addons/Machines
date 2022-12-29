@@ -1,6 +1,8 @@
 {
   "star": {
-    "layer1": "armor/star_layer_1",
-    "layer2": "armor/star_layer_2"
+    "layer_1": "armor/star_layer_1",
+    "layer_1_emissivity_map": "armor/star_layer_1_emissivity_map",
+    "layer_2": "armor/star_layer_2",
+    "layer_2_emissivity_map": "armor/star_layer_2_emissivity_map"
   }
 }
