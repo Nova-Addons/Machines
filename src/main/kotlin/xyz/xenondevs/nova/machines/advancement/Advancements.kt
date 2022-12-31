@@ -56,6 +56,10 @@ private val QUARRY = obtainNovaItemAdvancement(Machines, BLOCK_BREAKER, Blocks.Q
 //<editor-fold desc="Star Shards" defaultstate="collapsed">
 private val STAR_SHARDS = obtainNovaItemAdvancement(Machines, ROOT, Items.STAR_SHARDS)
 private val STAR_COLLECTOR = obtainNovaItemAdvancement(Machines, STAR_SHARDS, Blocks.STAR_COLLECTOR)
+private val CRYSTALLIZER = obtainNovaItemAdvancement(Machines, STAR_COLLECTOR, Blocks.CRYSTALLIZER)
+private val STAR_TOOLS = obtainNovaItemsAdvancement(Machines, "all_star_tools", CRYSTALLIZER, listOf(
+    Items.STAR_SWORD, Items.STAR_AXE, Items.STAR_PICKAXE, Items.STAR_HOE, Items.STAR_SHOVEL
+), true)
 //</editor-fold>
 
 //<editor-fold desc="Fluids" defaultstate="collapsed">
@@ -119,7 +123,7 @@ object Advancements {
         AdvancementLoader.registerAdvancements(
             ROOT, FURNACE_GENERATOR, LAVA_GENERATOR, SOLAR_PANEL, WIND_TURBINE, LIGHTNING_EXCHANGER, PLANTER,
             SPRINKLER, FERTILIZER, HARVESTER, TREE_FACTORY, MOB_CATCHER, BREEDER, MOB_KILLER, MOB_DUPLICATOR,
-            BLOCK_PLACER, BLOCK_BREAKER, QUARRY, STAR_SHARDS, STAR_COLLECTOR, PUMP, COBBLESTONE_GENERATOR,
+            BLOCK_PLACER, BLOCK_BREAKER, QUARRY, STAR_SHARDS, STAR_COLLECTOR, CRYSTALLIZER, STAR_TOOLS, PUMP, COBBLESTONE_GENERATOR,
             FLUID_INFUSER, ELECTRIC_BREWING_STAND, PULVERIZER, DUST, ALL_DUSTS, GEAR, ALL_GEARS, PLATE, ALL_PLATES,
             MECHANICAL_PRESS, GEAR, ALL_GEARS, PLATE, ALL_PLATES, CHARGER, WIRELESS_CHARGER, AUTO_FISHER
         )

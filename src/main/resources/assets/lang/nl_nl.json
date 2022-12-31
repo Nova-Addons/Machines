@@ -59,10 +59,6 @@
   "item.machines.mob_catcher.type": "%s",
   "item.machines.scaffolding": "Mijn steiger",
   "item.machines.star_shards": "Ster Scherven",
-  "item.machines.basic_machine_frame": "Simpele machine Frame",
-  "item.machines.advanced_machine_frame": "Ingewikkelde Machine frame",
-  "item.machines.ultimate_machine_frame": "Ultieme Machine Frame",
-  "item.machines.creative_machine_frame": "Creatieve Machine Frame",
   "item.machines.solar_cell": "Zonne cel",
   "item_info.machines.star_shards": "Ster Scherven kun je vinden in alle buit kisten zoals die in mijnen, woestijntempels of kerkers",
   "item_info.machines.infinite_water_source": "De Oneindige waterbron is te vinden in woestijn tempels.",
@@ -193,7 +189,6 @@
   "advancement.machines.sprinkler.title": "Een druppel regen in de woestijn",
   "advancement.machines.sprinkler.description": "Maak een Sproeier",
   "menu.machines.mob_duplicator.nbt.off": "Gebruik NBT-Data: Nee",
-  "item.machines.elite_machine_frame": "Elite Machine Frame",
   "menu.machines.items.category.machines": "Machines",
   "menu.machines.recipe.extract_fluid": "Extract %s mB %s",
   "menu.machines.mob_duplicator.nbt.on": "Gebruik NBT-Data: Ja"

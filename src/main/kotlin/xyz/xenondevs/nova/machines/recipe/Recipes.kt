@@ -67,3 +67,12 @@ class ElectricBrewingStandRecipe(
 ) : NovaRecipe, MultiInputChoiceRecipe {
     override val type = RecipeTypes.ELECTRIC_BREWING_STAND
 }
+
+class CrystallizerRecipe(
+    key: NamespacedKey,
+    input: RecipeChoice,
+    result: ItemStack,
+    time: Int
+): ConversionNovaRecipe(key, input, result, time) {
+    override val type = RecipeTypes.CRYSTALLIZER
+}

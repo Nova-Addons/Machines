@@ -5,9 +5,12 @@ import de.studiocode.invui.gui.SlotElement.VISlotElement
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
+import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.entity.EquipmentSlot
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.nmsutils.particle.color
+import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -29,9 +32,8 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.dropItem
-import xyz.xenondevs.nova.util.particleBuilder
+import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
-import xyz.xenondevs.particle.ParticleEffect
 import java.awt.Color
 
 private class PlantConfiguration(val miniature: ItemNovaMaterial, val loot: ItemStack, val color: Color)
@@ -70,8 +72,8 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     override val itemHolder = NovaItemHolder(
         this,
         outputInventory to NetworkConnectionType.EXTRACT,
-        inputInventory to NetworkConnectionType.BUFFER,
-    ) { createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM, BlockSide.BACK) }
+        inputInventory to NetworkConnectionType.INSERT,
+    ) { createExclusiveSideConfig(NetworkConnectionType.BUFFER, BlockSide.BOTTOM, BlockSide.BACK) }
     
     private var plantType = inputInventory.getItemStack(0)?.type
     private val plant: FakeArmorStand
@@ -115,13 +117,13 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
             } else {
                 idleTimeLeft--
                 
-                particleBuilder(ParticleEffect.REDSTONE) {
+                particle(ParticleTypes.DUST) {
                     color(PLANTS[plantType]!!.color)
                     location(location.clone().center().apply { y += 0.5 })
                     offset(0.15, 0.15, 0.15)
                     speed(0.1f)
                     amount(5)
-                }.display(getViewers())
+                }.sendTo(getViewers())
                 
                 if (idleTimeLeft == 0) {
                     growthProgress = 0.0

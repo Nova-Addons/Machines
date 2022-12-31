@@ -77,9 +77,9 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     
     override val itemHolder = NovaItemHolder(
         this,
-        ingredientsInventory to NetworkConnectionType.BUFFER,
-        outputInventory to NetworkConnectionType.BUFFER
-    ) { createSideConfig(NetworkConnectionType.INSERT) }
+        ingredientsInventory to NetworkConnectionType.INSERT,
+        outputInventory to NetworkConnectionType.EXTRACT
+    ) { createSideConfig(NetworkConnectionType.BUFFER) }
     
     override val fluidHolder = NovaFluidHolder(
         this,

@@ -5,6 +5,8 @@ import de.studiocode.invui.gui.SlotElement
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
+import net.minecraft.core.particles.ParticleTypes
+import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -27,8 +29,6 @@ import xyz.xenondevs.nova.util.axis
 import xyz.xenondevs.nova.util.intValue
 import xyz.xenondevs.nova.util.item.fuel
 import xyz.xenondevs.nova.util.item.toItemStack
-import xyz.xenondevs.nova.util.particle
-import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -42,7 +42,7 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
     private val inventory = getInventory("fuel", 1, ::handleInventoryUpdate)
     override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder) { createSideConfig(NetworkConnectionType.EXTRACT, FRONT) }
-    override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
+    override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.INSERT) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     
     private var burnTimeMultiplier = BURN_TIME_MULTIPLIER
     private var burnTime: Int = retrieveData("burnTime") { 0 }
@@ -58,8 +58,8 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
             }
         }
     
-    private val particleTask = createParticleTask(listOf(
-        particle(ParticleEffect.SMOKE_NORMAL) {
+    private val particleTask = createPacketTask(listOf(
+        particle(ParticleTypes.SMOKE) {
             location(centerLocation.advance(getFace(FRONT), 0.6).apply { y += 0.8 })
             offset(getFace(BlockSide.RIGHT).axis, 0.15f)
             offsetY(0.1f)

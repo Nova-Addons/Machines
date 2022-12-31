@@ -76,3 +76,11 @@ object ElectricBrewingStandRecipeDeserializer : RecipeDeserializer<ElectricBrewi
     }
     
 }
+
+object CrystallizerRecipeDeserializer : ConversionRecipeDeserializer<CrystallizerRecipe>() {
+    
+    override fun createRecipe(json: JsonObject, key: NamespacedKey, input: RecipeChoice, result: ItemStack, time: Int): CrystallizerRecipe {
+        return CrystallizerRecipe(key, input, result, time)
+    }
+    
+}

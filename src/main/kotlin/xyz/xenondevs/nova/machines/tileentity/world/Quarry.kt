@@ -8,6 +8,7 @@ import de.studiocode.invui.item.ItemProvider
 import de.studiocode.invui.item.impl.BaseItem
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.TranslatableComponent
+import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.Axis
 import org.bukkit.Location
 import org.bukkit.OfflinePlayer
@@ -17,6 +18,8 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.nmsutils.particle.block
+import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -57,15 +60,14 @@ import xyz.xenondevs.nova.util.getRectangle
 import xyz.xenondevs.nova.util.getStraightLine
 import xyz.xenondevs.nova.util.hardness
 import xyz.xenondevs.nova.util.item.ToolUtils
-import xyz.xenondevs.nova.util.particleBuilder
 import xyz.xenondevs.nova.util.positionEquals
 import xyz.xenondevs.nova.util.remove
+import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.util.serverTick
 import xyz.xenondevs.nova.util.setBreakStage
 import xyz.xenondevs.nova.world.block.BlockManager
 import xyz.xenondevs.nova.world.block.context.BlockBreakContext
 import xyz.xenondevs.nova.world.pos
-import xyz.xenondevs.particle.ParticleEffect
 import java.util.concurrent.CompletableFuture
 import kotlin.math.max
 import kotlin.math.min
@@ -433,18 +435,18 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     private fun spawnDrillParticles(block: Block) {
         // block cracks
-        particleBuilder(ParticleEffect.BLOCK_CRACK, block.location.center().apply { y += 1 }) {
-            texture(block.breakTexture)
+        particle(ParticleTypes.BLOCK, block.location.center().apply { y += 1 }) {
+            block(block.breakTexture)
             offsetX(0.2f)
             offsetZ(0.2f)
             speed(0.5f)
-        }.display()
+        }.sendTo(getViewers())
         
         // smoke
-        particleBuilder(ParticleEffect.SMOKE_NORMAL, pointerLocation.clone().apply { y -= 0.1 }) {
+        particle(ParticleTypes.BLOCK, pointerLocation.clone().apply { y -= 0.1 }) {
             amount(10)
             speed(0.02f)
-        }.display()
+        }.sendTo(getViewers())
     }
     
     private fun createScaffolding() {

@@ -6,9 +6,13 @@ import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.item.builder.ItemBuilder
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import net.md_5.bungee.api.ChatColor
+import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.entity.EquipmentSlot
 import org.bukkit.Bukkit
 import org.bukkit.util.Vector
+import xyz.xenondevs.nmsutils.particle.color
+import xyz.xenondevs.nmsutils.particle.dustTransition
+import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -35,10 +39,8 @@ import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.dropItem
 import xyz.xenondevs.nova.util.isFull
-import xyz.xenondevs.nova.util.particle
-import xyz.xenondevs.nova.util.particleBuilder
+import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
-import xyz.xenondevs.particle.ParticleEffect
 import java.awt.Color
 
 private val MAX_ENERGY = configReloadable { NovaConfig[STAR_COLLECTOR].getLong("capacity") }
@@ -74,10 +76,10 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         ast.setEquipment(EquipmentSlot.HEAD, (material.block as ArmorStandBlockModelData)[1].get(), false)
     }
     
-    private val particleTask = createParticleTask(listOf(
-        particle(ParticleEffect.DUST_COLOR_TRANSITION) {
+    private val particleTask = createPacketTask(listOf(
+        particle(ParticleTypes.DUST_COLOR_TRANSITION) {
             location(location.clone().center().apply { y += 0.2 })
-            dustFade(Color(132, 0, 245), Color(196, 128, 217), 1f)
+            dustTransition(Color(132, 0, 245), Color(196, 128, 217), 1f)
             offset(0.25, 0.1, 0.25)
             amount(3)
         }
@@ -129,10 +131,10 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             val particleDistance = percentageCollected * (STAR_PARTICLE_DISTANCE_PER_TICK * maxCollectionTime)
             val particleLocation = rodLocation.clone().add(particleVector.clone().multiply(particleDistance))
             
-            particleBuilder(ParticleEffect.REDSTONE) {
+            particle(ParticleTypes.DUST) {
                 location(particleLocation)
                 color(Color(255, 255, 255))
-            }.display(getViewers())
+            }.sendTo(getViewers())
         }
         
         if (gui.isInitialized())

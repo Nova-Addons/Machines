@@ -67,8 +67,8 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     override val itemHolder = NovaItemHolder(
         this,
         inventory to NetworkConnectionType.EXTRACT,
-        shearInventory to NetworkConnectionType.BUFFER, axeInventory to NetworkConnectionType.BUFFER, hoeInventory to NetworkConnectionType.BUFFER
-    ) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
+        shearInventory to NetworkConnectionType.INSERT, axeInventory to NetworkConnectionType.INSERT, hoeInventory to NetworkConnectionType.INSERT
+    ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     
     private var maxIdleTime = 0
     private var maxRange = 0

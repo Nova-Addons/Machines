@@ -5,7 +5,9 @@ import de.studiocode.invui.gui.SlotElement.VISlotElement
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
+import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.NamespacedKey
+import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
@@ -27,8 +29,6 @@ import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
-import xyz.xenondevs.nova.util.particle
-import xyz.xenondevs.particle.ParticleEffect
 import kotlin.math.max
 
 private val MAX_ENERGY = configReloadable { NovaConfig[PULVERIZER].getLong("capacity") }
@@ -46,9 +46,9 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
-        inputInv to NetworkConnectionType.BUFFER,
+        inputInv to NetworkConnectionType.INSERT,
         outputInv to NetworkConnectionType.EXTRACT
-    ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     
     private var timeLeft = retrieveData("pulverizerTime") { 0 }
     private var pulverizeSpeed = 0
@@ -56,8 +56,8 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private var currentRecipe: PulverizerRecipe? =
         retrieveDataOrNull<NamespacedKey>("currentRecipe")?.let { RecipeManager.getRecipe(RecipeTypes.PULVERIZER, it) }
     
-    private val particleTask = createParticleTask(listOf(
-        particle(ParticleEffect.SMOKE_NORMAL) {
+    private val particleTask = createPacketTask(listOf(
+        particle(ParticleTypes.SMOKE) {
             location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.8 })
             offset(0.05, 0.2, 0.05)
             speed(0f)

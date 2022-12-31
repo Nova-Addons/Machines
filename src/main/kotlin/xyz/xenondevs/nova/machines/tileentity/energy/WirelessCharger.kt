@@ -99,7 +99,7 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         val chargeable = itemStack?.novaMaterial?.novaItem?.getBehavior(Chargeable::class)
         
         if (chargeable != null) {
-            val maxEnergy = chargeable.maxEnergy
+            val maxEnergy = chargeable.options.maxEnergy
             val currentEnergy = chargeable.getEnergy(itemStack)
             
             val energyToTransfer = minOf(energyHolder.energyConsumption - alreadyTransferred, maxEnergy - currentEnergy, energyHolder.energy)

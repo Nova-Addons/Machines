@@ -3,6 +3,8 @@ package xyz.xenondevs.nova.machines.tileentity.energy
 import de.studiocode.invui.gui.GUI
 import de.studiocode.invui.gui.builder.GUIBuilder
 import de.studiocode.invui.gui.builder.guitype.GUIType
+import net.minecraft.core.particles.ParticleTypes
+import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -23,8 +25,6 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.axis
 import xyz.xenondevs.nova.util.intValue
-import xyz.xenondevs.nova.util.particle
-import xyz.xenondevs.particle.ParticleEffect
 
 private val ENERGY_CAPACITY = configReloadable { NovaConfig[LAVA_GENERATOR].getLong("energy_capacity") }
 private val FLUID_CAPACITY = configReloadable { NovaConfig[LAVA_GENERATOR].getLong("fluid_capacity") }
@@ -45,8 +45,8 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     private var burnProgress = 0.0
     private var energyPerTick = 0L
     
-    private val smokeParticleTask = createParticleTask(listOf(
-        particle(ParticleEffect.SMOKE_NORMAL) {
+    private val smokeParticleTask = createPacketTask(listOf(
+        particle(ParticleTypes.SMOKE) {
             location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
             offset(getFace(BlockSide.RIGHT).axis, 0.15f)
             offsetY(0.1f)
@@ -55,8 +55,8 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         }
     ), 3)
     
-    private val lavaParticleTask = createParticleTask(listOf(
-        particle(ParticleEffect.LAVA) {
+    private val lavaParticleTask = createPacketTask(listOf(
+        particle(ParticleTypes.LAVA) {
             location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
             offset(getFace(BlockSide.RIGHT).axis, 0.15f)
             offsetY(0.1f)
