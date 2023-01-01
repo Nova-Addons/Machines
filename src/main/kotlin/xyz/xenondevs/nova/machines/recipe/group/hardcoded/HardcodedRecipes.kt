@@ -25,7 +25,7 @@ object HardcodedRecipes {
     )
     
     fun register() {
-        RecipeRegistry.addHardcodedRecipes(recipes)
+        RecipeRegistry.addFakeRecipes(recipes)
         RecipeRegistry.addCreationInfo(mapOf(
             "machines:star_shards" to "item_info.machines.star_shards",
             "machines:infinite_water_source" to "item_info.machines.infinite_water_source"

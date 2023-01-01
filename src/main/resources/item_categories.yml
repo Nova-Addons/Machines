@@ -85,7 +85,7 @@ crafting:
 
 tools:
   icon: machines:star_axe
-  name: "menu.machines.items.category.tools"
+  name: "menu.machines.items.category.equipment"
   priority: 4
   items:
     - machines:star_sword
@@ -93,6 +93,10 @@ tools:
     - machines:star_pickaxe
     - machines:star_axe
     - machines:star_hoe
+    - machines:star_helmet
+    - machines:star_chestplate
+    - machines:star_leggings
+    - machines:star_boots
 
 resources:
   icon: machines:star_shards_ore
@@ -105,6 +109,6 @@ resources:
 misc:
   icon: nova:wrench
   name: "menu.nova.items.category.misc"
-  priority: 5
+  priority: 6
   items:
     - machines:mob_catcher
