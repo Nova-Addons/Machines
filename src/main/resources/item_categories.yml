@@ -83,7 +83,7 @@ crafting:
     - machines:scaffolding
     - machines:netherite_drill
 
-tools:
+equipment:
   icon: machines:star_axe
   name: "menu.machines.items.category.equipment"
   priority: 4
