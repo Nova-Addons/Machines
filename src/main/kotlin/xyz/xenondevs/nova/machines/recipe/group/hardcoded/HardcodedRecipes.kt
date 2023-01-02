@@ -4,7 +4,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.recipe.NovaRecipe
 import xyz.xenondevs.nova.data.recipe.RecipeRegistry
-import xyz.xenondevs.nova.data.recipe.ResultingRecipe
+import xyz.xenondevs.nova.data.recipe.SingleResultRecipe
 import xyz.xenondevs.nova.machines.Machines
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
@@ -34,7 +34,7 @@ object HardcodedRecipes {
     
 }
 
-object StarCollectorRecipe : NovaRecipe, ResultingRecipe {
+object StarCollectorRecipe : NovaRecipe, SingleResultRecipe {
     override val key = NamespacedKey(Machines, "star_collector.star_dust")
     override val type = RecipeTypes.STAR_COLLECTOR
     override val result = Items.STAR_DUST.createItemStack()
@@ -44,7 +44,7 @@ class CobblestoneGeneratorRecipe(
     override val key: NamespacedKey,
     val mode: CobblestoneGenerator.Mode,
     override val result: ItemStack = mode.product
-) : NovaRecipe, ResultingRecipe {
+) : NovaRecipe, SingleResultRecipe {
     override val type = RecipeTypes.COBBLESTONE_GENERATOR
 }
 
@@ -52,6 +52,6 @@ class FreezerRecipe(
     override val key: NamespacedKey,
     val mode: Freezer.Mode,
     override val result: ItemStack = mode.product
-) : NovaRecipe, ResultingRecipe {
+) : NovaRecipe, SingleResultRecipe {
     override val type = RecipeTypes.FREEZER
 }
