@@ -27,8 +27,9 @@ import xyz.xenondevs.nova.util.BlockSide.FRONT
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.axis
 import xyz.xenondevs.nova.util.intValue
-import xyz.xenondevs.nova.util.item.fuel
-import xyz.xenondevs.nova.util.item.toItemStack
+import xyz.xenondevs.nova.util.item.burnTime
+import xyz.xenondevs.nova.util.item.craftingRemainingItem
+import xyz.xenondevs.nova.util.item.isFuel
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -105,22 +106,21 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
     private fun burnItem() {
         val fuelStack = inventory.getItemStack(0)
         if (energyHolder.energy < energyHolder.maxEnergy && fuelStack != null) {
-            val fuel = fuelStack.type.fuel
-            if (fuel != null) {
-                burnTime += (fuel.burnTime * burnTimeMultiplier).roundToInt()
+            val itemBurnTime = fuelStack.burnTime
+            if (itemBurnTime != null) {
+                burnTime += (itemBurnTime * burnTimeMultiplier).roundToInt()
                 totalBurnTime = burnTime
-                if (fuel.remains == null) {
-                    inventory.addItemAmount(null, 0, -1)
-                } else {
-                    inventory.setItemStack(null, 0, fuel.remains!!.toItemStack())
-                }
+                val remains = fuelStack.craftingRemainingItem
+                if (remains != null) {
+                    inventory.setItemStack(null, 0, remains)
+                } else inventory.addItemAmount(null, 0, -1)
             }
         }
     }
     
     private fun handleInventoryUpdate(event: ItemUpdateEvent) {
         if (event.updateReason != null) { // not done by the tileEntity itself
-            if (event.newItemStack != null && event.newItemStack.type.fuel == null) {
+            if (event.newItemStack != null && event.newItemStack.isFuel) {
                 // illegal item
                 event.isCancelled = true
             }
