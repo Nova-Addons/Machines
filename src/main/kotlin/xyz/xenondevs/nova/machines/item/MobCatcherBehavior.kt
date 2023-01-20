@@ -20,6 +20,7 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
+import xyz.xenondevs.nova.data.serialization.cbf.NamespacedCompound
 import xyz.xenondevs.nova.data.serialization.persistentdata.getLegacy
 import xyz.xenondevs.nova.data.serialization.persistentdata.set
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
@@ -33,7 +34,6 @@ import xyz.xenondevs.nova.util.data.NamespacedKey
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.getTargetLocation
 import xyz.xenondevs.nova.util.item.retrieveData
-import xyz.xenondevs.nova.util.item.retrieveDataOrNull
 import xyz.xenondevs.nova.util.item.storeData
 
 private val LEGACY_DATA_KEY = NamespacedKey("nova", "entitydata1")
@@ -84,7 +84,7 @@ object MobCatcherBehavior : ItemBehavior() {
         
         if (action == Action.RIGHT_CLICK_BLOCK) {
             // Adds a small delay to prevent players from spamming the item
-            if (System.currentTimeMillis() - (itemStack.retrieveData<Long>(TIME_KEY) { -1 }) < 50) return
+            if (System.currentTimeMillis() - (itemStack.retrieveData<Long>(TIME_KEY) ?: -1 ) < 50) return
             
             val data = getEntityData(itemStack)
             if (data != null) {
@@ -104,9 +104,13 @@ object MobCatcherBehavior : ItemBehavior() {
         }
     }
     
-    fun getEntityData(itemStack: ItemStack): ByteArray? = itemStack.retrieveDataOrNull(DATA_KEY)
+    fun getEntityData(itemStack: ItemStack): ByteArray? = itemStack.retrieveData(DATA_KEY)
     
-    fun getEntityType(itemStack: ItemStack): EntityType? = itemStack.retrieveDataOrNull<String>(TYPE_KEY)?.let { EntityType.valueOf(it) }
+    fun getEntityData(compound: NamespacedCompound): ByteArray? = compound[DATA_KEY]
+    
+    fun getEntityType(itemStack: ItemStack): EntityType? = itemStack.retrieveData(TYPE_KEY)
+    
+    fun getEntityType(compound: NamespacedCompound): EntityType? = compound[TYPE_KEY]
     
     private fun setEntityData(itemStack: ItemStack, type: EntityType, data: ByteArray) {
         itemStack.storeData(DATA_KEY, data)
@@ -119,8 +123,8 @@ object MobCatcherBehavior : ItemBehavior() {
         setEntityData(itemStack, entity.type, data)
     }
     
-    override fun updatePacketItemData(itemStack: ItemStack, itemData: PacketItemData) {
-        val type = getEntityType(itemStack) ?: return
+    override fun updatePacketItemData(data: NamespacedCompound, itemData: PacketItemData) {
+        val type = getEntityType(data) ?: return
         val nmsType = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation("minecraft", type.key.key))
         
         itemData.addLore(listOf(
