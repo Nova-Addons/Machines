@@ -49,7 +49,7 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     override val gui = lazy { MobCrusherGUI() }
     override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_DAMAGE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
-    private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID ?: UUID.randomUUID(), "Mob Killer").bukkitEntity
+    private val fakePlayer = EntityUtils.createFakePlayer(location).bukkitEntity
     
     private var timePassed = 0
     private var maxIdleTime = 0
