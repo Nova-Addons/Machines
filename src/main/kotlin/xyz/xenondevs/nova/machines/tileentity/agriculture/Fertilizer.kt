@@ -16,10 +16,8 @@ import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.FERTILIZER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
@@ -33,6 +31,8 @@ import xyz.xenondevs.nova.util.item.PlantUtils
 import xyz.xenondevs.nova.util.item.isFullyAged
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 
 private val MAX_ENERGY = configReloadable { NovaConfig[FERTILIZER].getLong("capacity") }
 private val ENERGY_PER_TICK = configReloadable { NovaConfig[FERTILIZER].getLong("energy_per_tick") }
@@ -46,7 +46,7 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     
     private val fertilizerInventory = getInventory("fertilizer", 12, ::handleFertilizerUpdate)
     override val gui = lazy(::FertilizerGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_FERTILIZE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, fertilizerInventory to NetworkConnectionType.INSERT) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
@@ -68,10 +68,10 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     
     override fun reload() {
         super.reload()
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
         if (range > maxRange) range = maxRange
     }
     

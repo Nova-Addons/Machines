@@ -10,15 +10,15 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.SOLAR_PANEL
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.item.isGlass
 import xyz.xenondevs.nova.util.runTaskTimer
 import xyz.xenondevs.nova.util.untilHeightLimit
+import xyz.xenondevs.simpleupgrades.ProviderEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -28,8 +28,8 @@ private val ENERGY_PER_TICK = configReloadable { NovaConfig[SOLAR_PANEL].getLong
 class SolarPanel(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { SolarPanelGUI() }
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder) {
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
+    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder, UpgradeTypes.EFFICIENCY) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
     }
     

@@ -22,7 +22,6 @@ import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
@@ -37,6 +36,8 @@ import xyz.xenondevs.nova.util.registerEvents
 import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
+import xyz.xenondevs.simpleupgrades.getFluidContainer
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import kotlin.math.min
 import kotlin.math.roundToLong
 
@@ -49,7 +50,7 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("ra
 class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::SprinklerGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.EFFICIENCY, UpgradeType.FLUID, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.FLUID, UpgradeTypes.RANGE)
     private val tank = getFluidContainer("tank", hashSetOf(FluidType.WATER), WATER_CAPACITY, upgradeHolder = upgradeHolder)
     override val fluidHolder = NovaFluidHolder(this, tank to NetworkConnectionType.BUFFER) { createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM) }
     
@@ -80,8 +81,8 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     override fun reload() {
         super.reload()
         
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
-        waterPerMoistureLevel = (WATER_PER_MOISTURE_LEVEL / upgradeHolder.getValue(UpgradeType.EFFICIENCY)).roundToLong()
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
+        waterPerMoistureLevel = (WATER_PER_MOISTURE_LEVEL / upgradeHolder.getValue(UpgradeTypes.EFFICIENCY)).roundToLong()
     }
     
     private fun updateRegion() {

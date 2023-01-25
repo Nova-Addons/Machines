@@ -23,18 +23,19 @@ import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.getFluidContainer
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import kotlin.math.roundToInt
 
 fun getFluidInfuserInsertRecipeFor(fluidType: FluidType, input: ItemStack): FluidInfuserRecipe? {
@@ -63,7 +64,7 @@ private val FLUID_CAPACITY = configReloadable { NovaConfig[FLUID_INFUSER].getLon
 class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::FluidInfuserGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     private val input = getInventory("input", 1, ::handleInputInventoryUpdate)
     private val output = getInventory("output", 1, ::handleOutputInventoryUpdate)
     private val tank = getFluidContainer("tank", hashSetOf(FluidType.WATER, FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
@@ -79,7 +80,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     
     private var recipe: FluidInfuserRecipe? = null
     private val recipeTime: Int
-        get() = (recipe!!.time.toDouble() / upgradeHolder.getValue(UpgradeType.SPEED)).roundToInt()
+        get() = (recipe!!.time.toDouble() / upgradeHolder.getValue(UpgradeTypes.SPEED)).roundToInt()
     private var timePassed = 0
     
     override fun saveData() {

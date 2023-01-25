@@ -21,10 +21,8 @@ import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.ItemNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
@@ -34,6 +32,8 @@ import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.dropItem
 import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.awt.Color
 
 private class PlantConfiguration(val miniature: ItemNovaMaterial, val loot: ItemStack, val color: Color)
@@ -65,7 +65,7 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     private val outputInventory = getInventory("output", 9, ::handleOutputInventoryUpdate)
     
     override val gui: Lazy<TileEntityGUI> = lazy(::TreeFactoryGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) {
         createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM, BlockSide.BACK)
     }
@@ -95,8 +95,8 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     
     override fun reload() {
         super.reload()
-        progressPerTick = PROGRESS_PER_TICK * upgradeHolder.getValue(UpgradeType.SPEED)
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        progressPerTick = PROGRESS_PER_TICK * upgradeHolder.getValue(UpgradeTypes.SPEED)
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
     }
     
     override fun handleTick() {

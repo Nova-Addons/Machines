@@ -11,6 +11,7 @@ import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
+import xyz.xenondevs.commons.collections.rotateRight
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -20,11 +21,9 @@ import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -40,10 +39,12 @@ import xyz.xenondevs.nova.util.VERTICAL_FACES
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.isSourceFluid
 import xyz.xenondevs.nova.util.item.playPlaceSoundEffect
-import xyz.xenondevs.nova.util.rotateRight
 import xyz.xenondevs.nova.util.sourceFluidType
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.getFluidContainer
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.util.*
 
 private val ENERGY_CAPACITY = configReloadable { NovaConfig[PUMP].getLong("energy_capacity") }
@@ -59,11 +60,11 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[PUMP].getInt("range.d
 class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::PumpGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE, UpgradeType.FLUID)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE, UpgradeTypes.FLUID)
     
     private val fluidTank = getFluidContainer("tank", hashSetOf(FluidType.WATER, FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
     
-    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, null, upgradeHolder = upgradeHolder) { createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.TOP) }
+    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, upgradeHolder = upgradeHolder) { createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.TOP) }
     override val fluidHolder = NovaFluidHolder(this, fluidTank to NetworkConnectionType.EXTRACT) { createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.TOP) }
     
     private var maxIdleTime = 0
@@ -91,10 +92,10 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
     override fun reload() {
         super.reload()
         
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (idleTime > maxIdleTime) idleTime = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
         if (maxRange < range) range = maxRange
     }
     

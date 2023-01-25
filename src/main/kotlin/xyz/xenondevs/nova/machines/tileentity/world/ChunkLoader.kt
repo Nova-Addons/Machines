@@ -11,9 +11,7 @@ import xyz.xenondevs.nova.machines.registry.Blocks.CHUNK_LOADER
 import xyz.xenondevs.nova.tileentity.ChunkLoadManager
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
@@ -23,6 +21,8 @@ import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.util.getSurroundingChunks
 import xyz.xenondevs.nova.world.pos
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 
 private val MAX_ENERGY = configReloadable { NovaConfig[CHUNK_LOADER].getLong("capacity") }
 private val ENERGY_PER_CHUNK by configReloadable { NovaConfig[CHUNK_LOADER].getLong("energy_per_chunk") }
@@ -32,8 +32,8 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     
     override val gui = lazy { ChunkLoaderGUI() }
     
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.ENERGY, UpgradeType.EFFICIENCY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, null, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.ENERGY, UpgradeTypes.EFFICIENCY)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, upgradeHolder = upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     
     private var range = retrieveData("range") { 0 }
     private var chunks = chunk.getSurroundingChunks(range, true)
@@ -47,7 +47,7 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     
     override fun reload() {
         super.reload()
-        energyPerTick = (ENERGY_PER_CHUNK * chunks.size / upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toInt()
+        energyPerTick = (ENERGY_PER_CHUNK * chunks.size / upgradeHolder.getValue(UpgradeTypes.EFFICIENCY)).toInt()
     }
     
     override fun saveData() {

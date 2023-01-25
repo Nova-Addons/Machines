@@ -17,9 +17,7 @@ import xyz.xenondevs.nova.tileentity.Model
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.util.BlockSide
@@ -28,6 +26,8 @@ import xyz.xenondevs.nova.util.concurrent.CombinedBooleanFuture
 import xyz.xenondevs.nova.util.item.isReplaceable
 import xyz.xenondevs.nova.world.BlockPos
 import xyz.xenondevs.nova.world.pos
+import xyz.xenondevs.simpleupgrades.ProviderEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.util.concurrent.CompletableFuture
 import kotlin.math.abs
 
@@ -38,8 +38,8 @@ private val PLAY_ANIMATION by configReloadable { NovaConfig[WIND_TURBINE].getBoo
 class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { WindTurbineGUI() }
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder) {
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
+    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder, UpgradeTypes.EFFICIENCY) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT, BlockSide.BOTTOM)
     }
     
@@ -87,7 +87,7 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         if (PLAY_ANIMATION) {
             turbineModel.useArmorStands {
                 it.updateEntityData(true) {
-                    headRotation = headRotation!!.add(0f, 0f, rotationPerTick)
+                    headRotation = headRotation.add(0f, 0f, rotationPerTick)
                 }
             }
         }

@@ -25,6 +25,9 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.axis
 import xyz.xenondevs.nova.util.intValue
+import xyz.xenondevs.simpleupgrades.ProviderEnergyHolder
+import xyz.xenondevs.simpleupgrades.getFluidContainer
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 
 private val ENERGY_CAPACITY = configReloadable { NovaConfig[LAVA_GENERATOR].getLong("energy_capacity") }
 private val FLUID_CAPACITY = configReloadable { NovaConfig[LAVA_GENERATOR].getLong("fluid_capacity") }
@@ -35,10 +38,10 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     
     override val gui = lazy(::LavaGeneratorGUI)
     
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     private val fluidContainer = getFluidContainer("tank", hashSetOf(FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
     override val fluidHolder = NovaFluidHolder(this, fluidContainer to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
-    override val energyHolder = ProviderEnergyHolder(this, ENERGY_CAPACITY, null, upgradeHolder) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
+    override val energyHolder = ProviderEnergyHolder(this, ENERGY_CAPACITY, upgradeHolder) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
     
     private var on = false
     private var burnRate = 0.0
@@ -69,8 +72,8 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     
     override fun reload() {
         super.reload()
-        burnRate = BURN_RATE * upgradeHolder.getValue(UpgradeType.SPEED) / upgradeHolder.getValue(UpgradeType.EFFICIENCY)
-        energyPerTick = (ENERGY_PER_MB * BURN_RATE * upgradeHolder.getValue(UpgradeType.SPEED)).toLong()
+        burnRate = BURN_RATE * upgradeHolder.getValue(UpgradeTypes.SPEED) / upgradeHolder.getValue(UpgradeTypes.EFFICIENCY)
+        energyPerTick = (ENERGY_PER_MB * BURN_RATE * upgradeHolder.getValue(UpgradeTypes.SPEED)).toLong()
     }
     
     private fun updateModelState() {

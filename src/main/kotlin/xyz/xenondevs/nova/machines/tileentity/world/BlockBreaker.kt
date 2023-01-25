@@ -14,10 +14,8 @@ import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.BLOCK_BREAKER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
@@ -34,6 +32,8 @@ import xyz.xenondevs.nova.util.remove
 import xyz.xenondevs.nova.util.setBreakStage
 import xyz.xenondevs.nova.world.block.context.BlockBreakContext
 import xyz.xenondevs.nova.world.pos
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -46,7 +46,7 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     
     private val inventory = getInventory("inventory", 9, ::handleInventoryUpdate)
     override val gui = lazy { BlockBreakerGUI() }
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -89,7 +89,7 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
                 block.hardness,
                 correctCategory = true,
                 correctForDrops = true,
-                toolMultiplier = BREAK_SPEED_MULTIPLIER * upgradeHolder.getValue(UpgradeType.SPEED),
+                toolMultiplier = BREAK_SPEED_MULTIPLIER * upgradeHolder.getValue(UpgradeTypes.SPEED),
                 efficiency = 0,
                 onGround = true,
                 underWater = false,
