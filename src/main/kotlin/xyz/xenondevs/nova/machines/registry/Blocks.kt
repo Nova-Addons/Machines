@@ -4,9 +4,9 @@ import org.bukkit.Material
 import xyz.xenondevs.nova.data.world.block.property.Directional
 import xyz.xenondevs.nova.data.world.block.property.LegacyDirectional
 import xyz.xenondevs.nova.item.tool.ToolCategory
-import xyz.xenondevs.nova.item.tool.ToolLevel
 import xyz.xenondevs.nova.item.tool.ToolTier
 import xyz.xenondevs.nova.machines.Machines
+import xyz.xenondevs.nova.machines.block.StarShardsOre
 import xyz.xenondevs.nova.machines.tileentity.agriculture.AutoFisher
 import xyz.xenondevs.nova.machines.tileentity.agriculture.Fertilizer
 import xyz.xenondevs.nova.machines.tileentity.agriculture.Harvester
@@ -38,7 +38,6 @@ import xyz.xenondevs.nova.machines.tileentity.world.Pump
 import xyz.xenondevs.nova.machines.tileentity.world.Quarry
 import xyz.xenondevs.nova.machines.tileentity.world.Sprinkler
 import xyz.xenondevs.nova.machines.tileentity.world.StarCollector
-import xyz.xenondevs.nova.material.BlockOptions
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.block
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerUnnamedItem
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.tileEntity
@@ -52,7 +51,7 @@ object Blocks {
     private val STONE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolTier.WOOD, true, SoundGroup.STONE, Material.NETHERITE_BLOCK)
     private val LIGHT_METAL = BlockOptions(0.5, ToolCategory.PICKAXE, ToolTier.WOOD, false, SoundGroup.METAL, Material.IRON_BLOCK)
     private val STONE_ORE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolTier.STONE, true, SoundGroup.STONE, Material.STONE)
-    private val DEEPSLATE_ORE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolTier.STONE, true, SoundGroup.DEEPSLATE, Material.STONE)
+    private val DEEPSLATE_ORE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolTier.STONE, true, SoundGroup.DEEPSLATE, Material.DEEPSLATE)
     private val METAL = BlockOptions(5.0, ToolCategory.PICKAXE, ToolTier.WOOD, true, SoundGroup.METAL, Material.IRON_BLOCK)
     private val MACHINE_FRAME = BlockOptions(2.0, ToolCategory.PICKAXE, ToolTier.WOOD, true, SoundGroup.METAL, Material.STONE)
     
@@ -98,8 +97,8 @@ object Blocks {
     val CREATIVE_MACHINE_FRAME = block(Machines, "creative_machine_frame").blockOptions(MACHINE_FRAME).register()
     
     // Ores
-    val STAR_SHARDS_ORE = block(Machines, "star_shards_ore").blockOptions(STONE_ORE)
-    val DEEPSLATE_STAR_SHARDS_ORE = block(Machines, "deepslate_star_shards_ore").blockOptions(DEEPSLATE_ORE)
+    val STAR_SHARDS_ORE = block(Machines, "star_shards_ore").blockOptions(STONE_ORE).block(StarShardsOre).register()
+    val DEEPSLATE_STAR_SHARDS_ORE = block(Machines, "deepslate_star_shards_ore").blockOptions(DEEPSLATE_ORE).block(StarShardsOre).register()
     
     // Tree Miniatures
     val OAK_TREE_MINIATURE = registerUnnamedItem(Machines, "oak_tree_miniature")
