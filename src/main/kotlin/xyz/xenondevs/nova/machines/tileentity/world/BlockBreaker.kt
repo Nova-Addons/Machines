@@ -1,10 +1,9 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.Material
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -19,7 +18,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.callEvent
@@ -45,7 +44,7 @@ private val BREAK_SPEED_CLAMP by configReloadable { NovaConfig[BLOCK_BREAKER].ge
 class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 9, ::handleInventoryUpdate)
-    override val gui = lazy { BlockBreakerGUI() }
+    override val gui = lazy { BlockBreakerGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
@@ -132,15 +131,15 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
             block.setBreakStage(entityId, -1)
     }
     
-    inner class BlockBreakerGUI : TileEntityGUI() {
+    inner class BlockBreakerGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@BlockBreaker,
             listOf(Pair(itemHolder.getNetworkedInventory(inventory), "inventory.nova.default")),
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # i i i # e |",
@@ -148,7 +147,7 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
                 "| # # i i i # e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .build()

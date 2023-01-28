@@ -1,23 +1,22 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.ItemProvider
-import de.studiocode.invui.item.impl.BaseItem
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.LeftRightFluidProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.FREEZER
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.material.ItemNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -29,7 +28,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.getFluidContainer
@@ -45,7 +44,7 @@ private val MB_PER_TICK by configReloadable { NovaConfig[FREEZER].getLong("mb_pe
 
 class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::FreezerGUI)
+    override val gui = lazy(::FreezerGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     private val inventory = getInventory("inventory", 6, ::handleInventoryUpdate)
     private val waterTank = getFluidContainer("water", setOf(FluidType.WATER), WATER_CAPACITY, 0, upgradeHolder = upgradeHolder)
@@ -105,16 +104,16 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         storeData("mode", mode)
     }
     
-    inner class FreezerGUI : TileEntityGUI() {
+    inner class FreezerGui : TileEntityGui() {
         
         private val progressItem = LeftRightFluidProgressItem()
-        private val sideConfigGUI = SideConfigGUI(this@Freezer,
+        private val sideConfigGui = SideConfigGui(this@Freezer,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output"),
             listOf(waterTank to "container.nova.water_tank"),
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| w # i i # s e |",
@@ -123,7 +122,7 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('>', progressItem)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('m', ChangeModeItem())
             .addIngredient('w', FluidBar(3, fluidHolder, waterTank))
@@ -152,9 +151,9 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     }
     
     enum class Mode(val product: ItemStack, val uiItem: ItemNovaMaterial, val maxCostMultiplier: Int) {
-        ICE(ItemStack(Material.ICE), GUIMaterials.ICE_MODE_BTN, 1),
-        PACKED_ICE(ItemStack(Material.PACKED_ICE), GUIMaterials.PACKED_ICE_MODE_BTN, 9),
-        BLUE_ICE(ItemStack(Material.BLUE_ICE), GUIMaterials.BLUE_ICE_MODE_BTN, 81)
+        ICE(ItemStack(Material.ICE), GuiMaterials.ICE_MODE_BTN, 1),
+        PACKED_ICE(ItemStack(Material.PACKED_ICE), GuiMaterials.PACKED_ICE_MODE_BTN, 9),
+        BLUE_ICE(ItemStack(Material.BLUE_ICE), GuiMaterials.BLUE_ICE_MODE_BTN, 81)
     }
     
 }

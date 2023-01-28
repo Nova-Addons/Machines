@@ -1,11 +1,10 @@
 package xyz.xenondevs.nova.machines.tileentity.energy
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import net.minecraft.core.particles.ParticleTypes
+import xyz.xenondevs.invui.gui.SlotElement
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -19,7 +18,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.BlockSide.FRONT
 import xyz.xenondevs.nova.util.advance
@@ -39,7 +38,7 @@ private val BURN_TIME_MULTIPLIER by configReloadable { NovaConfig[FURNACE_GENERA
 
 class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { FurnaceGeneratorGUI() }
+    override val gui = lazy { FurnaceGeneratorGui() }
     private val inventory = getInventory("fuel", 1, ::handleInventoryUpdate)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder, UpgradeTypes.SPEED) { createSideConfig(NetworkConnectionType.EXTRACT, FRONT) }
@@ -133,17 +132,17 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
         storeData("totalBurnTime", totalBurnTime)
     }
     
-    inner class FurnaceGeneratorGUI : TileEntityGUI() {
+    inner class FurnaceGeneratorGui : TileEntityGui() {
         
         val progressItem = EnergyProgressItem()
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@FurnaceGenerator,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.machines.fuel"),
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # # # # e |",
@@ -153,7 +152,7 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
                 "3 - - - - - - - 4")
             .addIngredient('i', SlotElement.VISlotElement(inventory, 0))
             .addIngredient('!', progressItem)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(4, energyHolder))
             .build()

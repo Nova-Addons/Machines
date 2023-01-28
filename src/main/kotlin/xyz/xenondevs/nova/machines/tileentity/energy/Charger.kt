@@ -1,10 +1,9 @@
 package xyz.xenondevs.nova.machines.tileentity.energy
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement.VISlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
+import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -18,7 +17,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.item.novaMaterial
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
@@ -29,7 +28,7 @@ private val ENERGY_PER_TICK = configReloadable { NovaConfig[CHARGER].getLong("ch
 class Charger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 1, ::handleInventoryUpdate)
-    override val gui = lazy { ChargerGUI() }
+    override val gui = lazy { ChargerGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.ENERGY, UpgradeTypes.SPEED)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.BUFFER) }
@@ -63,22 +62,22 @@ class Charger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         }
     }
     
-    inner class ChargerGUI : TileEntityGUI() {
+    inner class ChargerGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@Charger,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default"),
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # # # # e |",
                 "| u # # i # # e |",
                 "| # # # # # # e |",
                 "3 - - - - - - - 4")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('i', VISlotElement(inventory, 0))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))

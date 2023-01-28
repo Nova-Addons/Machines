@@ -1,8 +1,7 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -11,32 +10,32 @@ import xyz.xenondevs.nova.tileentity.network.fluid.container.FluidContainer
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import java.util.*
 
 class InfiniteWaterSource(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState) {
     
-    override val gui = lazy(::InfiniteWaterSourceGUI)
+    override val gui = lazy(::InfiniteWaterSourceGui)
     
     private val fluidContainer = InfiniteFluidContainer
     override val fluidHolder = NovaFluidHolder(this, fluidContainer to NetworkConnectionType.EXTRACT) { createSideConfig(NetworkConnectionType.EXTRACT) }
     
-    inner class InfiniteWaterSourceGUI : TileEntityGUI() {
+    inner class InfiniteWaterSourceGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@InfiniteWaterSource,
             fluidContainerNames = listOf(fluidContainer to "block.minecraft.water"),
             openPrevious = ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # f # # # |",
                 "| # # # f # # # |",
                 "| # # # f # # # |",
                 "3 - - - - - - - 4")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('f', FluidBar(3, fluidHolder, fluidContainer))
             .build()
         

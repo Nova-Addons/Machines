@@ -1,15 +1,14 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.builder.ItemBuilder
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import net.md_5.bungee.api.ChatColor
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.entity.EquipmentSlot
 import org.bukkit.Bukkit
 import org.bukkit.util.Vector
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.item.builder.ItemBuilder
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nmsutils.particle.color
 import xyz.xenondevs.nmsutils.particle.dustTransition
 import xyz.xenondevs.nmsutils.particle.particle
@@ -20,7 +19,7 @@ import xyz.xenondevs.nova.data.resources.model.data.ArmorStandBlockModelData
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.STAR_COLLECTOR
 import xyz.xenondevs.nova.machines.registry.Items
-import xyz.xenondevs.nova.material.CoreGUIMaterial
+import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
@@ -29,14 +28,13 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.Vector
 import xyz.xenondevs.nova.util.calculateYaw
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.dropItem
-import xyz.xenondevs.nova.util.isFull
 import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
@@ -54,7 +52,7 @@ private const val STAR_PARTICLE_DISTANCE_PER_TICK = 0.75
 class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 1, ::handleInventoryUpdate)
-    override val gui: Lazy<StarCollectorGUI> = lazy(::StarCollectorGUI)
+    override val gui: Lazy<StarCollectorGui> = lazy(::StarCollectorGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
@@ -185,16 +183,16 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         rod.remove()
     }
     
-    inner class StarCollectorGUI : TileEntityGUI() {
+    inner class StarCollectorGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@StarCollector,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output"),
             ::openWindow
         )
         
         val collectionBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGUIMaterial.BAR_GREEN
+            override val barMaterial = CoreGuiMaterial.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder): ItemBuilder {
                 if (timeSpentCollecting != -1)
                     itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.star_collector.collection"))
@@ -203,19 +201,19 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         }
         
         val idleBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGUIMaterial.BAR_GREEN
+            override val barMaterial = CoreGuiMaterial.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.star_collector.idle"))
         }
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # # c p e |",
                 "| u # i # c p e |",
                 "| # # # # c p e |",
                 "3 - - - - - - - 4")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('i', inventory)
             .addIngredient('c', collectionBar)

@@ -1,18 +1,17 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement.VISlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
-import de.studiocode.invui.item.ItemProvider
-import de.studiocode.invui.item.impl.BaseItem
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.NamespacedKey
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
+import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.ConversionNovaRecipe
@@ -21,7 +20,7 @@ import xyz.xenondevs.nova.data.recipe.RecipeType
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.PressProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.MECHANICAL_PRESS
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -30,7 +29,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide.FRONT
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
@@ -47,7 +46,7 @@ private enum class PressType(val recipeType: RecipeType<out ConversionNovaRecipe
 
 class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { MechanicalPressGUI() }
+    override val gui = lazy { MechanicalPressGui() }
     
     private val inputInv = getInventory("input", 1, ::handleInputUpdate)
     private val outputInv = getInventory("output", 1, ::handleOutputUpdate)
@@ -127,12 +126,12 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     }
     
     
-    inner class MechanicalPressGUI : TileEntityGUI() {
+    inner class MechanicalPressGui : TileEntityGui() {
         
         private val pressProgress = PressProgressItem()
         private val pressTypeItems = ArrayList<PressTypeItem>()
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@MechanicalPress,
             listOf(
                 itemHolder.getNetworkedInventory(inputInv) to "inventory.nova.input",
@@ -141,7 +140,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| p g # i # # e |",
@@ -151,7 +150,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             .addIngredient('i', VISlotElement(inputInv, 0))
             .addIngredient('o', VISlotElement(outputInv, 0))
             .addIngredient(',', pressProgress)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('p', PressTypeItem(PressType.PLATE).apply(pressTypeItems::add))
             .addIngredient('g', PressTypeItem(PressType.GEAR).apply(pressTypeItems::add))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
@@ -171,11 +170,11 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             
             override fun getItemProvider(): ItemProvider {
                 return if (type == PressType.PLATE) {
-                    if (this@MechanicalPress.type == PressType.PLATE) GUIMaterials.PLATE_BTN_OFF.createItemBuilder()
-                    else GUIMaterials.PLATE_BTN_ON.clientsideProvider
+                    if (this@MechanicalPress.type == PressType.PLATE) GuiMaterials.PLATE_BTN_OFF.createItemBuilder()
+                    else GuiMaterials.PLATE_BTN_ON.clientsideProvider
                 } else {
-                    if (this@MechanicalPress.type == PressType.GEAR) GUIMaterials.GEAR_BTN_OFF.createItemBuilder()
-                    else GUIMaterials.GEAR_BTN_ON.clientsideProvider
+                    if (this@MechanicalPress.type == PressType.GEAR) GuiMaterials.GEAR_BTN_OFF.createItemBuilder()
+                    else GuiMaterials.GEAR_BTN_ON.clientsideProvider
                 }
             }
             

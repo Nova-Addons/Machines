@@ -1,28 +1,25 @@
 package xyz.xenondevs.nova.machines.tileentity.mob
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
-import de.studiocode.invui.item.builder.ItemBuilder
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Mob
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.MOB_KILLER
-import xyz.xenondevs.nova.material.CoreGUIMaterial
+import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -33,7 +30,6 @@ import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
-import java.util.*
 import kotlin.math.min
 
 private val MAX_ENERGY = configReloadable { NovaConfig[MOB_KILLER].getLong("capacity") }
@@ -48,7 +44,7 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[MOB_KILLER].getInt("r
 
 class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { MobCrusherGUI() }
+    override val gui = lazy { MobCrusherGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_DAMAGE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     private val fakePlayer = EntityUtils.createFakePlayer(location).bukkitEntity
@@ -119,9 +115,9 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         VisualRegion.removeRegion(uuid)
     }
     
-    inner class MobCrusherGUI : TileEntityGUI() {
+    inner class MobCrusherGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@MobKiller,
             ::openWindow
         )
@@ -129,19 +125,19 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         private val rangeItems = ArrayList<Item>()
         
         val idleBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGUIMaterial.BAR_GREEN
+            override val barMaterial = CoreGuiMaterial.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.mob_killer.idle", maxIdleTime - timePassed))
         }
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # i # e # p |",
                 "| r # i # e # n |",
                 "| u # i # e # m |",
                 "3 - - - - - - - 4")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('r', VisualizeRegionItem(uuid) { region })
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))

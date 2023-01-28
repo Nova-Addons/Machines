@@ -1,25 +1,24 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.ItemProvider
-import de.studiocode.invui.item.impl.BaseItem
-import de.studiocode.invui.item.impl.CycleItem
-import de.studiocode.invui.item.impl.SimpleItem
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.item.impl.CycleItem
+import xyz.xenondevs.invui.item.impl.SimpleItem
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.recipe.FluidInfuserRecipe
 import xyz.xenondevs.nova.machines.registry.Blocks.FLUID_INFUSER
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -31,7 +30,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.getFluidContainer
@@ -63,7 +62,7 @@ private val FLUID_CAPACITY = configReloadable { NovaConfig[FLUID_INFUSER].getLon
 
 class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::FluidInfuserGUI)
+    override val gui = lazy(::FluidInfuserGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     private val input = getInventory("input", 1, ::handleInputInventoryUpdate)
     private val output = getInventory("output", 1, ::handleOutputInventoryUpdate)
@@ -136,17 +135,17 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
         }
     }
     
-    inner class FluidInfuserGUI : TileEntityGUI() {
+    inner class FluidInfuserGui : TileEntityGui() {
         
         private val progressItem = InfuserProgressItem()
         private val changeModeItem = CycleItem.withStateChangeHandler(
             ::changeMode,
             mode.ordinal,
-            GUIMaterials.FLUID_LEFT_RIGHT_BTN.clientsideProvider,
-            GUIMaterials.FLUID_RIGHT_LEFT_BTN.clientsideProvider
+            GuiMaterials.FLUID_LEFT_RIGHT_BTN.clientsideProvider,
+            GuiMaterials.FLUID_RIGHT_LEFT_BTN.clientsideProvider
         )
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@FluidInfuser,
             listOf(
                 itemHolder.getNetworkedInventory(input) to "inventory.nova.input",
@@ -156,7 +155,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| f # m u s # e |",
@@ -167,8 +166,8 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
             .addIngredient('o', output)
             .addIngredient('p', progressItem)
             .addIngredient('m', changeModeItem)
-            .addIngredient('>', SimpleItem(GUIMaterials.ARROW_PROGRESS.clientsideProvider))
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('>', SimpleItem(GuiMaterials.ARROW_PROGRESS.clientsideProvider))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('f', FluidBar(3, fluidHolder, tank))
             .addIngredient('e', EnergyBar(3, energyHolder))
@@ -194,8 +193,8 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
             
             override fun getItemProvider(): ItemProvider {
                 val material = if (mode == FluidInfuserRecipe.InfuserMode.INSERT)
-                    GUIMaterials.FLUID_PROGRESS_LEFT_RIGHT
-                else GUIMaterials.FLUID_PROGRESS_RIGHT_LEFT
+                    GuiMaterials.FLUID_PROGRESS_LEFT_RIGHT
+                else GuiMaterials.FLUID_PROGRESS_RIGHT_LEFT
                 
                 return material.item.createItemBuilder((percentage * 16).roundToInt())
             }

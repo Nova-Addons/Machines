@@ -1,15 +1,14 @@
 package xyz.xenondevs.nova.machines.tileentity.agriculture
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement.VISlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
-import de.studiocode.invui.virtualinventory.VirtualInventory
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.Material
 import org.bukkit.Tag
 import org.bukkit.block.Block
+import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.virtualinventory.VirtualInventory
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -18,7 +17,7 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.item.tool.ToolCategory
 import xyz.xenondevs.nova.machines.registry.Blocks.HARVESTER
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
@@ -26,7 +25,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -35,7 +34,6 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.addAll
 import xyz.xenondevs.nova.util.callEvent
 import xyz.xenondevs.nova.util.dropItemsNaturally
-import xyz.xenondevs.nova.util.isFull
 import xyz.xenondevs.nova.util.item.DamageableUtils
 import xyz.xenondevs.nova.util.item.PlantUtils
 import xyz.xenondevs.nova.util.item.isLeaveLike
@@ -61,7 +59,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     private val shearInventory = getInventory("shears", 1, ::handleShearInventoryUpdate)
     private val axeInventory = getInventory("axe", 1, ::handleAxeInventoryUpdate)
     private val hoeInventory = getInventory("hoe", 1, ::handleHoeInventoryUpdate)
-    override val gui = lazy(::HarvesterGUI)
+    override val gui = lazy(::HarvesterGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREAK, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
@@ -119,7 +117,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 if (timePassed++ >= maxIdleTime) {
                     timePassed = 0
                     
-                    if (!GlobalValues.DROP_EXCESS_ON_GROUND && inventory.isFull()) return
+                    if (!GlobalValues.DROP_EXCESS_ON_GROUND && inventory.isFull) return
                     if (queuedBlocks.isEmpty()) loadBlocks()
                     harvestNextBlock()
                 }
@@ -224,9 +222,9 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         VisualRegion.removeRegion(uuid)
     }
     
-    inner class HarvesterGUI : TileEntityGUI() {
+    inner class HarvesterGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@Harvester,
             listOf(
                 itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output",
@@ -239,7 +237,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| c v u s a h e |",
@@ -248,11 +246,11 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 "| i i i i i i e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
-            .addIngredient('c', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('c', OpenSideConfigItem(sideConfigGui))
             .addIngredient('v', VisualizeRegionItem(uuid) { harvestRegion })
-            .addIngredient('s', VISlotElement(shearInventory, 0, GUIMaterials.SHEARS_PLACEHOLDER.clientsideProvider))
-            .addIngredient('a', VISlotElement(axeInventory, 0, GUIMaterials.AXE_PLACEHOLDER.clientsideProvider))
-            .addIngredient('h', VISlotElement(hoeInventory, 0, GUIMaterials.HOE_PLACEHOLDER.clientsideProvider))
+            .addIngredient('s', VISlotElement(shearInventory, 0, GuiMaterials.SHEARS_PLACEHOLDER.clientsideProvider))
+            .addIngredient('a', VISlotElement(axeInventory, 0, GuiMaterials.AXE_PLACEHOLDER.clientsideProvider))
+            .addIngredient('h', VISlotElement(hoeInventory, 0, GuiMaterials.HOE_PLACEHOLDER.clientsideProvider))
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))

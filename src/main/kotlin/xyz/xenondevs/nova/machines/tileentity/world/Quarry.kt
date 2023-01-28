@@ -1,11 +1,5 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
-import de.studiocode.invui.item.ItemProvider
-import de.studiocode.invui.item.impl.BaseItem
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.TranslatableComponent
 import net.minecraft.core.particles.ParticleTypes
@@ -18,6 +12,11 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.impl.BaseItem
 import xyz.xenondevs.nmsutils.particle.block
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
@@ -28,7 +27,7 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.QUARRY
 import xyz.xenondevs.nova.machines.registry.Items
-import xyz.xenondevs.nova.material.CoreGUIMaterial
+import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.Model
 import xyz.xenondevs.nova.tileentity.MultiModel
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -39,7 +38,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.util.BlockSide
@@ -103,7 +102,7 @@ private val ENERGY_PER_SQUARE_BLOCK by configReloadable { NovaConfig[QUARRY].get
 
 class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { QuarryGUI() }
+    override val gui = lazy { QuarryGui() }
     private val inventory = getInventory("quarryInventory", 9)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, upgradeHolder = upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
@@ -585,9 +584,9 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         
     }
     
-    inner class QuarryGUI : TileEntityGUI() {
+    inner class QuarryGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@Quarry,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default"),
             ::openWindow
@@ -596,7 +595,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         private val sizeItems = ArrayList<Item>()
         private val depthItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s u # # # # e |",
@@ -605,7 +604,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
                 "| M N P i i i e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('m', RemoveNumberItem({ MIN_SIZE..maxSize }, { sizeX }, ::setSize).also(sizeItems::add))
             .addIngredient('n', SizeDisplayItem { sizeX }.also(sizeItems::add))
             .addIngredient('p', AddNumberItem({ MIN_SIZE..maxSize }, { sizeX }, ::setSize).also(sizeItems::add))
@@ -631,7 +630,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             
             override fun getItemProvider(): ItemProvider {
                 val number = getNumber()
-                return CoreGUIMaterial.NUMBER.item.createItemBuilder(getNumber())
+                return CoreGuiMaterial.NUMBER.item.createItemBuilder(getNumber())
                     .setDisplayName(TranslatableComponent("menu.machines.quarry.size", number, number))
                     .addLoreLines(localized(ChatColor.GRAY, "menu.machines.quarry.size_tip"))
             }
@@ -644,7 +643,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             
             override fun getItemProvider(): ItemProvider {
                 val number = getNumber()
-                return CoreGUIMaterial.NUMBER.item.createItemBuilder(getNumber())
+                return CoreGuiMaterial.NUMBER.item.createItemBuilder(getNumber())
                     .setDisplayName(TranslatableComponent("menu.machines.quarry.depth", number))
                     .addLoreLines(localized(ChatColor.GRAY, "menu.machines.quarry.depth_tip"))
             }

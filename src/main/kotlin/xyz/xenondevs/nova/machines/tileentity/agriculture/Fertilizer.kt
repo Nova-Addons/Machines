@@ -1,14 +1,13 @@
 package xyz.xenondevs.nova.machines.tileentity.agriculture
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.data.Ageable
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -21,7 +20,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -45,7 +44,7 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[FERTILIZER].getInt("r
 class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val fertilizerInventory = getInventory("fertilizer", 12, ::handleFertilizerUpdate)
-    override val gui = lazy(::FertilizerGUI)
+    override val gui = lazy(::FertilizerGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_FERTILIZE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, fertilizerInventory to NetworkConnectionType.INSERT) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
@@ -127,9 +126,9 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         VisualRegion.removeRegion(uuid)
     }
     
-    inner class FertilizerGUI : TileEntityGUI() {
+    inner class FertilizerGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@Fertilizer,
             listOf(itemHolder.getNetworkedInventory(fertilizerInventory) to "inventory.machines.fertilizer"),
             ::openWindow
@@ -137,7 +136,7 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s p i i i i e |",
@@ -146,7 +145,7 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
                 "3 - - - - - - - 4")
             .addIngredient('i', fertilizerInventory)
             .addIngredient('v', VisualizeRegionItem(uuid) { fertilizeRegion })
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))

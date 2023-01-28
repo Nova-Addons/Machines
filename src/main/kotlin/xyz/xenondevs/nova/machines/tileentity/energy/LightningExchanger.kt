@@ -1,14 +1,13 @@
 package xyz.xenondevs.nova.machines.tileentity.energy
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.weather.LightningStrikeEvent
 import org.bukkit.event.weather.LightningStrikeEvent.Cause
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -34,7 +33,7 @@ private val MAX_BURST by configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getL
 
 class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { LightningExchangerGUI() }
+    override val gui = lazy { LightningExchangerGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, upgradeHolder) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
@@ -65,9 +64,9 @@ class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(
         toCharge += (if (leeway <= maxBurst) leeway else Random.nextLong(minBurst, maxBurst))
     }
     
-    inner class LightningExchangerGUI : TileEntityGUI() {
+    inner class LightningExchangerGui : TileEntityGui() {
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| u # # e # # # |",

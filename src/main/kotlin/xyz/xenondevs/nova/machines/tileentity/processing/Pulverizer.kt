@@ -1,12 +1,11 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement.VISlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.NamespacedKey
+import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -24,7 +23,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
@@ -37,7 +36,7 @@ private val PULVERIZE_SPEED by configReloadable { NovaConfig[PULVERIZER].getInt(
 
 class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { PulverizerGUI() }
+    override val gui = lazy { PulverizerGui() }
     
     private val inputInv = getInventory("input", 1, ::handleInputUpdate)
     private val outputInv = getInventory("output", 2, ::handleOutputUpdate)
@@ -124,12 +123,12 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         storeData("currentRecipe", currentRecipe?.key)
     }
     
-    inner class PulverizerGUI : TileEntityGUI() {
+    inner class PulverizerGui : TileEntityGui() {
         
         private val mainProgress = ProgressArrowItem()
         private val pulverizerProgress = PulverizerProgressItem()
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@Pulverizer,
             listOf(
                 itemHolder.getNetworkedInventory(inputInv) to "inventory.nova.input",
@@ -138,7 +137,7 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s u # # # # e |",
@@ -150,7 +149,7 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
             .addIngredient('a', VISlotElement(outputInv, 1))
             .addIngredient(',', mainProgress)
             .addIngredient('c', pulverizerProgress)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .build()

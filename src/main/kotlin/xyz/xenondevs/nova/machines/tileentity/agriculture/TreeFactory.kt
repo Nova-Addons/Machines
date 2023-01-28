@@ -1,14 +1,13 @@
 package xyz.xenondevs.nova.machines.tileentity.agriculture
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement.VISlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.entity.EquipmentSlot
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nmsutils.particle.color
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.GlobalValues
@@ -17,7 +16,7 @@ import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.Blocks.TREE_FACTORY
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.material.ItemNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -26,7 +25,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.dropItem
@@ -64,7 +63,7 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     private val inputInventory = getInventory("input", 1, intArrayOf(1), false, ::handleInputInventoryUpdate)
     private val outputInventory = getInventory("output", 9, ::handleOutputInventoryUpdate)
     
-    override val gui: Lazy<TileEntityGUI> = lazy(::TreeFactoryGUI)
+    override val gui: Lazy<TileEntityGui> = lazy(::TreeFactoryGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) {
         createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM, BlockSide.BACK)
@@ -160,9 +159,9 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         plant.remove()
     }
     
-    private inner class TreeFactoryGUI : TileEntityGUI() {
+    private inner class TreeFactoryGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@TreeFactory,
             listOf(
                 itemHolder.getNetworkedInventory(inputInventory) to "inventory.nova.input",
@@ -171,7 +170,7 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s u # # # # e |",
@@ -179,9 +178,9 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
                 "| # i # o o o e |",
                 "| # # # o o o e |",
                 "3 - - - - - - - 4")
-            .addIngredient('i', VISlotElement(inputInventory, 0, GUIMaterials.SAPLING_PLACEHOLDER.clientsideProvider))
+            .addIngredient('i', VISlotElement(inputInventory, 0, GuiMaterials.SAPLING_PLACEHOLDER.clientsideProvider))
             .addIngredient('o', outputInventory)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(4, energyHolder))
             .build()

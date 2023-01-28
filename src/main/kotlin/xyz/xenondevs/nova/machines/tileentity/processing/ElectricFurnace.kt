@@ -1,12 +1,6 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
-import de.studiocode.invui.virtualinventory.event.PlayerUpdateReason
 import net.minecraft.world.SimpleContainer
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.item.crafting.SmeltingRecipe
@@ -14,6 +8,11 @@ import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.commons.provider.mutable.map
+import xyz.xenondevs.invui.gui.SlotElement
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
+import xyz.xenondevs.invui.virtualinventory.event.PlayerUpdateReason
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -26,7 +25,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.bukkitCopy
 import xyz.xenondevs.nova.util.intValue
@@ -50,7 +49,7 @@ private val COOK_SPEED by configReloadable { NovaConfig[ELECTRIC_FURNACE].getInt
 
 class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { ElectricFurnaceGUI() }
+    override val gui = lazy { ElectricFurnaceGui() }
     
     private val inputInventory = getInventory("input", 1, ::handleInputInventoryUpdate)
     private val outputInventory = getInventory("output", 1, ::handleOutputInventoryUpdate)
@@ -150,11 +149,11 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         } else active = false
     }
     
-    inner class ElectricFurnaceGUI : TileEntityGUI() {
+    inner class ElectricFurnaceGui : TileEntityGui() {
         
         private val progressItem = ProgressArrowItem()
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@ElectricFurnace,
             listOf(
                 itemHolder.getNetworkedInventory(inputInventory) to "inventory.nova.input",
@@ -163,7 +162,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s u # # # # e |",
@@ -173,7 +172,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             .addIngredient('i', SlotElement.VISlotElement(inputInventory, 0))
             .addIngredient('o', SlotElement.VISlotElement(outputInventory, 0))
             .addIngredient('>', progressItem)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .build()

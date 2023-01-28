@@ -1,9 +1,8 @@
 package xyz.xenondevs.nova.machines.tileentity.energy
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
 import org.bukkit.Material
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -27,7 +26,7 @@ private val ENERGY_PER_TICK = configReloadable { NovaConfig[SOLAR_PANEL].getLong
 
 class SolarPanel(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { SolarPanelGUI() }
+    override val gui = lazy { SolarPanelGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder, UpgradeTypes.EFFICIENCY) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
@@ -67,9 +66,9 @@ class SolarPanel(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         obstructionTask.cancel()
     }
     
-    inner class SolarPanelGUI : TileEntityGUI() {
+    inner class SolarPanelGui : TileEntityGui() {
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| u # # e # # # |",

@@ -1,9 +1,8 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
 import org.bukkit.block.BlockFace
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -17,7 +16,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.item.isReplaceable
@@ -34,7 +33,7 @@ private val ENERGY_PER_PLACE = configReloadable { NovaConfig[BLOCK_PLACER].getLo
 class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 9) {}
-    override val gui = lazy { BlockPlacerGUI() }
+    override val gui = lazy { BlockPlacerGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_PLACE, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.INSERT) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
@@ -67,15 +66,15 @@ class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         }
     }
     
-    inner class BlockPlacerGUI : TileEntity.TileEntityGUI() {
+    inner class BlockPlacerGui : TileEntity.TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@BlockPlacer,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default"),
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # i i i # e |",
@@ -83,7 +82,7 @@ class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
                 "| # # i i i # e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .build()

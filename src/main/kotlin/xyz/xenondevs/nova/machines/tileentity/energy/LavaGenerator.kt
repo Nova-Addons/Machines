@@ -1,9 +1,8 @@
 package xyz.xenondevs.nova.machines.tileentity.energy
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
 import net.minecraft.core.particles.ParticleTypes
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -11,16 +10,14 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.LAVA_GENERATOR
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.axis
@@ -36,7 +33,7 @@ private val BURN_RATE by configReloadable { NovaConfig[LAVA_GENERATOR].getDouble
 
 class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::LavaGeneratorGUI)
+    override val gui = lazy(::LavaGeneratorGui)
     
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     private val fluidContainer = getFluidContainer("tank", hashSetOf(FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
@@ -114,22 +111,22 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         }
     }
     
-    inner class LavaGeneratorGUI : TileEntityGUI() {
+    inner class LavaGeneratorGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@LavaGenerator,
             fluidContainerNames = listOf(fluidContainer to "container.nova.lava_tank"),
             openPrevious = ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # # # f e |",
                 "| u # # # # f e |",
                 "| # # # # # f e |",
                 "3 - - - - - - - 4")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .addIngredient('f', FluidBar(3, fluidHolder, fluidContainer))

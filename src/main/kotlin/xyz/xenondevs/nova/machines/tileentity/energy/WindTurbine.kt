@@ -1,12 +1,11 @@
 package xyz.xenondevs.nova.machines.tileentity.energy
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
 import net.minecraft.core.Rotations
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.resources.model.data.ArmorStandBlockModelData
@@ -37,7 +36,7 @@ private val PLAY_ANIMATION by configReloadable { NovaConfig[WIND_TURBINE].getBoo
 
 class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { WindTurbineGUI() }
+    override val gui = lazy { WindTurbineGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder, UpgradeTypes.EFFICIENCY) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT, BlockSide.BOTTOM)
@@ -113,9 +112,9 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         
     }
     
-    inner class WindTurbineGUI : TileEntity.TileEntityGUI() {
+    inner class WindTurbineGui : TileEntity.TileEntityGui() {
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| u # # e # # # |",

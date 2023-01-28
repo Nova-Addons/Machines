@@ -1,14 +1,13 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.builder.ItemBuilder
-import de.studiocode.invui.virtualinventory.event.InventoryUpdatedEvent
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import net.md_5.bungee.api.ChatColor
 import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.block.BlockFace
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.item.builder.ItemBuilder
+import xyz.xenondevs.invui.virtualinventory.event.InventoryUpdatedEvent
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nmsutils.particle.vibration
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -17,7 +16,7 @@ import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
-import xyz.xenondevs.nova.material.CoreGUIMaterial
+import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntityPacketTask
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -28,7 +27,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.data.localized
@@ -46,7 +45,7 @@ class Crystallizer(
     
     private val inventory = getInventory("inventory", 1, intArrayOf(1), false, ::handleInventoryUpdate, ::handleInventoryUpdated)
     
-    override val gui = lazy(::CrystallizerGUI)
+    override val gui = lazy(::CrystallizerGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) {
@@ -155,28 +154,28 @@ class Crystallizer(
         } else if (particleTask.isRunning()) particleTask.stop()
     }
     
-    inner class CrystallizerGUI : TileEntityGUI() {
+    inner class CrystallizerGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@Crystallizer,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default"),
             ::openWindow
         )
         
         val progressBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGUIMaterial.BAR_GREEN
+            override val barMaterial = CoreGuiMaterial.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.crystallizer.idle"))
         }
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # # p # e |",
                 "| u # i # p # e |",
                 "| # # # # p # e |",
                 "3 - - - - - - - 4")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('i', inventory)
             .addIngredient('p', progressBar)

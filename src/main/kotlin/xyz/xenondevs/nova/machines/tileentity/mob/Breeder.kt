@@ -1,19 +1,18 @@
 package xyz.xenondevs.nova.machines.tileentity.mob
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
-import de.studiocode.invui.item.builder.ItemBuilder
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Animals
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.item.builder.ItemBuilder
+import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.BREEDER
-import xyz.xenondevs.nova.material.CoreGUIMaterial
+import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
@@ -22,7 +21,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -51,7 +50,7 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[BREEDER].getInt("rang
 class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 9, ::handleInventoryUpdate)
-    override val gui = lazy { MobCrusherGUI() }
+    override val gui = lazy { MobCrusherGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREED, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.INSERT) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
@@ -174,9 +173,9 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         VisualRegion.removeRegion(uuid)
     }
     
-    inner class MobCrusherGUI : TileEntityGUI() {
+    inner class MobCrusherGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@Breeder,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default"),
             ::openWindow
@@ -185,12 +184,12 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         private val rangeItems = ArrayList<Item>()
         
         val idleBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGUIMaterial.BAR_GREEN
+            override val barMaterial = CoreGuiMaterial.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.breeder.idle", maxIdleTime - timePassed))
         }
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s p i i i b e |",
@@ -198,7 +197,7 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 "| u m i i i b e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('r', VisualizeRegionItem(uuid) { region })
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))

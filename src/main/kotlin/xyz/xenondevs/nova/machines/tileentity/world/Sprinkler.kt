@@ -1,9 +1,5 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
 import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -12,6 +8,9 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPhysicsEvent
+import xyz.xenondevs.invui.gui.builder.GuiBuilder
+import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -25,7 +24,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigGui
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -49,7 +48,7 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("ra
 
 class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::SprinklerGUI)
+    override val gui = lazy(::SprinklerGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.FLUID, UpgradeTypes.RANGE)
     private val tank = getFluidContainer("tank", hashSetOf(FluidType.WATER), WATER_CAPACITY, upgradeHolder = upgradeHolder)
     override val fluidHolder = NovaFluidHolder(this, tank to NetworkConnectionType.BUFFER) { createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM) }
@@ -99,9 +98,9 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         storeData("range", range)
     }
     
-    inner class SprinklerGUI : TileEntityGUI() {
+    inner class SprinklerGui : TileEntityGui() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigGui(
             this@Sprinkler,
             fluidContainerNames = listOf(tank to "container.nova.fluid_tank"),
             openPrevious = ::openWindow
@@ -109,14 +108,14 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = GuiBuilder(GuiType.NORMAL)
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # f # # p |",
                 "| u # # f # # d |",
                 "| v # # f # # m |",
                 "3 - - - - - - - 4")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('v', VisualizeRegionItem(uuid) { region })
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
