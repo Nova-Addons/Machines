@@ -24,6 +24,7 @@ repositories {
 dependencies {
     implementation(libs.nova)
     implementation(variantOf(libs.spigot) { classifier("remapped-mojang") })
+    implementation("xyz.xenondevs:simple-upgrades:1.0-SNAPSHOT")
 }
 
 addon {
@@ -32,6 +33,7 @@ addon {
     version.set(project.version.toString())
     novaVersion.set(libs.versions.nova)
     main.set("xyz.xenondevs.nova.machines.Machines")
+    depend.add("simple_upgrades")
     authors.set(listOf("StudioCode", "ByteZ", "Javahase"))
     spigotResourceId.set(102712)
 }
@@ -67,6 +69,6 @@ tasks {
         
         from(File(File(project.buildDir, "libs"), "${project.name}-${project.version}.jar"))
         into(System.getProperty("outDir")?.let(::File) ?: project.buildDir)
-        rename(String::capitalized)
+        rename { it.replace(project.name, addon.get().addonName.get()) }
     }
 }

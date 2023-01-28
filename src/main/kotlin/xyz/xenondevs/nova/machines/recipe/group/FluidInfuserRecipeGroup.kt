@@ -6,7 +6,6 @@ import de.studiocode.invui.gui.builder.guitype.GUIType
 import de.studiocode.invui.item.builder.ItemBuilder
 import net.md_5.bungee.api.chat.TranslatableComponent
 import xyz.xenondevs.nova.data.config.NovaConfig
-import xyz.xenondevs.nova.data.recipe.RecipeContainer
 import xyz.xenondevs.nova.machines.recipe.FluidInfuserRecipe
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
@@ -18,15 +17,13 @@ import xyz.xenondevs.nova.ui.menu.item.recipes.group.RecipeGroup
 
 private val FLUID_CAPACITY = NovaConfig[Blocks.FLUID_INFUSER].getLong("fluid_capacity")
 
-object FluidInfuserRecipeGroup : RecipeGroup() {
+object FluidInfuserRecipeGroup : RecipeGroup<FluidInfuserRecipe>() {
     
     override val texture = GUITextures.RECIPE_FLUID_INFUSER
     override val icon = Blocks.FLUID_INFUSER.basicClientsideProvider
     override val priority = 6
     
-    override fun createGUI(container: RecipeContainer): GUI {
-        val recipe = container.recipe as FluidInfuserRecipe
-        
+    override fun createGUI(recipe: FluidInfuserRecipe): GUI {
         val progressItem: ItemBuilder
         val translate: String
         if (recipe.mode == FluidInfuserRecipe.InfuserMode.INSERT) {

@@ -12,16 +12,16 @@ import xyz.xenondevs.nova.item.behavior.Chargeable
 import xyz.xenondevs.nova.machines.registry.Blocks.CHARGER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.network.item.inventory.NetworkedVirtualInventory
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.item.novaMaterial
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 
 private val MAX_ENERGY = configReloadable { NovaConfig[CHARGER].getLong("capacity") }
 private val ENERGY_PER_TICK = configReloadable { NovaConfig[CHARGER].getLong("charge_speed") }
@@ -30,7 +30,7 @@ class Charger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     
     private val inventory = getInventory("inventory", 1, ::handleInventoryUpdate)
     override val gui = lazy { ChargerGUI() }
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.ENERGY, UpgradeType.SPEED)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.ENERGY, UpgradeTypes.SPEED)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.BUFFER) }
     

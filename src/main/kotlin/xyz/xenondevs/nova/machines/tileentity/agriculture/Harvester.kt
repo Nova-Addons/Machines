@@ -21,10 +21,8 @@ import xyz.xenondevs.nova.machines.registry.Blocks.HARVESTER
 import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
@@ -45,6 +43,8 @@ import xyz.xenondevs.nova.world.block.context.BlockBreakContext
 import xyz.xenondevs.nova.world.pos
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.util.*
 
 private val MAX_ENERGY = configReloadable { NovaConfig[HARVESTER].getLong("capacity") }
@@ -62,7 +62,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     private val axeInventory = getInventory("axe", 1, ::handleAxeInventoryUpdate)
     private val hoeInventory = getInventory("hoe", 1, ::handleHoeInventoryUpdate)
     override val gui = lazy(::HarvesterGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREAK, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -92,10 +92,10 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     override fun reload() {
         super.reload()
         
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
         if (range > maxRange) range = maxRange
     }
     

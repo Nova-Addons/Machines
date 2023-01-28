@@ -31,6 +31,8 @@ import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.util.*
 import kotlin.math.min
 
@@ -47,9 +49,9 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[MOB_KILLER].getInt("r
 class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy { MobCrusherGUI() }
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_DAMAGE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
-    private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID ?: UUID.randomUUID(), "Mob Killer").bukkitEntity
+    private val fakePlayer = EntityUtils.createFakePlayer(location).bukkitEntity
     
     private var timePassed = 0
     private var maxIdleTime = 0
@@ -70,10 +72,10 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     override fun reload() {
         super.reload()
         
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
         if (range > maxRange) range = maxRange
     }
     

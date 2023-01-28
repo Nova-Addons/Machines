@@ -25,15 +25,15 @@ import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide.FRONT
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import kotlin.math.max
 
 private val MAX_ENERGY = configReloadable { NovaConfig[MECHANICAL_PRESS].getLong("capacity") }
@@ -52,7 +52,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     private val inputInv = getInventory("input", 1, ::handleInputUpdate)
     private val outputInv = getInventory("output", 1, ::handleOutputUpdate)
     
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -74,7 +74,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     
     override fun reload() {
         super.reload()
-        pressSpeed = (PRESS_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        pressSpeed = (PRESS_SPEED * upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
     }
     
     override fun handleTick() {

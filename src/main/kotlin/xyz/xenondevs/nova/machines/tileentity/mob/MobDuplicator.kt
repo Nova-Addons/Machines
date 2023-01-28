@@ -22,6 +22,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.commons.gson.isString
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -31,10 +32,8 @@ import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
@@ -44,12 +43,13 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.data.NBTUtils
-import xyz.xenondevs.nova.util.data.isString
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.isBetweenXZ
 import xyz.xenondevs.nova.util.item.novaMaterial
 import xyz.xenondevs.nova.util.nmsEntity
 import xyz.xenondevs.nova.util.runAsyncTask
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.net.URL
 import kotlin.random.Random
 import kotlin.random.nextInt
@@ -66,7 +66,7 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     
     private val inventory = getInventory("inventory", 1, ::handleInventoryUpdate)
     override val gui = lazy { MobDuplicatorGUI() }
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_TICK_NBT, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.TOP) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER)
     private val energyPerTick: Long
@@ -90,8 +90,8 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     
     override fun reload() {
         super.reload()
-        idleTimeNBT = (IDLE_TIME_NBT / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
-        idleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        idleTimeNBT = (IDLE_TIME_NBT / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
+        idleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > totalIdleTime) timePassed = totalIdleTime
     }
     

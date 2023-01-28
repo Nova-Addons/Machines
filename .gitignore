@@ -21,6 +21,7 @@ tmp/
 .idea/
 /out/
 .idea_modules/
+.run/
 
 # Target directory
 target/

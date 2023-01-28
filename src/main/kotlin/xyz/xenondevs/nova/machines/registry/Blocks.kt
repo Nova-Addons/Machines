@@ -37,6 +37,7 @@ import xyz.xenondevs.nova.machines.tileentity.world.InfiniteWaterSource
 import xyz.xenondevs.nova.machines.tileentity.world.Pump
 import xyz.xenondevs.nova.machines.tileentity.world.Quarry
 import xyz.xenondevs.nova.machines.tileentity.world.Sprinkler
+import xyz.xenondevs.nova.machines.tileentity.world.StarCollector
 import xyz.xenondevs.nova.material.BlockOptions
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.block
 import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerUnnamedItem
@@ -72,7 +73,7 @@ object Blocks {
     val PULVERIZER = tileEntity(Machines, "pulverizer", ::Pulverizer).blockOptions(STONE).properties(Directional.NORMAL).register()
     val BLOCK_BREAKER = tileEntity(Machines, "block_breaker", ::BlockBreaker).blockOptions(STONE).properties(Directional.NORMAL).register()
     val BLOCK_PLACER = tileEntity(Machines, "block_placer", ::BlockPlacer).blockOptions(STONE).properties(Directional.NORMAL).register()
-    val STAR_COLLECTOR = tileEntity(Machines, "star_collector", ::BlockPlacer).blockOptions(STONE).properties(LegacyDirectional).register()
+    val STAR_COLLECTOR = tileEntity(Machines, "star_collector", ::StarCollector).blockOptions(STONE).properties(LegacyDirectional).register()
     val CHUNK_LOADER = tileEntity(Machines, "chunk_loader", ::ChunkLoader).blockOptions(STONE).properties(Directional.NORMAL).register()
     val QUARRY = tileEntity(Machines, "quarry", ::Quarry).blockOptions(STONE).properties(Directional.NORMAL).placeCheck(Quarry::canPlace).register()
     val ELECTRIC_BREWING_STAND = tileEntity(Machines, "electric_brewing_stand", ::ElectricBrewingStand).blockOptions(STONE).properties(Directional.NORMAL).register()

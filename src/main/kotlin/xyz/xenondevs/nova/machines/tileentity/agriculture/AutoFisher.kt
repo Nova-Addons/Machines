@@ -29,10 +29,8 @@ import xyz.xenondevs.nova.machines.registry.GUIMaterials
 import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
@@ -43,6 +41,8 @@ import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.hasEmptySlot
 import xyz.xenondevs.nova.util.item.DamageableUtils
 import xyz.xenondevs.nova.util.serverLevel
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.util.*
 
 private val MAX_ENERGY = configReloadable { NovaConfig[AUTO_FISHER].getLong("capacity") }
@@ -54,7 +54,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private val inventory = getInventory("inventory", 12, ::handleInventoryUpdate)
     private val fishingRodInventory = getInventory("fishingRod", 1, ::handleFishingRodInventoryUpdate)
     override val gui = lazy(::AutoFisherGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -70,7 +70,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private val level = world.serverLevel
     private val position = Vec3(centerLocation.x, location.y - 0.5, centerLocation.z)
     private val itemDropLocation = location.clone().add(0.0, 1.0, 0.0)
-    private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID ?: UUID.randomUUID(), "AutoFisher")
+    private val fakePlayer = EntityUtils.createFakePlayer(location)
     
     init {
         reload()
@@ -78,7 +78,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     
     override fun reload() {
         super.reload()
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
     }
     

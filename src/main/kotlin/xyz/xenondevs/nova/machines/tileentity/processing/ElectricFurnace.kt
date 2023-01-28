@@ -13,35 +13,35 @@ import net.minecraft.world.item.crafting.SmeltingRecipe
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.commons.provider.mutable.map
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
-import xyz.xenondevs.nova.data.provider.map
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.ProgressArrowItem
 import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_FURNACE
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
 import xyz.xenondevs.nova.util.BlockSide
-import xyz.xenondevs.nova.util.bukkitStack
+import xyz.xenondevs.nova.util.bukkitCopy
 import xyz.xenondevs.nova.util.intValue
 import xyz.xenondevs.nova.util.minecraftServer
 import xyz.xenondevs.nova.util.namespacedKey
-import xyz.xenondevs.nova.util.nmsStack
+import xyz.xenondevs.nova.util.nmsCopy
 import xyz.xenondevs.nova.util.resourceLocation
 import xyz.xenondevs.nova.util.serverLevel
 import xyz.xenondevs.nova.util.spawnExpOrb
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 
 private fun getRecipe(input: ItemStack, world: World): SmeltingRecipe? {
     return minecraftServer.recipeManager.getAllRecipesFor(RecipeType.SMELTING)
-        .firstOrNull { it.matches(SimpleContainer(input.nmsStack), world.serverLevel) }
+        .firstOrNull { it.matches(SimpleContainer(input.nmsCopy), world.serverLevel) }
 }
 
 private val MAX_ENERGY = configReloadable { NovaConfig[ELECTRIC_FURNACE].getLong("capacity") }
@@ -55,7 +55,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     private val inputInventory = getInventory("input", 1, ::handleInputInventoryUpdate)
     private val outputInventory = getInventory("output", 1, ::handleOutputInventoryUpdate)
     
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
@@ -86,7 +86,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     
     override fun reload() {
         super.reload()
-        cookSpeed = (COOK_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        cookSpeed = (COOK_SPEED * upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
     }
     
     private fun handleInputInventoryUpdate(event: ItemUpdateEvent) {
@@ -124,7 +124,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 val item = inputInventory.getItemStack(0)
                 if (item != null) {
                     val recipe = getRecipe(item, world)
-                    if (recipe != null && outputInventory.canHold(recipe.resultItem.bukkitStack)) {
+                    if (recipe != null && outputInventory.canHold(recipe.resultItem.bukkitCopy)) {
                         currentRecipe = recipe
                         inputInventory.addItemAmount(null, 0, -1)
                         
@@ -139,7 +139,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 timeCooked += cookSpeed
                 
                 if (timeCooked >= currentRecipe.cookingTime) {
-                    outputInventory.addItem(SELF_UPDATE_REASON, currentRecipe.resultItem.bukkitStack)
+                    outputInventory.addItem(SELF_UPDATE_REASON, currentRecipe.resultItem.bukkitCopy)
                     experience += currentRecipe.experience
                     timeCooked = 0
                     this.currentRecipe = null

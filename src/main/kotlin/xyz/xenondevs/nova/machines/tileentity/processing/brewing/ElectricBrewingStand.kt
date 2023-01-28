@@ -28,7 +28,6 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
-import xyz.xenondevs.nova.data.world.legacy.impl.v0_10.cbf.LegacyCompound
 import xyz.xenondevs.nova.machines.gui.BrewProgressItem
 import xyz.xenondevs.nova.machines.recipe.ElectricBrewingStandRecipe
 import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_BREWING_STAND
@@ -37,12 +36,10 @@ import xyz.xenondevs.nova.machines.registry.GUITextures
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
@@ -53,6 +50,9 @@ import xyz.xenondevs.nova.util.contains
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.item.localizedName
 import xyz.xenondevs.nova.util.removeFirstMatching
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.getFluidContainer
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -66,7 +66,7 @@ private val IGNORE_UPDATE_REASON = object : UpdateReason {}
 class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::ElectricBrewingStandGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     private val fluidTank = getFluidContainer("tank", setOf(FluidType.WATER), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
     private val ingredientsInventory = getInventory("ingredients", 27, null, ::handleIngredientsInventoryAfterUpdate)
     private val outputInventory = getInventory("output", 3, ::handleOutputPreUpdate, ::handleOutputInventoryAfterUpdate)
@@ -99,22 +99,12 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     init {
         val potionEffects = ArrayList<PotionEffectBuilder>()
         
-        if (legacyData != null) {
-            retrieveDataOrNull<List<LegacyCompound>>("potionEffects")?.forEach { potionCompound ->
-                val type = PotionEffectType.getByKey(potionCompound.get<NamespacedKey>("type"))!!
-                val duration: Int = potionCompound["duration"]!!
-                val amplifier: Int = potionCompound["amplifier"]!!
-        
-                potionEffects += PotionEffectBuilder(type, duration, amplifier)
-            }
-        } else {
-            retrieveDataOrNull<List<Compound>>("potionEffects")?.forEach { potionCompound ->
-                val type = PotionEffectType.getByKey(potionCompound.get<NamespacedKey>("type"))!!
-                val duration: Int = potionCompound["duration"]!!
-                val amplifier: Int = potionCompound["amplifier"]!!
-        
-                potionEffects += PotionEffectBuilder(type, duration, amplifier)
-            }
+        retrieveDataOrNull<List<Compound>>("potionEffects")?.forEach { potionCompound ->
+            val type = PotionEffectType.getByKey(potionCompound.get<NamespacedKey>("type"))!!
+            val duration: Int = potionCompound["duration"]!!
+            val amplifier: Int = potionCompound["amplifier"]!!
+            
+            potionEffects += PotionEffectBuilder(type, duration, amplifier)
         }
         
         updatePotionData(potionType, potionEffects, color)
@@ -139,7 +129,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     
     override fun reload() {
         super.reload()
-        maxBrewTime = (BREW_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).roundToInt()
+        maxBrewTime = (BREW_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).roundToInt()
     }
     
     private fun updatePotionData(type: PotionBuilder.PotionType, effects: List<PotionEffectBuilder>, color: Color) {

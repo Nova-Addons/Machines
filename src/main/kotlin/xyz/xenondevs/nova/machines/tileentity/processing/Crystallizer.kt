@@ -21,11 +21,9 @@ import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntityPacketTask
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.network.item.inventory.NetworkedVirtualInventory
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
@@ -36,6 +34,8 @@ import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.nmsCopy
 import xyz.xenondevs.nova.world.fakeentity.impl.FakeItem
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 
 private val MAX_ENERGY = configReloadable { NovaConfig[Blocks.CRYSTALLIZER].getLong("capacity") }
 private val ENERGY_PER_TICK = configReloadable { NovaConfig[Blocks.CRYSTALLIZER].getLong("energy_per_tick") }
@@ -47,7 +47,7 @@ class Crystallizer(
     private val inventory = getInventory("inventory", 1, intArrayOf(1), false, ::handleInventoryUpdate, ::handleInventoryUpdated)
     
     override val gui = lazy(::CrystallizerGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) {
         createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM)
@@ -56,7 +56,7 @@ class Crystallizer(
         createExclusiveSideConfig(NetworkConnectionType.BUFFER, BlockSide.BOTTOM)
     }
     
-    private var progressPerTick = 0.0
+    private val progressPerTick by upgradeHolder.getValueProvider(UpgradeTypes.SPEED)
     private var progress by storedValue("progress") { 0.0 }
     private var recipe = inventory.getItemStack(0)?.let { RecipeManager.getConversionRecipeFor(RecipeTypes.CRYSTALLIZER, it) }
     
@@ -65,8 +65,6 @@ class Crystallizer(
     private val itemDisplay: FakeItem
     
     init {
-        reload()
-        
         // item display
         val itemStack = inventory.getItemStack(0).nmsCopy
         displayState = !itemStack.isEmpty
@@ -85,11 +83,6 @@ class Crystallizer(
         }
         
         particleTask = createPacketTask(packets, 9)
-    }
-    
-    override fun reload() {
-        super.reload()
-        progressPerTick = upgradeHolder.getValue(UpgradeType.SPEED)
     }
     
     override fun handleRemoved(unload: Boolean) {

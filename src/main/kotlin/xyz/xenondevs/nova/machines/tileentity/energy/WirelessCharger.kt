@@ -12,9 +12,7 @@ import xyz.xenondevs.nova.item.behavior.Chargeable
 import xyz.xenondevs.nova.machines.registry.Blocks.WIRELESS_CHARGER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
@@ -26,6 +24,8 @@ import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.item.novaMaterial
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import de.studiocode.invui.item.Item as UIItem
 
 private val MAX_ENERGY = configReloadable { NovaConfig[WIRELESS_CHARGER].getLong("capacity") }
@@ -37,7 +37,7 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[WIRELESS_CHARGER].get
 class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val gui = lazy(::WirelessChargerGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, CHARGE_SPEED, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     
     private var maxRange = 0
@@ -57,7 +57,7 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     
     override fun reload() {
         super.reload()
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
         if (maxRange < range) range = maxRange
     }
     

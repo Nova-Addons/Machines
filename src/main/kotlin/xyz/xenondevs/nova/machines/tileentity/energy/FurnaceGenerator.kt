@@ -14,10 +14,8 @@ import xyz.xenondevs.nova.machines.gui.EnergyProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.FURNACE_GENERATOR
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
@@ -27,8 +25,11 @@ import xyz.xenondevs.nova.util.BlockSide.FRONT
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.axis
 import xyz.xenondevs.nova.util.intValue
-import xyz.xenondevs.nova.util.item.fuel
-import xyz.xenondevs.nova.util.item.toItemStack
+import xyz.xenondevs.nova.util.item.burnTime
+import xyz.xenondevs.nova.util.item.craftingRemainingItem
+import xyz.xenondevs.nova.util.item.isFuel
+import xyz.xenondevs.simpleupgrades.ProviderEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -40,8 +41,8 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
     
     override val gui = lazy { FurnaceGeneratorGUI() }
     private val inventory = getInventory("fuel", 1, ::handleInventoryUpdate)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder) { createSideConfig(NetworkConnectionType.EXTRACT, FRONT) }
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
+    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder, UpgradeTypes.SPEED) { createSideConfig(NetworkConnectionType.EXTRACT, FRONT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.INSERT) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     
     private var burnTimeMultiplier = BURN_TIME_MULTIPLIER
@@ -81,7 +82,7 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
         // previous burn time without the burnTimeMultiplier
         val previousBurnTime = totalBurnTime.toDouble() / burnTimeMultiplier
         // calculate the new burn time multiplier based on upgrades
-        burnTimeMultiplier = BURN_TIME_MULTIPLIER / upgradeHolder.getValue(UpgradeType.SPEED) * upgradeHolder.getValue(UpgradeType.EFFICIENCY)
+        burnTimeMultiplier = BURN_TIME_MULTIPLIER / upgradeHolder.getValue(UpgradeTypes.SPEED) * upgradeHolder.getValue(UpgradeTypes.EFFICIENCY)
         // set the new total burn time based on the fuel burn time and the new multiplier
         totalBurnTime = (previousBurnTime * burnTimeMultiplier).toInt()
         // set the burn time based on the calculated total burn time and the percentage of burn time that was left previously
@@ -105,22 +106,21 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
     private fun burnItem() {
         val fuelStack = inventory.getItemStack(0)
         if (energyHolder.energy < energyHolder.maxEnergy && fuelStack != null) {
-            val fuel = fuelStack.type.fuel
-            if (fuel != null) {
-                burnTime += (fuel.burnTime * burnTimeMultiplier).roundToInt()
+            val itemBurnTime = fuelStack.burnTime
+            if (itemBurnTime != null) {
+                burnTime += (itemBurnTime * burnTimeMultiplier).roundToInt()
                 totalBurnTime = burnTime
-                if (fuel.remains == null) {
-                    inventory.addItemAmount(null, 0, -1)
-                } else {
-                    inventory.setItemStack(null, 0, fuel.remains!!.toItemStack())
-                }
+                val remains = fuelStack.craftingRemainingItem
+                if (remains != null) {
+                    inventory.setItemStack(null, 0, remains)
+                } else inventory.addItemAmount(null, 0, -1)
             }
         }
     }
     
     private fun handleInventoryUpdate(event: ItemUpdateEvent) {
         if (event.updateReason != null) { // not done by the tileEntity itself
-            if (event.newItemStack != null && event.newItemStack.type.fuel == null) {
+            if (event.newItemStack != null && event.newItemStack.isFuel) {
                 // illegal item
                 event.isCancelled = true
             }

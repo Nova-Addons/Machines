@@ -34,10 +34,8 @@ import xyz.xenondevs.nova.tileentity.MultiModel
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntityManager
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
@@ -68,6 +66,8 @@ import xyz.xenondevs.nova.util.setBreakStage
 import xyz.xenondevs.nova.world.block.BlockManager
 import xyz.xenondevs.nova.world.block.context.BlockBreakContext
 import xyz.xenondevs.nova.world.pos
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.util.concurrent.CompletableFuture
 import kotlin.math.max
 import kotlin.math.min
@@ -105,8 +105,8 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     override val gui = lazy { QuarryGUI() }
     private val inventory = getInventory("quarryInventory", 9)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, null, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, upgradeHolder = upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
     
     private val entityId = uuid.hashCode()
@@ -171,7 +171,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     override fun handleInitialized(first: Boolean) {
         super.handleInitialized(first)
-    
+        
         updateBounds(first)
         pointerLocation = retrieveDataOrNull("pointerLocation") ?: Location(world, minX + 1.5, y - 2.0, minZ + 1.5)
         lastPointerLocation = retrieveDataOrNull("lastPointerLocation") ?: Location(world, 0.0, 0.0, 0.0)
@@ -183,9 +183,9 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         
         updateEnergyPerTick()
         
-        maxSize = MAX_SIZE + upgradeHolder.getValue(UpgradeType.RANGE)
-        drillSpeedMultiplier = DRILL_SPEED_MULTIPLIER * upgradeHolder.getValue(UpgradeType.SPEED)
-        moveSpeed = MOVE_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)
+        maxSize = MAX_SIZE + upgradeHolder.getValue(UpgradeTypes.RANGE)
+        drillSpeedMultiplier = DRILL_SPEED_MULTIPLIER * upgradeHolder.getValue(UpgradeTypes.SPEED)
+        moveSpeed = MOVE_SPEED * upgradeHolder.getValue(UpgradeTypes.SPEED)
     }
     
     private fun updateBounds(checkPermission: Boolean): Boolean {
@@ -230,7 +230,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     private fun updateEnergyPerTick() {
         energyPerTick = ((BASE_ENERGY_CONSUMPTION + sizeX * sizeZ * ENERGY_PER_SQUARE_BLOCK)
-            * upgradeHolder.getValue(UpgradeType.SPEED) / upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toInt()
+            * upgradeHolder.getValue(UpgradeTypes.SPEED) / upgradeHolder.getValue(UpgradeTypes.EFFICIENCY)).toInt()
     }
     
     override fun saveData() {
