@@ -1,8 +1,7 @@
 package xyz.xenondevs.nova.machines.tileentity.energy
 
 import net.minecraft.core.particles.ParticleTypes
-import xyz.xenondevs.invui.gui.builder.GuiBuilder
-import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -119,7 +118,7 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             openPrevious = ::openWindow
         )
         
-        override val gui = GuiBuilder(GuiType.NORMAL)
+        override val gui = GuiType.NORMAL.builder()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # # # f e |",

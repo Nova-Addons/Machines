@@ -3,8 +3,7 @@ package xyz.xenondevs.nova.machines.tileentity.processing
 import net.md_5.bungee.api.ChatColor
 import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.block.BlockFace
-import xyz.xenondevs.invui.gui.builder.GuiBuilder
-import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.virtualinventory.event.InventoryUpdatedEvent
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
@@ -168,7 +167,7 @@ class Crystallizer(
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.crystallizer.idle"))
         }
         
-        override val gui = GuiBuilder(GuiType.NORMAL)
+        override val gui = GuiType.NORMAL.builder()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # # p # e |",

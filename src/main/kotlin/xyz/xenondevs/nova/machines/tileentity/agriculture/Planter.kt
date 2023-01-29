@@ -9,8 +9,7 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
-import xyz.xenondevs.invui.gui.builder.GuiBuilder
-import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.impl.BaseItem
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
@@ -227,7 +226,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui = GuiBuilder(GuiType.NORMAL)
+        override val gui = GuiType.NORMAL.builder()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s u v # # p e |",

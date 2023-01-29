@@ -14,8 +14,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.commons.gson.isString
 import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
-import xyz.xenondevs.invui.gui.builder.GuiBuilder
-import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.SkullBuilder
@@ -173,7 +172,7 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.mob_duplicator.idle", totalIdleTime - timePassed))
         }
         
-        override val gui = GuiBuilder(GuiType.NORMAL)
+        override val gui = GuiType.NORMAL.builder()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # # # p e |",

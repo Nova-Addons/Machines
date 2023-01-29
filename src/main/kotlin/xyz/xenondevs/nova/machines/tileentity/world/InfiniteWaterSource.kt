@@ -1,7 +1,6 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import xyz.xenondevs.invui.gui.builder.GuiBuilder
-import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -28,7 +27,7 @@ class InfiniteWaterSource(blockState: NovaTileEntityState) : NetworkedTileEntity
             openPrevious = ::openWindow
         )
         
-        override val gui = GuiBuilder(GuiType.NORMAL)
+        override val gui = GuiType.NORMAL.builder()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # f # # # |",

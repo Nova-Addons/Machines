@@ -2,8 +2,7 @@ package xyz.xenondevs.nova.machines.tileentity.mob
 
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Mob
-import xyz.xenondevs.invui.gui.builder.GuiBuilder
-import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -130,7 +129,7 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.mob_killer.idle", maxIdleTime - timePassed))
         }
         
-        override val gui = GuiBuilder(GuiType.NORMAL)
+        override val gui = GuiType.NORMAL.builder()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # i # e # p |",

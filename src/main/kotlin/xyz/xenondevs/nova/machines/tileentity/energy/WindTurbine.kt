@@ -4,8 +4,7 @@ import net.minecraft.core.Rotations
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import xyz.xenondevs.invui.gui.builder.GuiBuilder
-import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.resources.model.data.ArmorStandBlockModelData
@@ -114,7 +113,7 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     
     inner class WindTurbineGui : TileEntity.TileEntityGui() {
         
-        override val gui = GuiBuilder(GuiType.NORMAL)
+        override val gui = GuiType.NORMAL.builder()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| u # # e # # # |",

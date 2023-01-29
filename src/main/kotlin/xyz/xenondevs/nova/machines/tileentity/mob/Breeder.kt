@@ -3,8 +3,7 @@ package xyz.xenondevs.nova.machines.tileentity.mob
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Animals
 import org.bukkit.inventory.ItemStack
-import xyz.xenondevs.invui.gui.builder.GuiBuilder
-import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
@@ -189,7 +188,7 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.breeder.idle", maxIdleTime - timePassed))
         }
         
-        override val gui = GuiBuilder(GuiType.NORMAL)
+        override val gui = GuiType.NORMAL.builder()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s p i i i b e |",

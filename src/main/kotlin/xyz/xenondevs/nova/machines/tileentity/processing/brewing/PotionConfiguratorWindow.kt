@@ -12,7 +12,7 @@ import org.bukkit.potion.PotionEffectType
 import org.bukkit.potion.PotionType
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.builder.GuiBuilder
-import xyz.xenondevs.invui.gui.builder.guitype.GuiType
+import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.ItemWrapper
 import xyz.xenondevs.invui.item.builder.ItemBuilder
@@ -98,7 +98,7 @@ class PotionConfiguratorWindow(
     }
     
     private fun createAddEffectGui(): Gui {
-        return GuiBuilder(GuiType.NORMAL)
+        return GuiType.NORMAL.builder()
             .setStructure("+ . . . . . . .")
             .addIngredient('+', clickableItem(
                 GuiMaterials.TP_GREEN_PLUS.createItemBuilder()
@@ -121,7 +121,7 @@ class PotionConfiguratorWindow(
         private val amplifierModifierItem = AmplifierModifierItem()
         private val potionPickerItem = OpenPotionPickerItem()
         
-        val gui = GuiBuilder(GuiType.NORMAL)
+        val gui = GuiType.NORMAL.builder()
             .setStructure("- . p . d . a .")
             .addIngredient('p', potionPickerItem)
             .addIngredient('d', durationModifierItem)
