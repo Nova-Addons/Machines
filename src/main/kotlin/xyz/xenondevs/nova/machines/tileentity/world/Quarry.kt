@@ -442,7 +442,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         }.sendTo(getViewers())
         
         // smoke
-        particle(ParticleTypes.BLOCK, pointerLocation.clone().apply { y -= 0.1 }) {
+        particle(ParticleTypes.SMOKE, pointerLocation.clone().apply { y -= 0.1 }) {
             amount(10)
             speed(0.02f)
         }.sendTo(getViewers())
