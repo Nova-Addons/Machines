@@ -1,6 +1,6 @@
 machines:
   icon: machines:quarry
-  name: "menu.machines.items.category.machines"
+  name: menu.machines.items.category.machines
   priority: 0
   items:
     - machines:mechanical_press
@@ -32,7 +32,7 @@ machines:
 
 power:
   icon: machines:wind_turbine
-  name: "menu.machines.items.category.power"
+  name: menu.machines.items.category.power
   priority: 1
   items:
     - machines:solar_panel
@@ -41,9 +41,17 @@ power:
     - machines:wind_turbine
     - machines:lightning_exchanger
 
+resources:
+  icon: machines:star_shards_ore
+  name: menu.machines.items.category.resources
+  priority: 2
+  items:
+    - machines:star_shards_ore
+    - machines:deepslate_star_shards_ore
+
 crafting:
   icon: machines:copper_gear
-  name: "menu.machines.items.category.crafting"
+  name: menu.machines.items.category.crafting
   priority: 3
   items:
     - machines:star_dust_block
@@ -85,7 +93,7 @@ crafting:
 
 equipment:
   icon: machines:star_axe
-  name: "menu.machines.items.category.equipment"
+  name: menu.machines.items.category.equipment
   priority: 4
   items:
     - machines:star_sword
@@ -98,17 +106,9 @@ equipment:
     - machines:star_leggings
     - machines:star_boots
 
-resources:
-  icon: machines:star_shards_ore
-  name: "menu.machines.items.category.resources"
-  priority: 2
-  items:
-    - machines:star_shards_ore
-    - machines:deepslate_star_shards_ore
-
 misc:
   icon: nova:wrench
-  name: "menu.nova.items.category.misc"
+  name: menu.nova.items.category.misc
   priority: 6
   items:
     - machines:mob_catcher

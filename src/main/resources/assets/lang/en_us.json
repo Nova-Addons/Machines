@@ -91,6 +91,7 @@
     "inventory.machines.ingredients": "Ingredients Inventory",
     "menu.machines.items.category.machines": "Machines",
     "menu.machines.items.category.power": "Power Generation",
+    "menu.machines.items.category.resources": "Resources",
     "menu.machines.items.category.crafting": "Crafting Components",
     "menu.machines.items.category.equipment": "Equipment",
     "menu.machines.recipe.pulverize": "Pulverizing",
