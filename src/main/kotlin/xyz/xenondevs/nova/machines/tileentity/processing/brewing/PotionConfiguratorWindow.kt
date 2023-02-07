@@ -11,7 +11,6 @@ import org.bukkit.potion.PotionData
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.potion.PotionType
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.builder.GuiBuilder
 import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.ItemWrapper
@@ -62,7 +61,7 @@ class PotionConfiguratorWindow(
                 .setDisplayName(TranslatableComponent("menu.machines.color_picker.current_color"))
         ), color, ::openConfigurator)
     
-    private val gui = GuiBuilder(GuiType.SCROLL_GUIS)
+    private val gui = GuiType.SCROLL_GUIS.builder()
         .setStructure(
             "< c t . . . . . s",
             "x x x x x x x x u",
@@ -243,7 +242,7 @@ class PotionConfiguratorWindow(
             .filter { availableEffect -> effects.keys.none { builder -> builder.type == availableEffect } }
             .map(::ChooseEffectTypeItem)
         
-        private val gui = GuiBuilder(GuiType.SCROLL_ITEMS)
+        private val gui = GuiType.SCROLL_ITEMS.builder()
             .setStructure(
                 "< - - - - - - - 2",
                 "| x x x x x x x u",

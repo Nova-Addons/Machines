@@ -14,7 +14,6 @@ import org.bukkit.potion.PotionData
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.potion.PotionType
 import xyz.xenondevs.cbf.Compound
-import xyz.xenondevs.invui.gui.builder.GuiBuilder
 import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.builder.ItemBuilder
@@ -280,7 +279,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         val progressItem = BrewProgressItem()
         val ingredientsDisplay = IngredientsDisplay()
         
-        override val gui = GuiBuilder(GuiType.SCROLL_INVENTORY)
+        override val gui = GuiType.SCROLL_INVENTORY.builder()
             .setStructure(
                 ". x x x u i . U s",
                 ". x x x . p . . .",
