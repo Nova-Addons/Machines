@@ -3,8 +3,8 @@ package xyz.xenondevs.nova.machines.tileentity.agriculture
 import org.bukkit.Material
 import org.bukkit.Tag
 import org.bukkit.block.Block
+import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
-import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.virtualinventory.VirtualInventory
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
@@ -236,7 +236,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui = GuiType.NORMAL.builder()
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| c v u s a h e |",

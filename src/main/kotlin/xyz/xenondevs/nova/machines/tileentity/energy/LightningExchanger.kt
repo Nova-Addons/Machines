@@ -6,7 +6,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.weather.LightningStrikeEvent
 import org.bukkit.event.weather.LightningStrikeEvent.Cause
-import xyz.xenondevs.invui.gui.builder.GuiType
+import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -65,7 +65,7 @@ class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(
     
     inner class LightningExchangerGui : TileEntityGui() {
         
-        override val gui = GuiType.NORMAL.builder()
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| u # # e # # # |",

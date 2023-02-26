@@ -1,7 +1,7 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
 import org.bukkit.block.BlockFace
-import xyz.xenondevs.invui.gui.builder.GuiType
+import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -73,7 +73,7 @@ class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
             ::openWindow
         )
         
-        override val gui = GuiType.NORMAL.builder()
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # i i i # e |",

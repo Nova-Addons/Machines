@@ -12,7 +12,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
-import xyz.xenondevs.invui.gui.builder.GuiType
+import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.BaseItem
@@ -594,7 +594,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         private val sizeItems = ArrayList<Item>()
         private val depthItems = ArrayList<Item>()
         
-        override val gui = GuiType.NORMAL.builder()
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s u # # # # e |",

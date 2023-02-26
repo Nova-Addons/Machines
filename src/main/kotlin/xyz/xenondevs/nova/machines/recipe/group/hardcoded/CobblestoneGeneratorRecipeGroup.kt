@@ -2,7 +2,6 @@ package xyz.xenondevs.nova.machines.recipe.group.hardcoded
 
 import net.md_5.bungee.api.chat.TranslatableComponent
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.machines.registry.GuiTextures
@@ -22,7 +21,7 @@ object CobblestoneGeneratorRecipeGroup : RecipeGroup<CobblestoneGeneratorRecipe>
             .createClientsideItemBuilder()
             .setDisplayName(TranslatableComponent("menu.machines.recipe.cobblestone_generator.${recipe.mode.name.lowercase()}"))
         
-        return GuiType.NORMAL.builder()
+        return Gui.normal()
             .setStructure(
                 ". w l . . . . . .",
                 ". w l . > . r . .",

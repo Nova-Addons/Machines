@@ -2,7 +2,6 @@ package xyz.xenondevs.nova.machines.recipe.group
 
 import net.md_5.bungee.api.chat.TranslatableComponent
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.machines.recipe.FluidInfuserRecipe
@@ -39,7 +38,7 @@ object FluidInfuserRecipeGroup : RecipeGroup<FluidInfuserRecipe>() {
             TranslatableComponent(recipe.fluidType.localizedName)
         ))
         
-        return GuiType.NORMAL.builder()
+        return Gui.normal()
             .setStructure(
                 ". f . t . . . . .",
                 ". f p i . . . r .",

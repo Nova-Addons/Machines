@@ -2,7 +2,7 @@ package xyz.xenondevs.nova.machines.tileentity.energy
 
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import xyz.xenondevs.invui.gui.builder.GuiType
+import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -124,7 +124,7 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         
         private val rangeItems = ArrayList<UIItem>()
         
-        override val gui = GuiType.NORMAL.builder()
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # e # # p |",

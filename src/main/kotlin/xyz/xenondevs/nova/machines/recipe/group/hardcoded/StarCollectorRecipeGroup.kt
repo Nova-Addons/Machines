@@ -1,7 +1,6 @@
 package xyz.xenondevs.nova.machines.recipe.group.hardcoded
 
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.GuiTextures
 import xyz.xenondevs.nova.ui.menu.item.recipes.createRecipeChoiceItem
@@ -14,7 +13,7 @@ object StarCollectorRecipeGroup : RecipeGroup<StarCollectorRecipe>() {
     override val icon = Blocks.STAR_COLLECTOR.basicClientsideProvider
     
     override fun createGui(recipe: StarCollectorRecipe): Gui {
-        return GuiType.NORMAL.builder()
+        return Gui.normal()
             .setStructure(
                 ". . . . . . . . .",
                 ". . . . . . . r .",

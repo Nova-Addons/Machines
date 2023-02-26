@@ -8,8 +8,8 @@ import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.commons.provider.mutable.map
+import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.SlotElement
-import xyz.xenondevs.invui.gui.builder.GuiType
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.invui.virtualinventory.event.PlayerUpdateReason
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -161,7 +161,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             ::openWindow
         )
         
-        override val gui = GuiType.NORMAL.builder()
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s u # # # # e |",

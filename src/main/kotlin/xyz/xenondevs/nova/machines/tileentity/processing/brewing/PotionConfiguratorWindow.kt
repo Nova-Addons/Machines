@@ -11,14 +11,14 @@ import org.bukkit.potion.PotionData
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.potion.PotionType
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.builder.GuiType
+import xyz.xenondevs.invui.gui.ScrollGui
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.ItemWrapper
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.PotionBuilder
 import xyz.xenondevs.invui.item.impl.BaseItem
 import xyz.xenondevs.invui.item.impl.CycleItem
-import xyz.xenondevs.invui.window.builder.WindowType
+import xyz.xenondevs.invui.window.Window
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.machines.registry.GuiTextures
 import xyz.xenondevs.nova.machines.tileentity.processing.brewing.ElectricBrewingStand.Companion.ALLOW_DURATION_AMPLIFIER_MIXING
@@ -61,7 +61,7 @@ class PotionConfiguratorWindow(
                 .setDisplayName(TranslatableComponent("menu.machines.color_picker.current_color"))
         ), color, ::openConfigurator)
     
-    private val gui = GuiType.SCROLL_GUIS.builder()
+    private val gui = ScrollGui.guis()
         .setStructure(
             "< c t . . . . . s",
             "x x x x x x x x u",
@@ -97,7 +97,7 @@ class PotionConfiguratorWindow(
     }
     
     private fun createAddEffectGui(): Gui {
-        return GuiType.NORMAL.builder()
+        return Gui.normal()
             .setStructure("+ . . . . . . .")
             .addIngredient('+', clickableItem(
                 GuiMaterials.TP_GREEN_PLUS.createItemBuilder()
@@ -107,7 +107,7 @@ class PotionConfiguratorWindow(
     }
     
     fun openConfigurator(player: Player) {
-        WindowType.NORMAL.createWindow {
+        Window.single {
             it.setViewer(player)
             it.setTitle(GuiTextures.CONFIGURE_POTION.getTitle("menu.machines.electric_brewing_stand.configure_potion"))
             it.setGui(gui)
@@ -120,7 +120,7 @@ class PotionConfiguratorWindow(
         private val amplifierModifierItem = AmplifierModifierItem()
         private val potionPickerItem = OpenPotionPickerItem()
         
-        val gui = GuiType.NORMAL.builder()
+        val gui = Gui.normal()
             .setStructure("- . p . d . a .")
             .addIngredient('p', potionPickerItem)
             .addIngredient('d', durationModifierItem)
@@ -242,7 +242,7 @@ class PotionConfiguratorWindow(
             .filter { availableEffect -> effects.keys.none { builder -> builder.type == availableEffect } }
             .map(::ChooseEffectTypeItem)
         
-        private val gui = GuiType.SCROLL_ITEMS.builder()
+        private val gui = ScrollGui.items()
             .setStructure(
                 "< - - - - - - - 2",
                 "| x x x x x x x u",
@@ -255,7 +255,7 @@ class PotionConfiguratorWindow(
             .build()
         
         fun openPicker(player: Player) {
-            WindowType.NORMAL.createWindow {
+            Window.single {
                 it.setViewer(player)
                 it.setTitle(CoreGuiTexture.EMPTY_Gui.getTitle("menu.machines.electric_brewing_stand.pick_effect"))
                 it.setGui(gui)
