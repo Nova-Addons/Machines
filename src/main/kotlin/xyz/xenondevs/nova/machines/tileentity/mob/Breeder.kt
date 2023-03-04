@@ -2,6 +2,7 @@ package xyz.xenondevs.nova.machines.tileentity.mob
 
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Animals
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
@@ -13,6 +14,7 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.BREEDER
 import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -20,7 +22,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -49,7 +51,6 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[BREEDER].getInt("rang
 class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 9, ::handleInventoryUpdate)
-    override val gui = lazy { MobCrusherGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREED, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.INSERT) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
@@ -63,7 +64,7 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         set(value) {
             field = value
             updateRegion()
-            if (gui.isInitialized()) gui.value.updateRangeItems()
+            menuContainer.forEachMenu(BreederMenu::updateRangeItems)
         }
     
     init {
@@ -120,7 +121,7 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
             }
         }
         
-        if (gui.isInitialized()) gui.value.idleBar.percentage = timePassed / maxIdleTime.toDouble()
+        menuContainer.forEachMenu<BreederMenu> { it.idleBar.percentage = timePassed / maxIdleTime.toDouble() }
     }
     
     private fun tryHeal(animal: Animals): Boolean {
@@ -172,9 +173,10 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         VisualRegion.removeRegion(uuid)
     }
     
-    inner class MobCrusherGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class BreederMenu(player: Player) : IndividualTileEntityMenu(player) {
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@Breeder,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default"),
             ::openWindow
@@ -197,7 +199,7 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
-            .addIngredient('r', VisualizeRegionItem(uuid) { region })
+            .addIngredient('r', VisualizeRegionItem(player, uuid) { region })
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))

@@ -24,7 +24,7 @@ import xyz.xenondevs.nova.machines.registry.GuiTextures
 import xyz.xenondevs.nova.machines.tileentity.processing.brewing.ElectricBrewingStand.Companion.ALLOW_DURATION_AMPLIFIER_MIXING
 import xyz.xenondevs.nova.machines.tileentity.processing.brewing.ElectricBrewingStand.Companion.AVAILABLE_POTION_EFFECTS
 import xyz.xenondevs.nova.material.CoreGuiMaterial
-import xyz.xenondevs.nova.ui.config.side.BackItem
+import xyz.xenondevs.nova.ui.item.BackItem
 import xyz.xenondevs.nova.ui.item.clickableItem
 import xyz.xenondevs.nova.ui.menu.ColorPickerWindow
 import xyz.xenondevs.nova.ui.menu.ColorPreviewItem
@@ -111,7 +111,7 @@ class PotionConfiguratorWindow(
             it.setViewer(player)
             it.setTitle(GuiTextures.CONFIGURE_POTION.getTitle("menu.machines.electric_brewing_stand.configure_potion"))
             it.setGui(gui)
-        }.show()
+        }.open()
     }
     
     private inner class PotionTypeGui(private val effect: PotionEffectBuilder) {
@@ -257,9 +257,9 @@ class PotionConfiguratorWindow(
         fun openPicker(player: Player) {
             Window.single {
                 it.setViewer(player)
-                it.setTitle(CoreGuiTexture.EMPTY_Gui.getTitle("menu.machines.electric_brewing_stand.pick_effect"))
+                it.setTitle(CoreGuiTexture.EMPTY_GUI.getTitle("menu.machines.electric_brewing_stand.pick_effect"))
                 it.setGui(gui)
-            }.show()
+            }.open()
         }
         
         private inner class ChooseEffectTypeItem(private val type: PotionEffectType) : AbstractItem() {

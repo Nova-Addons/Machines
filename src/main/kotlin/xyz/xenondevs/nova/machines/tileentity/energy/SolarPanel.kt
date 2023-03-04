@@ -7,6 +7,7 @@ import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.SOLAR_PANEL
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
@@ -25,7 +26,6 @@ private val ENERGY_PER_TICK = configReloadable { NovaConfig[SOLAR_PANEL].getLong
 
 class SolarPanel(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { SolarPanelGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder, UpgradeTypes.EFFICIENCY) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
@@ -65,7 +65,8 @@ class SolarPanel(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         obstructionTask.cancel()
     }
     
-    inner class SolarPanelGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class SolarPanelMenu : GlobalTileEntityMenu() {
         
         override val gui = Gui.normal()
             .setStructure(

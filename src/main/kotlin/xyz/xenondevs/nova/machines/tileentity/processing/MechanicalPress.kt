@@ -22,13 +22,14 @@ import xyz.xenondevs.nova.machines.registry.Blocks.MECHANICAL_PRESS
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide.FRONT
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
@@ -44,8 +45,6 @@ private enum class PressType(val recipeType: RecipeType<out ConversionNovaRecipe
 }
 
 class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
-    
-    override val gui = lazy { MechanicalPressGui() }
     
     private val inputInv = getInventory("input", 1, ::handleInputUpdate)
     private val outputInv = getInventory("output", 1, ::handleOutputUpdate)
@@ -87,7 +86,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                     currentRecipe = null
                 }
                 
-                if (gui.isInitialized()) gui.value.updateProgress()
+                menuContainer.forEachMenu(MechanicalPressMenu::updateProgress)
             }
         }
     }
@@ -125,12 +124,13 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     }
     
     
-    inner class MechanicalPressGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class MechanicalPressMenu : GlobalTileEntityMenu() {
         
         private val pressProgress = PressProgressItem()
         private val pressTypeItems = ArrayList<PressTypeItem>()
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@MechanicalPress,
             listOf(
                 itemHolder.getNetworkedInventory(inputInv) to "inventory.nova.input",

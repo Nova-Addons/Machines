@@ -3,6 +3,7 @@ package xyz.xenondevs.nova.machines.tileentity.agriculture
 import org.bukkit.Material
 import org.bukkit.Tag
 import org.bukkit.block.Block
+import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
 import xyz.xenondevs.invui.item.Item
@@ -18,13 +19,14 @@ import xyz.xenondevs.nova.item.tool.ToolCategory
 import xyz.xenondevs.nova.machines.registry.Blocks.HARVESTER
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -58,7 +60,6 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     private val shearInventory = getInventory("shears", 1, ::handleShearInventoryUpdate)
     private val axeInventory = getInventory("axe", 1, ::handleAxeInventoryUpdate)
     private val hoeInventory = getInventory("hoe", 1, ::handleHoeInventoryUpdate)
-    override val gui = lazy(::HarvesterGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREAK, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
@@ -73,7 +74,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         set(value) {
             field = value
             updateRegion()
-            if (gui.isInitialized()) gui.value.updateRangeItems()
+            menuContainer.forEachMenu(HarvesterMenu::updateRangeItems)
         }
     private lateinit var harvestRegion: Region
     
@@ -221,9 +222,10 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         VisualRegion.removeRegion(uuid)
     }
     
-    inner class HarvesterGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class HarvesterMenu(player: Player) : IndividualTileEntityMenu(player) {
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@Harvester,
             listOf(
                 itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output",
@@ -246,7 +248,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('c', OpenSideConfigItem(sideConfigGui))
-            .addIngredient('v', VisualizeRegionItem(uuid) { harvestRegion })
+            .addIngredient('v', VisualizeRegionItem(player, uuid) { harvestRegion })
             .addIngredient('s', VISlotElement(shearInventory, 0, GuiMaterials.SHEARS_PLACEHOLDER.clientsideProvider))
             .addIngredient('a', VISlotElement(axeInventory, 0, GuiMaterials.AXE_PLACEHOLDER.clientsideProvider))
             .addIngredient('h', VISlotElement(hoeInventory, 0, GuiMaterials.HOE_PLACEHOLDER.clientsideProvider))

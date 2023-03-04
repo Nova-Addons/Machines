@@ -20,6 +20,7 @@ import xyz.xenondevs.nova.machines.registry.Blocks.FLUID_INFUSER
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
@@ -29,7 +30,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.getFluidContainer
@@ -61,7 +62,6 @@ private val FLUID_CAPACITY = configReloadable { NovaConfig[FLUID_INFUSER].getLon
 
 class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::FluidInfuserGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     private val input = getInventory("input", 1, ::handleInputInventoryUpdate)
     private val output = getInventory("output", 1, ::handleOutputInventoryUpdate)
@@ -98,7 +98,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     private fun reset() {
         this.recipe = null
         this.timePassed = 0
-        if (gui.isInitialized()) gui.value.updateProgress()
+        menuContainer.forEachMenu(FluidInfuserMenu::updateProgress)
     }
     
     override fun handleTick() {
@@ -128,13 +128,14 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
                         else tank.addFluid(recipe.fluidType, recipe.fluidAmount)
                         
                         reset()
-                    } else if (gui.isInitialized()) gui.value.updateProgress()
+                    } else menuContainer.forEachMenu(FluidInfuserMenu::updateProgress)
                 } else timePassed = 0
             }
         }
     }
     
-    inner class FluidInfuserGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class FluidInfuserMenu : GlobalTileEntityMenu() {
         
         private val progressItem = InfuserProgressItem()
         private val changeModeItem = CycleItem.withStateChangeHandler(
@@ -144,7 +145,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
             GuiMaterials.FLUID_RIGHT_LEFT_BTN.clientsideProvider
         )
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@FluidInfuser,
             listOf(
                 itemHolder.getNetworkedInventory(input) to "inventory.nova.input",

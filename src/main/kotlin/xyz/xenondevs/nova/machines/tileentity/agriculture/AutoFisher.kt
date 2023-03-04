@@ -26,6 +26,7 @@ import xyz.xenondevs.nova.machines.registry.Blocks.AUTO_FISHER
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
@@ -33,7 +34,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.item.DamageableUtils
@@ -50,7 +51,6 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     
     private val inventory = getInventory("inventory", 12, ::handleInventoryUpdate)
     private val fishingRodInventory = getInventory("fishingRod", 1, ::handleFishingRodInventoryUpdate)
-    override val gui = lazy(::AutoFisherGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM) }
     override val itemHolder = NovaItemHolder(
@@ -91,7 +91,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
                 fish()
             }
             
-            if (gui.isInitialized()) gui.value.idleBar.percentage = timePassed.toDouble() / maxIdleTime.toDouble()
+            menuContainer.forEachMenu<AutoFisherMenu> { it.idleBar.percentage = timePassed.toDouble() / maxIdleTime.toDouble() }
         }
     }
     
@@ -144,9 +144,10 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         event.isCancelled = event.isAdd && event.newItemStack.type != Material.FISHING_ROD
     }
     
-    inner class AutoFisherGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class AutoFisherMenu : GlobalTileEntityMenu() {
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@AutoFisher,
             listOf(
                 itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default",

@@ -18,6 +18,7 @@ import xyz.xenondevs.nova.machines.registry.Blocks.FREEZER
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.material.ItemNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
@@ -27,7 +28,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.getFluidContainer
@@ -43,7 +44,6 @@ private val MB_PER_TICK by configReloadable { NovaConfig[FREEZER].getLong("mb_pe
 
 class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::FreezerGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     private val inventory = getInventory("inventory", 6, ::handleInventoryUpdate)
     private val waterTank = getFluidContainer("water", setOf(FluidType.WATER), WATER_CAPACITY, 0, upgradeHolder = upgradeHolder)
@@ -94,7 +94,8 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 mbUsed = 0
                 inventory.addItem(SELF_UPDATE_REASON, mode.product)
             }
-            if (gui.isInitialized()) gui.value.updateProgress()
+            
+            menuContainer.forEachMenu(FreezerMenu::updateProgress)
         }
     }
     
@@ -103,10 +104,11 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         storeData("mode", mode)
     }
     
-    inner class FreezerGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class FreezerMenu : GlobalTileEntityMenu() {
         
         private val progressItem = LeftRightFluidProgressItem()
-        private val sideConfigGui = SideConfigGui(this@Freezer,
+        private val sideConfigGui = SideConfigMenu(this@Freezer,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output"),
             listOf(waterTank to "container.nova.water_tank"),
             ::openWindow

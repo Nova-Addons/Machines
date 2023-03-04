@@ -8,12 +8,13 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.CHUNK_LOADER
 import xyz.xenondevs.nova.tileentity.ChunkLoadManager
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -27,8 +28,6 @@ private val ENERGY_PER_CHUNK by configReloadable { NovaConfig[CHUNK_LOADER].getL
 private val MAX_RANGE by configReloadable { NovaConfig[CHUNK_LOADER].getInt("max_range") }
 
 class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
-    
-    override val gui = lazy { ChunkLoaderGui() }
     
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.ENERGY, UpgradeTypes.EFFICIENCY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, upgradeHolder = upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
@@ -86,9 +85,10 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         if (!unload) setChunksForceLoaded(false)
     }
     
-    inner class ChunkLoaderGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class ChunkLoaderMenu : GlobalTileEntityMenu() {
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@ChunkLoader,
             ::openWindow
         )

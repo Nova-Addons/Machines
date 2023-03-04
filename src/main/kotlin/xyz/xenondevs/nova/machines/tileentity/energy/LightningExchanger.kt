@@ -13,6 +13,7 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.LIGHTNING_EXCHANGER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntityManager
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
@@ -32,7 +33,6 @@ private val MAX_BURST by configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getL
 
 class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { LightningExchangerGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, upgradeHolder) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
@@ -63,7 +63,8 @@ class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(
         toCharge += (if (leeway <= maxBurst) leeway else Random.nextLong(minBurst, maxBurst))
     }
     
-    inner class LightningExchangerGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class LightningExchangerMenu : GlobalTileEntityMenu() {
         
         override val gui = Gui.normal()
             .setStructure(

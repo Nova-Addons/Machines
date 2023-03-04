@@ -22,6 +22,7 @@ import xyz.xenondevs.nova.machines.registry.Blocks.COBBLESTONE_GENERATOR
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.material.ItemNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.container.FluidContainer
@@ -32,7 +33,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.axis
@@ -56,7 +57,6 @@ private val MB_PER_TICK by configReloadable { NovaConfig[COBBLESTONE_GENERATOR].
 
 class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::CobblestoneGeneratorGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     
     private val inventory = getInventory("inventory", 3, ::handleInventoryUpdate)
@@ -139,7 +139,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
                 particleEffect.sendTo(getViewers())
             }
             
-            if (gui.isInitialized()) gui.value.progressItem.percentage = mbUsed / 1000.0
+            menuContainer.forEachMenu<CobblestoneGeneratorMenu> { it.progressItem.percentage = mbUsed / 1000.0 }
         }
     }
     
@@ -158,9 +158,10 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
         storeData("mode", mode)
     }
     
-    inner class CobblestoneGeneratorGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class CobblestoneGeneratorMenu : GlobalTileEntityMenu() {
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@CobblestoneGenerator,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output"),
             listOf(waterTank to "container.nova.water_tank", lavaTank to "container.nova.lava_tank"),

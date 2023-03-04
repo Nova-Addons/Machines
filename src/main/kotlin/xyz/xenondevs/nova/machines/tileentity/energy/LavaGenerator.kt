@@ -8,6 +8,7 @@ import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.LAVA_GENERATOR
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
@@ -16,7 +17,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.axis
@@ -31,8 +32,6 @@ private val ENERGY_PER_MB by configReloadable { NovaConfig[LAVA_GENERATOR].getDo
 private val BURN_RATE by configReloadable { NovaConfig[LAVA_GENERATOR].getDouble("burn_rate") }
 
 class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
-    
-    override val gui = lazy(::LavaGeneratorGui)
     
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     private val fluidContainer = getFluidContainer("tank", hashSetOf(FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
@@ -110,9 +109,10 @@ class LavaGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         }
     }
     
-    inner class LavaGeneratorGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class LavaGeneratorMenu : GlobalTileEntityMenu() {
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@LavaGenerator,
             fluidContainerNames = listOf(fluidContainer to "container.nova.lava_tank"),
             openPrevious = ::openWindow

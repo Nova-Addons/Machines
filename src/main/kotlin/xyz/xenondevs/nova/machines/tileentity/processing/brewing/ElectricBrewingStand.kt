@@ -33,6 +33,7 @@ import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.machines.registry.GuiTextures
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
@@ -42,7 +43,7 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.item.localizedName
@@ -61,7 +62,6 @@ private val IGNORE_UPDATE_REASON = object : UpdateReason {}
 
 class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::ElectricBrewingStandGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     private val fluidTank = getFluidContainer("tank", setOf(FluidType.WATER), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
     private val ingredientsInventory = getInventory("ingredients", 27, null, ::handleIngredientsInventoryAfterUpdate)
@@ -177,9 +177,10 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         // Update
         updateAllRequiredStatus()
         checkBrewingPossibility()
-        if (gui.isInitialized()) {
-            gui.value.configurePotionItem.notifyWindows()
-            gui.value.ingredientsDisplay.notifyWindows()
+        
+        menuContainer.forEachMenu<ElectricBrewingStandMenu> {
+            it.configurePotionItem.notifyWindows()
+            it.ingredientsDisplay.notifyWindows()
         }
     }
     
@@ -206,16 +207,14 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
             .filter { !it.value }
             .forEach { (item, _) -> requiredItemsStatus!![item] = ingredientsInventory.containsSimilar(item) }
         
-        if (gui.isInitialized())
-            gui.value.ingredientsDisplay.notifyWindows()
+        menuContainer.forEachMenu<ElectricBrewingStandMenu> { it.ingredientsDisplay.notifyWindows() }
     }
     
     private fun updateAllRequiredStatus() {
         if (requiredItems == null) return
         requiredItemsStatus = requiredItems!!.associateWithTo(HashMap()) { ingredientsInventory.containsSimilar(it) }
         
-        if (gui.isInitialized())
-            gui.value.ingredientsDisplay.notifyWindows()
+        menuContainer.forEachMenu<ElectricBrewingStandMenu> { it.ingredientsDisplay.notifyWindows() }
     }
     
     private fun checkBrewingPossibility() {
@@ -230,7 +229,8 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         } else {
             nextPotion = null
             timePassed = 0
-            if (gui.isInitialized()) gui.value.progressItem.percentage = 0.0
+            
+            menuContainer.forEachMenu<ElectricBrewingStandMenu> { it.progressItem.percentage = 0.0 }
         }
     }
     
@@ -249,7 +249,9 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
                 updateAllRequiredStatus()
             }
             
-            if (gui.isInitialized()) gui.value.progressItem.percentage = timePassed.toDouble() / maxBrewTime.toDouble()
+            menuContainer.forEachMenu<ElectricBrewingStandMenu> {
+                it.progressItem.percentage = timePassed.toDouble() / maxBrewTime.toDouble()
+            }
         }
     }
     
@@ -263,9 +265,10 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         val ALLOW_DURATION_AMPLIFIER_MIXING = NovaConfig[ELECTRIC_BREWING_STAND].getBoolean("duration_amplifier_mixing")
     }
     
-    inner class ElectricBrewingStandGui : TileEntityGui(GuiTextures.ELECTRIC_BREWING_STAND) {
+    @TileEntityMenuClass
+    inner class ElectricBrewingStandMenu : GlobalTileEntityMenu(GuiTextures.ELECTRIC_BREWING_STAND) {
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@ElectricBrewingStand,
             listOf(
                 itemHolder.getNetworkedInventory(ingredientsInventory) to "inventory.machines.ingredients",

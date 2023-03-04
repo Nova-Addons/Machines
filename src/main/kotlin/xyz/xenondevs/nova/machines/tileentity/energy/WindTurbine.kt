@@ -13,7 +13,7 @@ import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.WIND_TURBINE
 import xyz.xenondevs.nova.tileentity.Model
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.TileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
@@ -35,7 +35,6 @@ private val PLAY_ANIMATION by configReloadable { NovaConfig[WIND_TURBINE].getBoo
 
 class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { WindTurbineGui() }
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder, UpgradeTypes.EFFICIENCY) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT, BlockSide.BOTTOM)
@@ -111,7 +110,8 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         
     }
     
-    inner class WindTurbineGui : TileEntity.TileEntityGui() {
+    @TileEntityMenuClass
+    inner class WindTurbineMenu : GlobalTileEntityMenu() {
         
         override val gui = Gui.normal()
             .setStructure(

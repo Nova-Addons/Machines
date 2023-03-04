@@ -3,25 +3,25 @@ package xyz.xenondevs.nova.machines.tileentity.world
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.container.FluidContainer
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import java.util.*
 
 class InfiniteWaterSource(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState) {
     
-    override val gui = lazy(::InfiniteWaterSourceGui)
-    
     private val fluidContainer = InfiniteFluidContainer
     override val fluidHolder = NovaFluidHolder(this, fluidContainer to NetworkConnectionType.EXTRACT) { createSideConfig(NetworkConnectionType.EXTRACT) }
     
-    inner class InfiniteWaterSourceGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class InfiniteWaterSourceMenu : GlobalTileEntityMenu() {
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@InfiniteWaterSource,
             fluidContainerNames = listOf(fluidContainer to "block.minecraft.water"),
             openPrevious = ::openWindow

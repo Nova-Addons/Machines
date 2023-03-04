@@ -18,13 +18,14 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.ProgressArrowItem
 import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_FURNACE
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.bukkitCopy
 import xyz.xenondevs.nova.util.intValue
@@ -47,8 +48,6 @@ private val ENERGY_PER_TICK = configReloadable { NovaConfig[ELECTRIC_FURNACE].ge
 private val COOK_SPEED by configReloadable { NovaConfig[ELECTRIC_FURNACE].getInt("cook_speed") }
 
 class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
-    
-    override val gui = lazy { ElectricFurnaceGui() }
     
     private val inputInventory = getInventory("input", 1, ::handleInputInventoryUpdate)
     private val outputInventory = getInventory("output", 1, ::handleOutputInventoryUpdate)
@@ -143,16 +142,17 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                     this.currentRecipe = null
                 }
                 
-                if (gui.isInitialized()) gui.value.updateProgress()
+                menuContainer.forEachMenu(ElectricFurnaceMenu::updateProgress)
             }
         } else active = false
     }
     
-    inner class ElectricFurnaceGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class ElectricFurnaceMenu : GlobalTileEntityMenu() {
         
         private val progressItem = ProgressArrowItem()
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@ElectricFurnace,
             listOf(
                 itemHolder.getNetworkedInventory(inputInventory) to "inventory.nova.input",

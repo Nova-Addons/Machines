@@ -11,13 +11,14 @@ import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.EnergyProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.FURNACE_GENERATOR
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.BlockSide.FRONT
 import xyz.xenondevs.nova.util.advance
@@ -37,7 +38,6 @@ private val BURN_TIME_MULTIPLIER by configReloadable { NovaConfig[FURNACE_GENERA
 
 class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { FurnaceGeneratorGui() }
     private val inventory = getInventory("fuel", 1, ::handleInventoryUpdate)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, upgradeHolder, UpgradeTypes.SPEED) { createSideConfig(NetworkConnectionType.EXTRACT, FRONT) }
@@ -94,8 +94,7 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
             burnTime--
             energyHolder.energy = min(energyHolder.maxEnergy, energyHolder.energy + energyHolder.energyGeneration)
             
-            if (gui.isInitialized())
-                gui.value.progressItem.percentage = burnTime.toDouble() / totalBurnTime.toDouble()
+            menuContainer.forEachMenu<FurnaceGeneratorMenu> { it.progressItem.percentage = burnTime.toDouble() / totalBurnTime.toDouble() }
             
             if (!active) active = true
         } else if (active) active = false
@@ -131,11 +130,12 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
         storeData("totalBurnTime", totalBurnTime)
     }
     
-    inner class FurnaceGeneratorGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class FurnaceGeneratorMenu : GlobalTileEntityMenu() {
         
         val progressItem = EnergyProgressItem()
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@FurnaceGenerator,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.machines.fuel"),
             ::openWindow

@@ -21,13 +21,14 @@ import xyz.xenondevs.nova.item.tool.ToolCategory
 import xyz.xenondevs.nova.machines.registry.Blocks.PLANTER
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -54,7 +55,6 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     
     private val inputInventory = getInventory("input", 6, ::handleSeedUpdate)
     private val hoesInventory = getInventory("hoes", 1, ::handleHoeUpdate)
-    override val gui = lazy(::PlanterGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_PLANT, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
@@ -72,7 +72,8 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         set(value) {
             field = value
             updateRegion()
-            if (gui.isInitialized()) gui.value.updateRangeItems()
+    
+            menuContainer.forEachMenu(PlanterMenu::updateRangeItems)
         }
     
     private lateinit var plantRegion: Region
@@ -213,9 +214,10 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         storeData("range", range)
     }
     
-    inner class PlanterGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class PlanterMenu(player: Player) : IndividualTileEntityMenu(player) {
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@Planter,
             listOf(
                 itemHolder.getNetworkedInventory(inputInventory) to "inventory.nova.input",
@@ -235,7 +237,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 "3 - - - - - - - 4")
             .addIngredient('i', inputInventory)
             .addIngredient('h', VISlotElement(hoesInventory, 0, GuiMaterials.HOE_PLACEHOLDER.clientsideProvider))
-            .addIngredient('v', VisualizeRegionItem(uuid) { plantRegion })
+            .addIngredient('v', VisualizeRegionItem(player, uuid) { plantRegion })
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('f', AutoTillingItem())
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))

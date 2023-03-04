@@ -16,6 +16,7 @@ import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.SPRINKLER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
@@ -23,7 +24,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -47,7 +48,6 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("ra
 
 class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::SprinklerGui)
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.FLUID, UpgradeTypes.RANGE)
     private val tank = getFluidContainer("tank", hashSetOf(FluidType.WATER), WATER_CAPACITY, upgradeHolder = upgradeHolder)
     override val fluidHolder = NovaFluidHolder(this, tank to NetworkConnectionType.BUFFER) { createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM) }
@@ -60,7 +60,7 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         set(value) {
             field = value
             updateRegion()
-            if (gui.isInitialized()) gui.value.updateRangeItems()
+            menuContainer.forEachMenu(SprinklerMenu::updateRangeItems)
         }
     
     init {
@@ -97,9 +97,10 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         storeData("range", range)
     }
     
-    inner class SprinklerGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class SprinklerMenu(player: Player) : IndividualTileEntityMenu(player) {
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@Sprinkler,
             fluidContainerNames = listOf(tank to "container.nova.fluid_tank"),
             openPrevious = ::openWindow
@@ -116,7 +117,7 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
-            .addIngredient('v', VisualizeRegionItem(uuid) { region })
+            .addIngredient('v', VisualizeRegionItem(player, uuid) { region })
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('d', DisplayNumberItem { range }.also(rangeItems::add))

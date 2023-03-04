@@ -16,13 +16,14 @@ import xyz.xenondevs.nova.machines.recipe.PulverizerRecipe
 import xyz.xenondevs.nova.machines.registry.Blocks.PULVERIZER
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGui
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
@@ -34,8 +35,6 @@ private val ENERGY_PER_TICK = configReloadable { NovaConfig[PULVERIZER].getLong(
 private val PULVERIZE_SPEED by configReloadable { NovaConfig[PULVERIZER].getInt("speed") }
 
 class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
-    
-    override val gui = lazy { PulverizerGui() }
     
     private val inputInv = getInventory("input", 1, ::handleInputUpdate)
     private val outputInv = getInventory("output", 2, ::handleOutputUpdate)
@@ -89,7 +88,7 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
                     currentRecipe = null
                 }
                 
-                if (gui.isInitialized()) gui.value.updateProgress()
+                menuContainer.forEachMenu(PulverizerMenu::updateProgress)
             }
             
         } else if (particleTask.isRunning()) particleTask.stop()
@@ -122,12 +121,13 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         storeData("currentRecipe", currentRecipe?.key)
     }
     
-    inner class PulverizerGui : TileEntityGui() {
+    @TileEntityMenuClass
+    inner class PulverizerMenu : GlobalTileEntityMenu() {
         
         private val mainProgress = ProgressArrowItem()
         private val pulverizerProgress = PulverizerProgressItem()
         
-        private val sideConfigGui = SideConfigGui(
+        private val sideConfigGui = SideConfigMenu(
             this@Pulverizer,
             listOf(
                 itemHolder.getNetworkedInventory(inputInv) to "inventory.nova.input",
