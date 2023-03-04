@@ -18,7 +18,7 @@ import xyz.xenondevs.invui.gui.ScrollGui
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.PotionBuilder
-import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.virtualinventory.event.InventoryUpdatedEvent
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.invui.virtualinventory.event.UpdateReason
@@ -306,7 +306,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
             ::openWindow
         )
         
-        inner class ConfigurePotionItem : BaseItem() {
+        inner class ConfigurePotionItem : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 val builder = PotionBuilder(potionType)
@@ -323,7 +323,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
             
         }
         
-        inner class IngredientsDisplay : BaseItem() {
+        inner class IngredientsDisplay : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 val hasAll = requiredItemsStatus?.all { it.value } ?: false

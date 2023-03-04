@@ -9,7 +9,7 @@ import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -165,7 +165,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             pressProgress.percentage = if (timeLeft == 0) 0.0 else (recipeTime - timeLeft).toDouble() / recipeTime.toDouble()
         }
         
-        private inner class PressTypeItem(private val type: PressType) : BaseItem() {
+        private inner class PressTypeItem(private val type: PressType) : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 return if (type == PressType.PLATE) {

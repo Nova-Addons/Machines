@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
 import xyz.xenondevs.invui.item.Item
-import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -247,7 +247,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         
         fun updateRangeItems() = rangeItems.forEach(Item::notifyWindows)
         
-        private inner class AutoTillingItem : BaseItem() {
+        private inner class AutoTillingItem : AbstractItem() {
             
             override fun getItemProvider() =
                 (if (autoTill) GuiMaterials.HOE_BTN_ON else GuiMaterials.HOE_BTN_OFF).clientsideProvider

@@ -16,7 +16,7 @@ import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.ItemWrapper
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.PotionBuilder
-import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.item.impl.CycleItem
 import xyz.xenondevs.invui.window.Window
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
@@ -131,7 +131,7 @@ class PotionConfiguratorWindow(
             ) { it.playClickSound(); removeEffect(effect) })
             .build()
         
-        private inner class OpenPotionPickerItem : BaseItem() {
+        private inner class OpenPotionPickerItem : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 return if (effect.type != null) {
@@ -149,7 +149,7 @@ class PotionConfiguratorWindow(
             
         }
         
-        private inner class DurationModifierItem : BaseItem() {
+        private inner class DurationModifierItem : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 if (effect.type == null) return ItemWrapper(ItemStack(Material.AIR))
@@ -191,7 +191,7 @@ class PotionConfiguratorWindow(
             }
         }
         
-        private inner class AmplifierModifierItem : BaseItem() {
+        private inner class AmplifierModifierItem : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 if (effect.type == null) return ItemWrapper(ItemStack(Material.AIR))
@@ -262,7 +262,7 @@ class PotionConfiguratorWindow(
             }.show()
         }
         
-        private inner class ChooseEffectTypeItem(private val type: PotionEffectType) : BaseItem() {
+        private inner class ChooseEffectTypeItem(private val type: PotionEffectType) : AbstractItem() {
             
             @Suppress("DEPRECATION")
             override fun getItemProvider(): ItemProvider {

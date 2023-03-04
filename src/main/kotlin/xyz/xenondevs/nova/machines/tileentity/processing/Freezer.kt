@@ -8,7 +8,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -132,7 +132,7 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
             progressItem.percentage = mbUsed / (1000 * mode.maxCostMultiplier).toDouble()
         }
         
-        private inner class ChangeModeItem : BaseItem() {
+        private inner class ChangeModeItem : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider =
                 mode.uiItem.clientsideProvider

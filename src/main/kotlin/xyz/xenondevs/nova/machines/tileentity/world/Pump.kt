@@ -9,7 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.commons.collections.rotateRight
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
-import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -245,7 +245,7 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
         
         fun updateRangeItems() = rangeItems.forEach(Item::notifyWindows)
         
-        private inner class PumpModeItem : BaseItem() {
+        private inner class PumpModeItem : AbstractItem() {
             
             override fun getItemProvider() =
                 (if (mode == PumpMode.PUMP) GuiMaterials.PUMP_MODE_BTN else GuiMaterials.PUMP_REPLACE_MODE_BTN).clientsideProvider

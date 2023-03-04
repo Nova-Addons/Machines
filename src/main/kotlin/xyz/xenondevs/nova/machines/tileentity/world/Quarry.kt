@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.nmsutils.particle.block
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
@@ -625,7 +625,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             depthItems.forEach(Item::notifyWindows)
         }
         
-        private inner class SizeDisplayItem(private val getNumber: () -> Int) : BaseItem() {
+        private inner class SizeDisplayItem(private val getNumber: () -> Int) : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 val number = getNumber()
@@ -638,7 +638,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             
         }
         
-        private inner class DepthDisplayItem(private val getNumber: () -> Int) : BaseItem() {
+        private inner class DepthDisplayItem(private val getNumber: () -> Int) : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 val number = getNumber()

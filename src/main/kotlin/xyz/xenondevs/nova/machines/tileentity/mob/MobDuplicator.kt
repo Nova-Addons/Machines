@@ -19,7 +19,7 @@ import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.SkullBuilder
 import xyz.xenondevs.invui.item.builder.SkullBuilder.HeadTexture
-import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -191,7 +191,7 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             idleBar.percentage = timePassed.toDouble() / totalIdleTime.toDouble()
         }
         
-        private inner class ToggleNBTModeItem : BaseItem() {
+        private inner class ToggleNBTModeItem : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 return (if (keepNbt) GuiMaterials.NBT_BTN_ON else GuiMaterials.NBT_BTN_OFF).clientsideProvider

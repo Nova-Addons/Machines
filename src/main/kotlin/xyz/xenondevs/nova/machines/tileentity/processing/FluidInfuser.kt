@@ -7,7 +7,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.item.impl.CycleItem
 import xyz.xenondevs.invui.item.impl.SimpleItem
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
@@ -182,7 +182,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
             player!!.playSound(player.location, Sound.UI_BUTTON_CLICK, 1f, 1f)
         }
         
-        private inner class InfuserProgressItem : BaseItem() {
+        private inner class InfuserProgressItem : AbstractItem() {
             
             var percentage: Double = 0.0
                 set(value) {

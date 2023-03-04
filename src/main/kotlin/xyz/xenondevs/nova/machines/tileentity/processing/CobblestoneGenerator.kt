@@ -10,7 +10,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.ItemProvider
-import xyz.xenondevs.invui.item.impl.BaseItem
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -186,7 +186,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
             .addIngredient('e', EnergyBar(3, energyHolder))
             .build()
         
-        private inner class ChangeModeItem : BaseItem() {
+        private inner class ChangeModeItem : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider =
                 mode.uiItem.clientsideProvider
