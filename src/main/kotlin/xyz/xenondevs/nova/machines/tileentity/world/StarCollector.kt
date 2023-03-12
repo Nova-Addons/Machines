@@ -1,12 +1,14 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import net.md_5.bungee.api.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.entity.EquipmentSlot
 import org.bukkit.Bukkit
 import org.bukkit.util.Vector
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.builder.ItemBuilder
+import xyz.xenondevs.invui.item.builder.setDisplayName
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nmsutils.particle.color
 import xyz.xenondevs.nmsutils.particle.dustTransition
@@ -33,7 +35,6 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.Vector
 import xyz.xenondevs.nova.util.calculateYaw
 import xyz.xenondevs.nova.util.center
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.dropItem
 import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
@@ -194,7 +195,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             override val barMaterial = CoreGuiMaterial.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder): ItemBuilder {
                 if (timeSpentCollecting != -1)
-                    itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.star_collector.collection"))
+                    itemBuilder.setDisplayName(Component.translatable( "menu.machines.star_collector.collection", NamedTextColor.GRAY))
                 return itemBuilder
             }
         }
@@ -202,7 +203,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         val idleBar = object : VerticalBar(3) {
             override val barMaterial = CoreGuiMaterial.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
-                itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.star_collector.idle"))
+                itemBuilder.setDisplayName(Component.translatable("menu.machines.star_collector.idle", NamedTextColor.GRAY))
         }
         
         override val gui = Gui.normal()

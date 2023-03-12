@@ -1,11 +1,13 @@
 package xyz.xenondevs.nova.machines.tileentity.mob
 
-import net.md_5.bungee.api.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Mob
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.builder.ItemBuilder
+import xyz.xenondevs.invui.item.builder.setDisplayName
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -26,7 +28,6 @@ import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.EntityUtils
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
@@ -127,7 +128,11 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         val idleBar = object : VerticalBar(3) {
             override val barMaterial = CoreGuiMaterial.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
-                itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.mob_killer.idle", maxIdleTime - timePassed))
+                itemBuilder.setDisplayName(Component.translatable(
+                    "menu.machines.mob_killer.idle",
+                    NamedTextColor.GRAY,
+                    Component.text(maxIdleTime - timePassed)
+                ))
         }
         
         override val gui = Gui.normal()

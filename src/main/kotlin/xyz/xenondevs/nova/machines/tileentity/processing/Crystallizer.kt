@@ -1,10 +1,12 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
-import net.md_5.bungee.api.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.block.BlockFace
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.builder.ItemBuilder
+import xyz.xenondevs.invui.item.builder.setDisplayName
 import xyz.xenondevs.invui.virtualinventory.event.InventoryUpdatedEvent
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nmsutils.particle.particle
@@ -30,7 +32,6 @@ import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.nmsCopy
 import xyz.xenondevs.nova.world.fakeentity.impl.FakeItem
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
@@ -164,7 +165,10 @@ class Crystallizer(
         val progressBar = object : VerticalBar(3) {
             override val barMaterial = CoreGuiMaterial.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
-                itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.crystallizer.idle"))
+                itemBuilder.setDisplayName(Component.translatable(
+                    "menu.machines.crystallizer.idle",
+                    NamedTextColor.GRAY
+                ))
         }
         
         override val gui = Gui.normal()

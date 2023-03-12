@@ -1,12 +1,14 @@
 package xyz.xenondevs.nova.machines.tileentity.mob
 
-import net.md_5.bungee.api.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Animals
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.builder.ItemBuilder
+import xyz.xenondevs.invui.item.builder.setDisplayName
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -28,7 +30,6 @@ import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.getSurroundingChunks
 import xyz.xenondevs.nova.util.item.FoodUtils
 import xyz.xenondevs.nova.util.item.canBredNow
@@ -187,7 +188,11 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         val idleBar = object : VerticalBar(3) {
             override val barMaterial = CoreGuiMaterial.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
-                itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.breeder.idle", maxIdleTime - timePassed))
+                itemBuilder.setDisplayName(Component.translatable(
+                    "menu.machines.breeder.idle",
+                    NamedTextColor.GRAY,
+                    Component.text(maxIdleTime - timePassed)
+                ))
         }
         
         override val gui = Gui.normal()

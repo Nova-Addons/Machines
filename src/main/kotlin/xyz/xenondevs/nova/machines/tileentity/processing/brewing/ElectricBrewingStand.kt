@@ -1,5 +1,7 @@
 package xyz.xenondevs.nova.machines.tileentity.processing.brewing
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.TranslatableComponent
@@ -18,6 +20,7 @@ import xyz.xenondevs.invui.gui.ScrollGui
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.PotionBuilder
+import xyz.xenondevs.invui.item.builder.setDisplayName
 import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.virtualinventory.event.InventoryUpdatedEvent
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
@@ -45,7 +48,6 @@ import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.item.localizedName
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.getFluidContainer
@@ -331,7 +333,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
             override fun getItemProvider(): ItemProvider {
                 val hasAll = requiredItemsStatus?.all { it.value } ?: false
                 val builder = ItemBuilder(Material.KNOWLEDGE_BOOK)
-                    .setDisplayName(localized(if (hasAll) ChatColor.GREEN else ChatColor.RED, "menu.machines.electric_brewing_stand.ingredients"))
+                    .setDisplayName(Component.translatable("menu.machines.electric_brewing_stand.ingredients", if (hasAll) NamedTextColor.GREEN else NamedTextColor.RED))
                 requiredItems
                     ?.asSequence()
                     ?.sortedByDescending { it.amount }

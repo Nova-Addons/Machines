@@ -3,7 +3,8 @@ package xyz.xenondevs.nova.machines.tileentity.mob
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
-import net.md_5.bungee.api.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minecraft.world.entity.Mob
 import org.bukkit.Sound
 import org.bukkit.entity.EntityType
@@ -19,6 +20,7 @@ import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.SkullBuilder
 import xyz.xenondevs.invui.item.builder.SkullBuilder.HeadTexture
+import xyz.xenondevs.invui.item.builder.setDisplayName
 import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -42,7 +44,6 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.data.NBTUtils
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.isBetweenXZ
 import xyz.xenondevs.nova.util.item.novaMaterial
 import xyz.xenondevs.nova.util.nmsEntity
@@ -170,7 +171,11 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         private val idleBar = object : VerticalBar(3) {
             override val barMaterial = CoreGuiMaterial.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
-                itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.mob_duplicator.idle", totalIdleTime - timePassed))
+                itemBuilder.setDisplayName(Component.translatable(
+                    "menu.machines.mob_duplicator.idle",
+                    NamedTextColor.GRAY,
+                    Component.text(totalIdleTime - timePassed)
+                ))
         }
         
         override val gui = Gui.normal()

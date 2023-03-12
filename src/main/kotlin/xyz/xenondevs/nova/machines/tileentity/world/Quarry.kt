@@ -1,6 +1,7 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import net.md_5.bungee.api.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.md_5.bungee.api.chat.TranslatableComponent
 import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.Axis
@@ -15,6 +16,7 @@ import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.builder.addLoreLines
 import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.nmsutils.particle.block
 import xyz.xenondevs.nmsutils.particle.particle
@@ -48,8 +50,6 @@ import xyz.xenondevs.nova.util.breakTexture
 import xyz.xenondevs.nova.util.callEvent
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.concurrent.CombinedBooleanFuture
-import xyz.xenondevs.nova.util.data.addLoreLines
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.getAllDrops
 import xyz.xenondevs.nova.util.getFullCuboid
 import xyz.xenondevs.nova.util.getNextBlockBelow
@@ -632,7 +632,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
                 val number = getNumber()
                 return CoreGuiMaterial.NUMBER.item.createItemBuilder(getNumber())
                     .setDisplayName(TranslatableComponent("menu.machines.quarry.size", number, number))
-                    .addLoreLines(localized(ChatColor.GRAY, "menu.machines.quarry.size_tip"))
+                    .addLoreLines(Component.translatable("menu.machines.quarry.size_tip", NamedTextColor.GRAY))
             }
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) = Unit
@@ -645,7 +645,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
                 val number = getNumber()
                 return CoreGuiMaterial.NUMBER.item.createItemBuilder(getNumber())
                     .setDisplayName(TranslatableComponent("menu.machines.quarry.depth", number))
-                    .addLoreLines(localized(ChatColor.GRAY, "menu.machines.quarry.depth_tip"))
+                    .addLoreLines(Component.translatable("menu.machines.quarry.depth_tip", NamedTextColor.GRAY))
             }
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) = Unit

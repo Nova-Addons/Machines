@@ -2,7 +2,8 @@
 
 package xyz.xenondevs.nova.machines.item
 
-import net.md_5.bungee.api.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import org.bukkit.Bukkit
@@ -31,7 +32,6 @@ import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.addPrioritized
 import xyz.xenondevs.nova.util.data.NamespacedKey
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.getTargetLocation
 import xyz.xenondevs.nova.util.item.retrieveData
 import xyz.xenondevs.nova.util.item.storeData
@@ -114,7 +114,7 @@ object MobCatcherBehavior : ItemBehavior() {
     
     private fun setEntityData(itemStack: ItemStack, type: EntityType, data: ByteArray) {
         itemStack.storeData(DATA_KEY, data)
-        itemStack.storeData(TYPE_KEY, type.name)
+        itemStack.storeData(TYPE_KEY, type)
         itemStack.storeData(TIME_KEY, System.currentTimeMillis())
     }
     
@@ -127,12 +127,10 @@ object MobCatcherBehavior : ItemBehavior() {
         val type = getEntityType(data) ?: return
         val nmsType = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation("minecraft", type.key.key))
         
-        itemData.addLore(listOf(
-            arrayOf(localized(
-                ChatColor.DARK_GRAY,
-                "item.machines.mob_catcher.type",
-                localized(ChatColor.YELLOW, nmsType.descriptionId)
-            ))
+        itemData.addLore(Component.translatable(
+            "item.machines.mob_catcher.type",
+            NamedTextColor.DARK_GRAY,
+            Component.translatable(nmsType.descriptionId, NamedTextColor.YELLOW)
         ))
     }
     

@@ -1,6 +1,7 @@
 package xyz.xenondevs.nova.machines.tileentity.processing.brewing
 
-import net.md_5.bungee.api.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.md_5.bungee.api.chat.TranslatableComponent
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -16,9 +17,11 @@ import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.ItemWrapper
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.PotionBuilder
+import xyz.xenondevs.invui.item.builder.addLoreLines
 import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.item.impl.CycleItem
 import xyz.xenondevs.invui.window.Window
+import xyz.xenondevs.invui.window.type.context.setTitle
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.machines.registry.GuiTextures
 import xyz.xenondevs.nova.machines.tileentity.processing.brewing.ElectricBrewingStand.Companion.ALLOW_DURATION_AMPLIFIER_MIXING
@@ -30,8 +33,6 @@ import xyz.xenondevs.nova.ui.menu.ColorPickerWindow
 import xyz.xenondevs.nova.ui.menu.ColorPreviewItem
 import xyz.xenondevs.nova.ui.menu.OpenColorPickerWindowItem
 import xyz.xenondevs.nova.ui.overlay.character.gui.CoreGuiTexture
-import xyz.xenondevs.nova.util.data.addLoreLines
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.playClickSound
 import xyz.xenondevs.nova.util.playItemPickupSound
 import java.awt.Color
@@ -160,8 +161,8 @@ class PotionConfiguratorWindow(
                 return CoreGuiMaterial.NUMBER.item.createItemBuilder(min(999, durationLevel))
                     .setDisplayName(TranslatableComponent("menu.machines.potion_configurator.duration", durationLevel, maxDurationLevel))
                     .addLoreLines(
-                        localized(ChatColor.GRAY, "menu.machines.potion_configurator.left_inc"),
-                        localized(ChatColor.GRAY, "menu.machines.potion_configurator.right_dec"),
+                        Component.translatable("menu.machines.potion_configurator.left_inc", NamedTextColor.GRAY),
+                        Component.translatable("menu.machines.potion_configurator.right_dec", NamedTextColor.GRAY)
                     )
             }
             
@@ -202,8 +203,8 @@ class PotionConfiguratorWindow(
                 return CoreGuiMaterial.NUMBER.item.createItemBuilder(min(999, amplifierLevel))
                     .setDisplayName(TranslatableComponent("menu.machines.potion_configurator.amplifier", amplifierLevel, maxAmplifierLevel))
                     .addLoreLines(
-                        localized(ChatColor.GRAY, "menu.machines.potion_configurator.left_inc"),
-                        localized(ChatColor.GRAY, "menu.machines.potion_configurator.right_dec"),
+                        Component.translatable("menu.machines.potion_configurator.left_inc", NamedTextColor.GRAY),
+                        Component.translatable("menu.machines.potion_configurator.right_dec", NamedTextColor.GRAY)
                     )
             }
             
