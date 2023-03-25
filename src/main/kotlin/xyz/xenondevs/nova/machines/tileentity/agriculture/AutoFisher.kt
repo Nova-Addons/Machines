@@ -8,11 +8,8 @@ import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.Vec3
-import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_19_R2.CraftServer
-import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_19_R2.util.RandomSourceWrapper
+import org.bukkit.craftbukkit.v1_19_R3.util.RandomSourceWrapper
 import org.bukkit.enchantments.Enchantment
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
@@ -37,7 +34,10 @@ import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.EntityUtils
+import xyz.xenondevs.nova.util.MINECRAFT_SERVER
+import xyz.xenondevs.nova.util.bukkitMirror
 import xyz.xenondevs.nova.util.item.DamageableUtils
+import xyz.xenondevs.nova.util.nmsCopy
 import xyz.xenondevs.nova.util.serverLevel
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
@@ -107,18 +107,16 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         
         val contextBuilder = LootContext.Builder(level)
             .withParameter(LootContextParams.ORIGIN, position)
-            .withParameter(LootContextParams.TOOL, CraftItemStack.asNMSCopy(rodItem))
+            .withParameter(LootContextParams.TOOL, rodItem.nmsCopy)
             .withParameter(LootContextParams.THIS_ENTITY, fakeFishingHook)
             .withRandom(random)
             .withLuck(luck.toFloat())
         
-        val server = (Bukkit.getServer() as CraftServer).server
-        val lootTable: LootTable = server.lootTables.get(BuiltInLootTables.FISHING)
-        
+        val lootTable: LootTable = MINECRAFT_SERVER.lootTables.get(BuiltInLootTables.FISHING)
         val list = lootTable.getRandomItems(contextBuilder.create(LootContextParamSets.FISHING))
         
         list.stream()
-            .map { CraftItemStack.asCraftMirror(it) }
+            .map { it.bukkitMirror }
             .forEach {
                 val leftover = inventory.addItem(SELF_UPDATE_REASON, it)
                 if (GlobalValues.DROP_EXCESS_ON_GROUND && leftover != 0) {

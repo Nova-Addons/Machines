@@ -1,9 +1,10 @@
 package xyz.xenondevs.nova.machines.tileentity.agriculture
 
 import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.world.item.ItemDisplayContext
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
+import org.joml.Vector3f
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
@@ -29,8 +30,9 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.dropItem
+import xyz.xenondevs.nova.util.nmsCopy
 import xyz.xenondevs.nova.util.sendTo
-import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
+import xyz.xenondevs.nova.world.fakeentity.impl.FakeItemDisplay
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.awt.Color
@@ -56,8 +58,6 @@ private val ENERGY_PER_TICK = configReloadable { NovaConfig[TREE_FACTORY].getLon
 private val PROGRESS_PER_TICK by configReloadable { NovaConfig[TREE_FACTORY].getDouble("progress_per_tick") }
 private val IDLE_TIME by configReloadable { NovaConfig[TREE_FACTORY].getInt("idle_time") }
 
-private const val MAX_GROWTH_STAGE = 199
-
 class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inputInventory = getInventory("input", 1, intArrayOf(1), false, ::handleInputInventoryUpdate)
@@ -74,7 +74,7 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     ) { createExclusiveSideConfig(NetworkConnectionType.BUFFER, BlockSide.BOTTOM, BlockSide.BACK) }
     
     private var plantType = inputInventory.getItemStack(0)?.type
-    private val plant: FakeArmorStand
+    private val plant: FakeItemDisplay
     
     private var progressPerTick = 0.0
     private var maxIdleTime = 0
@@ -83,11 +83,8 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     private var idleTimeLeft = 0
     
     init {
-        val plantLocation = location.clone().center().apply { y += 1 / 16.0 }
-        plant = FakeArmorStand(plantLocation, true) { _, data ->
-            data.isInvisible = true
-            data.isMarker = true
-        }
+        val plantLocation = location.clone().add(.5, 1.0 / 16.0, .5)
+        plant = FakeItemDisplay(plantLocation, true) { _, data -> data.itemDisplay = ItemDisplayContext.HEAD }
         reload()
     }
     
@@ -135,8 +132,12 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     }
     
     private fun updatePlantArmorStand() {
-        val growthStage = (MAX_GROWTH_STAGE * growthProgress).toInt().coerceAtMost(MAX_GROWTH_STAGE)
-        plant.setEquipment(EquipmentSlot.HEAD, plantType?.let { PLANTS[it]!!.miniature.clientsideProviders[growthStage].get() }, true)
+        val size = growthProgress.coerceIn(0.0..1.0).toFloat()
+        plant.updateEntityData(true) {
+            itemStack = plantType?.let { PLANTS[it]!!.miniature.clientsideProvider.get() }.nmsCopy
+            scale = Vector3f(size, size, size)
+            translation = Vector3f(0.0f, 0.5f * size, 0.0f)
+        }
     }
     
     private fun handleInputInventoryUpdate(event: ItemUpdateEvent) {

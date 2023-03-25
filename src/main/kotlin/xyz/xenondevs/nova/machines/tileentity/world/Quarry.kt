@@ -13,6 +13,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import org.joml.Vector3f
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
@@ -29,10 +30,7 @@ import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.QUARRY
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.material.CoreGuiMaterial
-import xyz.xenondevs.nova.tileentity.Model
-import xyz.xenondevs.nova.tileentity.MultiModel
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.TileEntityManager
 import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
@@ -64,6 +62,9 @@ import xyz.xenondevs.nova.util.serverTick
 import xyz.xenondevs.nova.util.setBreakStage
 import xyz.xenondevs.nova.world.block.BlockManager
 import xyz.xenondevs.nova.world.block.context.BlockBreakContext
+import xyz.xenondevs.nova.world.model.Model
+import xyz.xenondevs.nova.world.model.MovableMultiModel
+import xyz.xenondevs.nova.world.model.MultiModel
 import xyz.xenondevs.nova.world.pos
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
@@ -115,11 +116,11 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     private var energyPerTick by Delegates.notNull<Int>()
     
-    private val solidScaffolding = createMultiModel()
-    private val armX = createMultiModel()
-    private val armZ = createMultiModel()
-    private val armY = createMultiModel()
-    private val drill = createMultiModel()
+    private val solidScaffolding = MovableMultiModel()
+    private val armX = MovableMultiModel()
+    private val armZ = MovableMultiModel()
+    private val armY = MovableMultiModel()
+    private val drill = MovableMultiModel()
     
     private var maxSize = 0
     private var drillSpeedMultiplier = 0.0
@@ -186,6 +187,15 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         moveSpeed = MOVE_SPEED * upgradeHolder.getValue(UpgradeTypes.SPEED)
     }
     
+    override fun handleRemoved(unload: Boolean) {
+        super.handleRemoved(unload)
+        solidScaffolding.close()
+        armX.close()
+        armZ.close()
+        armY.close()
+        drill.close()
+    }
+    
     private fun updateBounds(checkPermission: Boolean): Boolean {
         val positions = getMinMaxPositions(location, sizeX, sizeZ, getFace(BlockSide.BACK), getFace(BlockSide.RIGHT))
         minX = positions[0]
@@ -216,11 +226,11 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             pointerDestination = null
             pointerLocation = Location(world, minX + 1.5, y - 2.0, minZ + 1.5)
             
-            solidScaffolding.removeAllModels()
-            armX.removeAllModels()
-            armY.removeAllModels()
-            armZ.removeAllModels()
-            drill.removeAllModels()
+            solidScaffolding.clear()
+            armX.clear()
+            armY.clear()
+            armZ.clear()
+            drill.clear()
             
             createScaffolding()
         }
@@ -350,26 +360,30 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         val pointerLocation = pointerLocation.clone()
         
         if (force || lastPointerLocation.z != pointerLocation.z)
-            armX.useArmorStands { it.teleport { z = pointerLocation.z } }
+            armX.use { it.teleport { z = pointerLocation.z } }
         if (force || lastPointerLocation.x != pointerLocation.x)
-            armZ.useArmorStands { it.teleport { x = pointerLocation.x } }
+            armZ.use { it.teleport { x = pointerLocation.x } }
         if (force || lastPointerLocation.x != pointerLocation.x || lastPointerLocation.z != pointerLocation.z)
-            armY.useArmorStands { it.teleport { x = pointerLocation.x; z = pointerLocation.z } }
+            armY.use { it.teleport { x = pointerLocation.x; z = pointerLocation.z } }
         
         if (force || lastPointerLocation.y != pointerLocation.y) {
             for (y in y - 1 downTo pointerLocation.blockY + 1) {
                 val location = pointerLocation.clone()
-                location.y = y.toDouble()
-                if (!armY.hasModelLocation(location)) armY.addModels(Model(FULL_SLIM_VERTICAL, location))
+                location.y = y.toDouble() + .5
+                if (armY.itemDisplays.none { it.location == location })
+                    armY.add(Model(FULL_SLIM_VERTICAL, location))
             }
-            armY.removeIf { armorStand, _ -> armorStand.location.blockY - 1 < pointerLocation.blockY }
+            armY.removeIf { armorStand -> armorStand.location.blockY - 1 < pointerLocation.blockY }
         }
         
-        drill.useArmorStands {
-            val location = pointerLocation.clone()
-            location.yaw = it.location.yaw.mod(360f)
-            if (drilling) location.yaw += 25f * (2 - drillProgress.toFloat())
-            else location.yaw += 10f
+        drill.use {
+            val location = pointerLocation.clone().apply {
+                y += 1.5
+                yaw = it.location.yaw.mod(360f)
+                yaw += if (drilling)
+                    25f * (2 - drillProgress.toFloat())
+                else 10f
+            }
             it.teleport(location)
         }
         
@@ -394,9 +408,9 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
                     
                     val topLoc = LocationUtils.getTopBlockBetween(world, x, z, maxBreakY, minBreakY)
                     if (topLoc != null
-                        && (topLoc.block.hardness >= 0 || TileEntityManager.getTileEntity(topLoc) != null)
-                        && ProtectionManager.canBreak(this, null, topLoc).get()) {
-                        
+                        && topLoc.block.hardness >= 0
+                        && ProtectionManager.canBreak(this, null, topLoc).get()
+                    ) {
                         results += topLoc
                     }
                 }
@@ -452,7 +466,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         createScaffoldingCorners()
         createScaffoldingPillars()
         createScaffoldingArms()
-        drill.addModels(Model(DRILL, pointerLocation))
+        drill.add(Model(DRILL, pointerLocation, translation = Vector3f(0f, -1f, 0f))) // translation fixes light issues, as entity is never inside block
         updatePointer(true)
     }
     
@@ -466,7 +480,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     }
     
     private fun createScaffoldingArms() {
-        val baseLocation = pointerLocation.clone().also { it.y = y.toDouble() }
+        val baseLocation = pointerLocation.clone().also { it.y = y.toDouble() + .5; }
         
         val armXLocations = LocationUtils.getStraightLine(baseLocation, Axis.X, minX..maxX)
         armXLocations.withIndex().forEach { (index, location) ->
@@ -495,7 +509,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             }
         }
         
-        armY.addModels(Model(SLIM_VERTICAL_DOWN, baseLocation.clone()))
+        armY.add(Model(SLIM_VERTICAL_DOWN, baseLocation.clone()))
     }
     
     private fun createScaffoldingPillars() {
@@ -511,37 +525,36 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         }
     }
     
-    
     private fun createScaffoldingCorners() {
         val y = location.y
         
         val corners = getCornerLocations(y)
             .filterNot { it.blockLocation == location }
-            .map { it.center() }
+            .map { it.add(.5, .5, .5) }
         
-        solidScaffolding.addModels(corners.map { Model(CORNER_DOWN, it) })
+        solidScaffolding.addAll(corners.map { Model(CORNER_DOWN, it) })
     }
     
     private fun getCornerLocations(y: Double) =
         listOf(
-            Location(world, minX.toDouble(), y, minZ.toDouble()),
-            Location(world, maxX.toDouble(), y, minZ.toDouble(), 90f, 0f),
-            Location(world, maxX.toDouble(), y, maxZ.toDouble(), 180f, 0f),
-            Location(world, minX.toDouble(), y, maxZ.toDouble(), 270f, 0f)
+            Location(world, maxX.toDouble(), y, maxZ.toDouble(), 0f, 0f),
+            Location(world, minX.toDouble(), y, maxZ.toDouble(), 90f, 0f),
+            Location(world, minX.toDouble(), y, minZ.toDouble(), 180f, 0f),
+            Location(world, maxX.toDouble(), y, minZ.toDouble(), 270f, 0f)
         )
     
     private fun createSmallHorizontalScaffolding(model: MultiModel, location: Location, axis: Axis) {
-        location.yaw += if (axis == Axis.Z) 0f else 90f
-        model.addModels(Model(SMALL_HORIZONTAL, location))
+        location.yaw += if (axis == Axis.Z) 180f else -90f
+        model.add(Model(SMALL_HORIZONTAL, location))
     }
     
     private fun createHorizontalScaffolding(model: MultiModel, location: Location, axis: Axis, center: Boolean = true) {
-        location.yaw = if (axis == Axis.Z) 0f else 90f
-        model.addModels(Model(FULL_HORIZONTAL, if (center) location.center() else location))
+        location.yaw = if (axis == Axis.Z) 180f else -90f
+        model.add(Model(FULL_HORIZONTAL, if (center) location.add(.5, .5, .5) else location))
     }
     
     private fun createVerticalScaffolding(model: MultiModel, location: Location) {
-        model.addModels(Model(FULL_VERTICAL, location.center()))
+        model.add(Model(FULL_VERTICAL, location.add(.5, .5, .5)))
     }
     
     companion object {
@@ -560,7 +573,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         }
         
         private fun canBreak(owner: OfflinePlayer?, location: Location, positions: IntArray): CompletableFuture<Boolean> {
-            if(owner == null) return CompletableFuture.completedFuture(true)
+            if (owner == null) return CompletableFuture.completedFuture(true)
             val minLoc = Location(location.world, positions[0].toDouble(), location.y, positions[1].toDouble())
             val maxLoc = Location(location.world, positions[2].toDouble(), location.y, positions[3].toDouble())
             return CombinedBooleanFuture(minLoc.getFullCuboid(maxLoc).map { ProtectionManager.canBreak(owner, null, it) })

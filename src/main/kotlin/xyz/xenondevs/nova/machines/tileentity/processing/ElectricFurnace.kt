@@ -27,9 +27,10 @@ import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
+import xyz.xenondevs.nova.util.MINECRAFT_SERVER
+import xyz.xenondevs.nova.util.NMSUtils.REGISTRY_ACCESS
 import xyz.xenondevs.nova.util.bukkitCopy
 import xyz.xenondevs.nova.util.intValue
-import xyz.xenondevs.nova.util.minecraftServer
 import xyz.xenondevs.nova.util.namespacedKey
 import xyz.xenondevs.nova.util.nmsCopy
 import xyz.xenondevs.nova.util.resourceLocation
@@ -39,7 +40,7 @@ import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 
 private fun getRecipe(input: ItemStack, world: World): SmeltingRecipe? {
-    return minecraftServer.recipeManager.getAllRecipesFor(RecipeType.SMELTING)
+    return MINECRAFT_SERVER.recipeManager.getAllRecipesFor(RecipeType.SMELTING)
         .firstOrNull { it.matches(SimpleContainer(input.nmsCopy), world.serverLevel) }
 }
 
@@ -61,7 +62,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     
     private var currentRecipe: SmeltingRecipe? by storedValue<NamespacedKey>("currentRecipe").map(
-        { minecraftServer.recipeManager.byKey(it.resourceLocation).orElse(null) as? SmeltingRecipe },
+        { MINECRAFT_SERVER.recipeManager.byKey(it.resourceLocation).orElse(null) as? SmeltingRecipe },
         { it.id.namespacedKey }
     )
     private var timeCooked: Int by storedValue("timeCooked") { 0 }
@@ -121,7 +122,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 val item = inputInventory.getItemStack(0)
                 if (item != null) {
                     val recipe = getRecipe(item, world)
-                    if (recipe != null && outputInventory.canHold(recipe.resultItem.bukkitCopy)) {
+                    if (recipe != null && outputInventory.canHold(recipe.getResultItem(REGISTRY_ACCESS).bukkitCopy)) {
                         currentRecipe = recipe
                         inputInventory.addItemAmount(null, 0, -1)
                         
@@ -136,7 +137,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 timeCooked += cookSpeed
                 
                 if (timeCooked >= currentRecipe.cookingTime) {
-                    outputInventory.addItem(SELF_UPDATE_REASON, currentRecipe.resultItem.bukkitCopy)
+                    outputInventory.addItem(SELF_UPDATE_REASON, currentRecipe.getResultItem(REGISTRY_ACCESS).bukkitCopy)
                     experience += currentRecipe.experience
                     timeCooked = 0
                     this.currentRecipe = null

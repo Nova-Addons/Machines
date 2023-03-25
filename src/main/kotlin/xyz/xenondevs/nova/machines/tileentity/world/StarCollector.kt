@@ -16,7 +16,7 @@ import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
-import xyz.xenondevs.nova.data.resources.model.data.ArmorStandBlockModelData
+import xyz.xenondevs.nova.data.resources.model.data.DisplayEntityBlockModelData
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.STAR_COLLECTOR
 import xyz.xenondevs.nova.machines.registry.Items
@@ -71,7 +71,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     private val rod = FakeArmorStand(location.clone().center().apply { y -= 1 }, true) { ast, data ->
         data.isMarker = true
         data.isInvisible = true
-        ast.setEquipment(EquipmentSlot.HEAD, (material.block as ArmorStandBlockModelData)[1].get(), false)
+        ast.setEquipment(EquipmentSlot.HEAD, (material.block as DisplayEntityBlockModelData)[1].get(), false)
     }
     
     private val particleTask = createPacketTask(listOf(
@@ -123,7 +123,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             if (GlobalValues.DROP_EXCESS_ON_GROUND && leftOver != 0) location.dropItem(item)
             
             particleTask.stop()
-            rod.setEquipment(EquipmentSlot.HEAD, (material.block as ArmorStandBlockModelData)[1].get(), true)
+            rod.setEquipment(EquipmentSlot.HEAD, (material.block as DisplayEntityBlockModelData)[1].get(), true)
         } else {
             val percentageCollected = (maxCollectionTime - timeSpentCollecting) / maxCollectionTime.toDouble()
             val particleDistance = percentageCollected * (STAR_PARTICLE_DISTANCE_PER_TICK * maxCollectionTime)
@@ -134,8 +134,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
                 color(Color(255, 255, 255))
             }.sendTo(getViewers())
         }
-    
-    
+        
         menuContainer.forEachMenu<StarCollectorMenu> { it.collectionBar.percentage = timeSpentCollecting / maxCollectionTime.toDouble() }
     }
     
@@ -146,7 +145,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             
             particleTask.start()
             
-            rod.setEquipment(EquipmentSlot.HEAD, (material.block as ArmorStandBlockModelData)[2].get(), true)
+            rod.setEquipment(EquipmentSlot.HEAD, (material.block as DisplayEntityBlockModelData)[2].get(), true)
             
             rodLocation.yaw = rod.location.yaw
             particleVector = Vector(rod.location.yaw, -65F)
