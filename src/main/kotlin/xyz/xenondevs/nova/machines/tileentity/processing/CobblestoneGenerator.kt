@@ -16,11 +16,11 @@ import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
+import xyz.xenondevs.nova.item.NovaItem
 import xyz.xenondevs.nova.machines.gui.LeftRightFluidProgressItem
-import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.Blocks.COBBLESTONE_GENERATOR
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
-import xyz.xenondevs.nova.material.ItemNovaMaterial
+import xyz.xenondevs.nova.machines.registry.Models
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -97,7 +97,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private fun updateWaterLevel() {
         val item = if (!waterTank.isEmpty()) {
             val state = getFluidState(waterTank)
-            Blocks.COBBLESTONE_GENERATOR_WATER_LEVELS.clientsideProviders[state].get()
+            Models.COBBLESTONE_GENERATOR_WATER_LEVELS.clientsideProviders[state].get()
         } else null
         waterLevel.setEquipment(EquipmentSlot.HEAD, item, true)
     }
@@ -105,7 +105,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private fun updateLavaLevel() {
         val item = if (!lavaTank.isEmpty()) {
             val state = getFluidState(lavaTank)
-            Blocks.COBBLESTONE_GENERATOR_LAVA_LEVELS.clientsideProviders[state].get()
+            Models.COBBLESTONE_GENERATOR_LAVA_LEVELS.clientsideProviders[state].get()
         } else null
         lavaLevel.setEquipment(EquipmentSlot.HEAD, item, true)
     }
@@ -205,7 +205,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
         
     }
     
-    enum class Mode(val takeWater: Boolean, val takeLava: Boolean, val product: ItemStack, val uiItem: ItemNovaMaterial) {
+    enum class Mode(val takeWater: Boolean, val takeLava: Boolean, val product: ItemStack, val uiItem: NovaItem) {
         COBBLESTONE(false, false, ItemStack(Material.COBBLESTONE), GuiMaterials.COBBLESTONE_MODE_BTN),
         STONE(true, false, ItemStack(Material.STONE), GuiMaterials.STONE_MODE_BTN),
         OBSIDIAN(false, true, ItemStack(Material.OBSIDIAN), GuiMaterials.OBSIDIAN_MODE_BTN)

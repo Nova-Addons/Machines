@@ -64,13 +64,13 @@ class WindTurbine(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         val location = location.add(0.5, 3.5, 0.5)
         
         turbineModel.add(Model(
-            (material.block as DisplayEntityBlockModelData)[4].get(),
+            (block.model as DisplayEntityBlockModelData)[4].get(),
             location
         ))
         
         for (blade in 0..2) {
             turbineModel.add(Model(
-                (material.block as DisplayEntityBlockModelData)[5].get(),
+                (block.model as DisplayEntityBlockModelData)[5].get(),
                 location,
                 rightRotation = Quaternionf().setAngleAxis(
                     (Math.PI * 2 / 3 * blade).toFloat(),

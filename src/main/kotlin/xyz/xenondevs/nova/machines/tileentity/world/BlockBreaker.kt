@@ -3,7 +3,7 @@ package xyz.xenondevs.nova.machines.tileentity.world
 import org.bukkit.Material
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
-import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
+import xyz.xenondevs.nova.api.NovaEventFactory
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -21,7 +21,6 @@ import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
-import xyz.xenondevs.nova.util.callEvent
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.getAllDrops
 import xyz.xenondevs.nova.util.hardness
@@ -52,7 +51,7 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     ) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
     
     private val entityId = uuid.hashCode()
-    private val block = location.clone().advance(getFace(BlockSide.FRONT)).block
+    private val targetBlock = location.clone().advance(getFace(BlockSide.FRONT)).block
     private var lastType: Material? = null
     private var breakProgress = retrieveData("breakProgress") { 0.0 }
     
@@ -67,11 +66,11 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     }
     
     override fun handleTick() {
-        val type = block.type
+        val type = targetBlock.type
         if (energyHolder.energy >= energyHolder.energyConsumption
             && !type.isTraversable()
-            && block.hardness >= 0
-            && ProtectionManager.canBreak(this, null, block.location).get()
+            && targetBlock.hardness >= 0
+            && ProtectionManager.canBreak(this, null, targetBlock.location).get()
         ) {
             // consume energy
             energyHolder.energy -= energyHolder.energyConsumption
@@ -84,7 +83,7 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
             
             // add progress
             val damage = ToolUtils.calculateDamage(
-                block.hardness,
+                targetBlock.hardness,
                 correctCategory = true,
                 correctForDrops = true,
                 toolMultiplier = BREAK_SPEED_MULTIPLIER * upgradeHolder.getValue(UpgradeTypes.SPEED),
@@ -97,29 +96,29 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
             breakProgress = min(1.0, breakProgress + damage)
             
             if (breakProgress >= 1.0) {
-                val ctx = BlockBreakContext(block.pos, this, location)
-                var drops = block.getAllDrops(ctx).toMutableList()
-                drops = TileEntityBreakBlockEvent(this, block, drops).also(::callEvent).drops
+                val ctx = BlockBreakContext(targetBlock.pos, this, location)
+                val drops = targetBlock.getAllDrops(ctx).toMutableList()
+                NovaEventFactory.callTileEntityBlockBreakEvent(this, targetBlock, drops)
                 
                 if (!GlobalValues.DROP_EXCESS_ON_GROUND && !inventory.canHold(drops))
                     return
                 
                 // reset break progress
                 breakProgress = 0.0
-                block.setBreakStage(entityId, -1)
+                targetBlock.setBreakStage(entityId, -1)
                 
                 // break block, add items to inventory / drop them if full
-                block.remove(ctx)
+                targetBlock.remove(ctx)
                 drops.forEach { drop ->
                     val amountLeft = inventory.addItem(SELF_UPDATE_REASON, drop)
                     if (GlobalValues.DROP_EXCESS_ON_GROUND && amountLeft != 0) {
                         drop.amount = amountLeft
-                        world.dropItemNaturally(block.location.center(), drop)
+                        world.dropItemNaturally(targetBlock.location.center(), drop)
                     }
                 }
             } else {
                 // send break state
-                block.setBreakStage(entityId, (breakProgress * 9).roundToInt())
+                targetBlock.setBreakStage(entityId, (breakProgress * 9).roundToInt())
             }
         }
     }
@@ -127,7 +126,7 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     override fun handleRemoved(unload: Boolean) {
         super.handleRemoved(unload)
         if (!unload)
-            block.setBreakStage(entityId, -1)
+            targetBlock.setBreakStage(entityId, -1)
     }
     
     @TileEntityMenuClass

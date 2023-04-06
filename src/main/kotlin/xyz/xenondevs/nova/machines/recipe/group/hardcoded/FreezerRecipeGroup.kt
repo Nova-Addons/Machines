@@ -1,8 +1,8 @@
 package xyz.xenondevs.nova.machines.recipe.group.hardcoded
 
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.GuiTextures
+import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.ui.StaticFluidBar
 import xyz.xenondevs.nova.ui.menu.item.recipes.createRecipeChoiceItem
@@ -12,7 +12,7 @@ object FreezerRecipeGroup : RecipeGroup<FreezerRecipe>() {
     
     override val priority = 8
     override val texture = GuiTextures.RECIPE_FREEZER
-    override val icon = Blocks.FREEZER.basicClientsideProvider
+    override val icon = Items.FREEZER.basicClientsideProvider
     
     override fun createGui(recipe: FreezerRecipe): Gui {
         return Gui.normal()

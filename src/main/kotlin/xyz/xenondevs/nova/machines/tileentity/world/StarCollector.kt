@@ -18,9 +18,9 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.resources.model.data.DisplayEntityBlockModelData
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
+import xyz.xenondevs.nova.item.DefaultGuiItems
 import xyz.xenondevs.nova.machines.registry.Blocks.STAR_COLLECTOR
 import xyz.xenondevs.nova.machines.registry.Items
-import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -71,7 +71,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     private val rod = FakeArmorStand(location.clone().center().apply { y -= 1 }, true) { ast, data ->
         data.isMarker = true
         data.isInvisible = true
-        ast.setEquipment(EquipmentSlot.HEAD, (material.block as DisplayEntityBlockModelData)[1].get(), false)
+        ast.setEquipment(EquipmentSlot.HEAD, (block.model as DisplayEntityBlockModelData)[1].get(), false)
     }
     
     private val particleTask = createPacketTask(listOf(
@@ -101,10 +101,10 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     
     private fun handleNightTick() {
         if (timeSpentCollecting != -1) {
-            if (!GlobalValues.DROP_EXCESS_ON_GROUND && inventory.isFull()) return
+            if (!GlobalValues.DROP_EXCESS_ON_GROUND && inventory.isFull) return
             if (energyHolder.energy >= energyHolder.specialEnergyConsumption) {
                 energyHolder.energy -= energyHolder.specialEnergyConsumption
-                handleCollectionTick()
+                handleCollectionTick() 
             }
         } else if (energyHolder.energy >= energyHolder.energyConsumption) {
             energyHolder.energy -= energyHolder.energyConsumption
@@ -123,7 +123,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             if (GlobalValues.DROP_EXCESS_ON_GROUND && leftOver != 0) location.dropItem(item)
             
             particleTask.stop()
-            rod.setEquipment(EquipmentSlot.HEAD, (material.block as DisplayEntityBlockModelData)[1].get(), true)
+            rod.setEquipment(EquipmentSlot.HEAD, (block.model as DisplayEntityBlockModelData)[1].get(), true)
         } else {
             val percentageCollected = (maxCollectionTime - timeSpentCollecting) / maxCollectionTime.toDouble()
             val particleDistance = percentageCollected * (STAR_PARTICLE_DISTANCE_PER_TICK * maxCollectionTime)
@@ -145,7 +145,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             
             particleTask.start()
             
-            rod.setEquipment(EquipmentSlot.HEAD, (material.block as DisplayEntityBlockModelData)[2].get(), true)
+            rod.setEquipment(EquipmentSlot.HEAD, (block.model as DisplayEntityBlockModelData)[2].get(), true)
             
             rodLocation.yaw = rod.location.yaw
             particleVector = Vector(rod.location.yaw, -65F)
@@ -191,7 +191,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         )
         
         val collectionBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGuiMaterial.BAR_GREEN
+            override val barItem = DefaultGuiItems.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder): ItemBuilder {
                 if (timeSpentCollecting != -1)
                     itemBuilder.setDisplayName(Component.translatable( "menu.machines.star_collector.collection", NamedTextColor.GRAY))
@@ -200,7 +200,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         }
         
         val idleBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGuiMaterial.BAR_GREEN
+            override val barItem = DefaultGuiItems.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
                 itemBuilder.setDisplayName(Component.translatable("menu.machines.star_collector.idle", NamedTextColor.GRAY))
         }

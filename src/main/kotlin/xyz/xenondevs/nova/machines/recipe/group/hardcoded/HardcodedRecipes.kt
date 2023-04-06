@@ -5,6 +5,8 @@ import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.recipe.NovaRecipe
 import xyz.xenondevs.nova.data.recipe.RecipeRegistry
 import xyz.xenondevs.nova.data.recipe.SingleResultRecipe
+import xyz.xenondevs.nova.initialize.Init
+import xyz.xenondevs.nova.initialize.InitFun
 import xyz.xenondevs.nova.machines.Machines
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
@@ -12,6 +14,7 @@ import xyz.xenondevs.nova.machines.tileentity.processing.CobblestoneGenerator
 import xyz.xenondevs.nova.machines.tileentity.processing.Freezer
 import xyz.xenondevs.nova.util.data.NamespacedKey
 
+@Init
 object HardcodedRecipes {
     
     private val recipes: List<NovaRecipe> = listOf(
@@ -24,6 +27,7 @@ object HardcodedRecipes {
         FreezerRecipe(NamespacedKey(Machines, "freezer.blue_ice"), Freezer.Mode.BLUE_ICE),
     )
     
+    @InitFun
     fun register() {
         RecipeRegistry.addFakeRecipes(recipes)
         RecipeRegistry.addCreationInfo(mapOf(

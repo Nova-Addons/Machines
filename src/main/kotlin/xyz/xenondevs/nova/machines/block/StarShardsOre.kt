@@ -4,11 +4,11 @@ import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.world.block.state.NovaBlockState
 import xyz.xenondevs.nova.machines.registry.Items
-import xyz.xenondevs.nova.world.block.NovaBlock
+import xyz.xenondevs.nova.world.block.BlockBehavior
 import xyz.xenondevs.nova.world.block.context.BlockBreakContext
 import kotlin.random.Random
 
-object StarShardsOre : NovaBlock.Default<NovaBlockState>() {
+object StarShardsOre : BlockBehavior.Default<NovaBlockState>() {
     
     override fun getDrops(state: NovaBlockState, ctx: BlockBreakContext): List<ItemStack> {
         var drops = super.getDrops(state, ctx)

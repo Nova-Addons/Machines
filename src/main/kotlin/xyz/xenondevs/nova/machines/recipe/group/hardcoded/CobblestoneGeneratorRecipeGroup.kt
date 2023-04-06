@@ -2,9 +2,9 @@ package xyz.xenondevs.nova.machines.recipe.group.hardcoded
 
 import net.md_5.bungee.api.chat.TranslatableComponent
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.machines.registry.GuiTextures
+import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.ui.StaticFluidBar
 import xyz.xenondevs.nova.ui.menu.item.recipes.createRecipeChoiceItem
@@ -14,7 +14,7 @@ object CobblestoneGeneratorRecipeGroup : RecipeGroup<CobblestoneGeneratorRecipe>
     
     override val priority = 7
     override val texture = GuiTextures.RECIPE_COBBLESTONE_GENERATOR
-    override val icon = Blocks.COBBLESTONE_GENERATOR.basicClientsideProvider
+    override val icon = Items.COBBLESTONE_GENERATOR.basicClientsideProvider
     
     override fun createGui(recipe: CobblestoneGeneratorRecipe): Gui {
         val progressItem = GuiMaterials.TP_FLUID_PROGRESS_LEFT_RIGHT

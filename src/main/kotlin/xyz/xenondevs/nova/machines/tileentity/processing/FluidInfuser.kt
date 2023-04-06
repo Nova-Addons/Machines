@@ -196,7 +196,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
                     GuiMaterials.FLUID_PROGRESS_LEFT_RIGHT
                 else GuiMaterials.FLUID_PROGRESS_RIGHT_LEFT
                 
-                return material.item.createItemBuilder((percentage * 16).roundToInt())
+                return material.model.createItemBuilder((percentage * 16).roundToInt())
             }
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) = Unit

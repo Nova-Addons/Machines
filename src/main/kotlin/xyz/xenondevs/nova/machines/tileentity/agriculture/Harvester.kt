@@ -9,13 +9,14 @@ import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.virtualinventory.VirtualInventory
 import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
-import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
+import xyz.xenondevs.nova.api.NovaEventFactory
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.item.tool.ToolCategory
+import xyz.xenondevs.nova.item.tool.VanillaToolCategories
 import xyz.xenondevs.nova.machines.registry.Blocks.HARVESTER
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -33,7 +34,6 @@ import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.addAll
-import xyz.xenondevs.nova.util.callEvent
 import xyz.xenondevs.nova.util.dropItemsNaturally
 import xyz.xenondevs.nova.util.item.DamageableUtils
 import xyz.xenondevs.nova.util.item.PlantUtils
@@ -165,8 +165,8 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                     
                     // get drops
                     val ctx = BlockBreakContext(block.pos, this, location, null, tool)
-                    var drops = PlantUtils.getHarvestDrops(ctx)!!.toMutableList()
-                    drops = TileEntityBreakBlockEvent(this, block, drops).also(::callEvent).drops
+                    val drops = PlantUtils.getHarvestDrops(ctx)!!.toMutableList()
+                    NovaEventFactory.callTileEntityBlockBreakEvent(this, block, drops)
                     
                     // check that the drops will fit in the inventory or can be dropped on the ground
                     if (!GlobalValues.DROP_EXCESS_ON_GROUND && !inventory.canHold(drops)) {
@@ -210,11 +210,11 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     }
     
     private fun handleAxeInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.newItemStack != null && ToolCategory.ofItem(event.newItemStack) != ToolCategory.AXE
+        event.isCancelled = event.newItemStack != null && ToolCategory.ofItem(event.newItemStack) != VanillaToolCategories.AXE
     }
     
     private fun handleHoeInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.newItemStack != null && ToolCategory.ofItem(event.newItemStack) != ToolCategory.HOE
+        event.isCancelled = event.newItemStack != null && ToolCategory.ofItem(event.newItemStack) != VanillaToolCategories.HOE
     }
     
     override fun handleRemoved(unload: Boolean) {

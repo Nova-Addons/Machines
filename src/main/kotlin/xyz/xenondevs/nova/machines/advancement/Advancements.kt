@@ -2,8 +2,9 @@ package xyz.xenondevs.nova.machines.advancement
 
 import net.md_5.bungee.api.chat.TranslatableComponent
 import xyz.xenondevs.nmsutils.advancement.AdvancementLoader
+import xyz.xenondevs.nova.initialize.Init
+import xyz.xenondevs.nova.initialize.InitFun
 import xyz.xenondevs.nova.machines.Machines
-import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.util.advancement
 import xyz.xenondevs.nova.util.icon
@@ -12,7 +13,7 @@ import xyz.xenondevs.nova.util.obtainNovaItemsAdvancement
 
 private val ROOT = advancement(Machines, "root") {
     display {
-        icon(Blocks.QUARRY)
+        icon(Items.QUARRY)
         title(TranslatableComponent("advancement.machines.root.title"))
         description("")
         background("minecraft:textures/block/tuff.png")
@@ -25,53 +26,53 @@ private val ROOT = advancement(Machines, "root") {
 }
 
 //<editor-fold desc="Power Generation" defaultstate="collapsed">
-private val FURNACE_GENERATOR = obtainNovaItemAdvancement(Machines, ROOT, Blocks.FURNACE_GENERATOR)
-private val LAVA_GENERATOR = obtainNovaItemAdvancement(Machines, FURNACE_GENERATOR, Blocks.LAVA_GENERATOR)
-private val SOLAR_PANEL = obtainNovaItemAdvancement(Machines, LAVA_GENERATOR, Blocks.SOLAR_PANEL)
-private val WIND_TURBINE = obtainNovaItemAdvancement(Machines, SOLAR_PANEL, Blocks.WIND_TURBINE)
-private val LIGHTNING_EXCHANGER = obtainNovaItemAdvancement(Machines, WIND_TURBINE, Blocks.LIGHTNING_EXCHANGER)
+private val FURNACE_GENERATOR = obtainNovaItemAdvancement(Machines, ROOT, Items.FURNACE_GENERATOR)
+private val LAVA_GENERATOR = obtainNovaItemAdvancement(Machines, FURNACE_GENERATOR, Items.LAVA_GENERATOR)
+private val SOLAR_PANEL = obtainNovaItemAdvancement(Machines, LAVA_GENERATOR, Items.SOLAR_PANEL)
+private val WIND_TURBINE = obtainNovaItemAdvancement(Machines, SOLAR_PANEL, Items.WIND_TURBINE)
+private val LIGHTNING_EXCHANGER = obtainNovaItemAdvancement(Machines, WIND_TURBINE, Items.LIGHTNING_EXCHANGER)
 //</editor-fold>
 
 //<editor-fold desc="Farming" defaultstate="collapsed">
-private val PLANTER = obtainNovaItemAdvancement(Machines, ROOT, Blocks.PLANTER)
-private val SPRINKLER = obtainNovaItemAdvancement(Machines, PLANTER, Blocks.SPRINKLER)
-private val FERTILIZER = obtainNovaItemAdvancement(Machines, SPRINKLER, Blocks.FERTILIZER)
-private val HARVESTER = obtainNovaItemAdvancement(Machines, FERTILIZER, Blocks.HARVESTER)
-private val TREE_FACTORY = obtainNovaItemAdvancement(Machines, HARVESTER, Blocks.TREE_FACTORY)
+private val PLANTER = obtainNovaItemAdvancement(Machines, ROOT, Items.PLANTER)
+private val SPRINKLER = obtainNovaItemAdvancement(Machines, PLANTER, Items.SPRINKLER)
+private val FERTILIZER = obtainNovaItemAdvancement(Machines, SPRINKLER, Items.FERTILIZER)
+private val HARVESTER = obtainNovaItemAdvancement(Machines, FERTILIZER, Items.HARVESTER)
+private val TREE_FACTORY = obtainNovaItemAdvancement(Machines, HARVESTER, Items.TREE_FACTORY)
 //</editor-fold>
 
 //<editor-fold desc="Mobs" defaultstate="collapsed">
 private val MOB_CATCHER = obtainNovaItemAdvancement(Machines, ROOT, Items.MOB_CATCHER)
-private val BREEDER = obtainNovaItemAdvancement(Machines, MOB_CATCHER, Blocks.BREEDER)
-private val MOB_KILLER = obtainNovaItemAdvancement(Machines, BREEDER, Blocks.MOB_KILLER)
-private val MOB_DUPLICATOR = obtainNovaItemAdvancement(Machines, MOB_KILLER, Blocks.MOB_DUPLICATOR)
+private val BREEDER = obtainNovaItemAdvancement(Machines, MOB_CATCHER, Items.BREEDER)
+private val MOB_KILLER = obtainNovaItemAdvancement(Machines, BREEDER, Items.MOB_KILLER)
+private val MOB_DUPLICATOR = obtainNovaItemAdvancement(Machines, MOB_KILLER, Items.MOB_DUPLICATOR)
 //</editor-fold>
 
 //<editor-fold desc="Blocks" defaultstate="collapsed">
-private val BLOCK_PLACER = obtainNovaItemAdvancement(Machines, ROOT, Blocks.BLOCK_PLACER)
-private val BLOCK_BREAKER = obtainNovaItemAdvancement(Machines, BLOCK_PLACER, Blocks.BLOCK_BREAKER)
-private val QUARRY = obtainNovaItemAdvancement(Machines, BLOCK_BREAKER, Blocks.QUARRY)
+private val BLOCK_PLACER = obtainNovaItemAdvancement(Machines, ROOT, Items.BLOCK_PLACER)
+private val BLOCK_BREAKER = obtainNovaItemAdvancement(Machines, BLOCK_PLACER, Items.BLOCK_BREAKER)
+private val QUARRY = obtainNovaItemAdvancement(Machines, BLOCK_BREAKER, Items.QUARRY)
 //</editor-fold>
 
 //<editor-fold desc="Star Shards" defaultstate="collapsed">
 private val STAR_SHARDS = obtainNovaItemAdvancement(Machines, ROOT, Items.STAR_SHARDS)
-private val STAR_COLLECTOR = obtainNovaItemAdvancement(Machines, STAR_SHARDS, Blocks.STAR_COLLECTOR)
-private val CRYSTALLIZER = obtainNovaItemAdvancement(Machines, STAR_COLLECTOR, Blocks.CRYSTALLIZER)
+private val STAR_COLLECTOR = obtainNovaItemAdvancement(Machines, STAR_SHARDS, Items.STAR_COLLECTOR)
+private val CRYSTALLIZER = obtainNovaItemAdvancement(Machines, STAR_COLLECTOR, Items.CRYSTALLIZER)
 private val STAR_TOOLS = obtainNovaItemsAdvancement(Machines, "all_star_tools", CRYSTALLIZER, listOf(
     Items.STAR_SWORD, Items.STAR_AXE, Items.STAR_PICKAXE, Items.STAR_HOE, Items.STAR_SHOVEL
 ), true)
 //</editor-fold>
 
 //<editor-fold desc="Fluids" defaultstate="collapsed">
-private val PUMP = obtainNovaItemAdvancement(Machines, ROOT, Blocks.PUMP)
-private val COBBLESTONE_GENERATOR = obtainNovaItemAdvancement(Machines, PUMP, Blocks.COBBLESTONE_GENERATOR)
-private val FREEZER = obtainNovaItemAdvancement(Machines, COBBLESTONE_GENERATOR, Blocks.FREEZER)
-private val FLUID_INFUSER = obtainNovaItemAdvancement(Machines, PUMP, Blocks.FLUID_INFUSER)
-private val ELECTRIC_BREWING_STAND = obtainNovaItemAdvancement(Machines, FLUID_INFUSER, Blocks.ELECTRIC_BREWING_STAND)
+private val PUMP = obtainNovaItemAdvancement(Machines, ROOT, Items.PUMP)
+private val COBBLESTONE_GENERATOR = obtainNovaItemAdvancement(Machines, PUMP, Items.COBBLESTONE_GENERATOR)
+private val FREEZER = obtainNovaItemAdvancement(Machines, COBBLESTONE_GENERATOR, Items.FREEZER)
+private val FLUID_INFUSER = obtainNovaItemAdvancement(Machines, PUMP, Items.FLUID_INFUSER)
+private val ELECTRIC_BREWING_STAND = obtainNovaItemAdvancement(Machines, FLUID_INFUSER, Items.ELECTRIC_BREWING_STAND)
 //</editor-fold>
 
 //<editor-fold desc="Pulverizing" defaultstate="collapsed">
-private val PULVERIZER = obtainNovaItemAdvancement(Machines, ROOT, Blocks.PULVERIZER)
+private val PULVERIZER = obtainNovaItemAdvancement(Machines, ROOT, Items.PULVERIZER)
 private val DUST = obtainNovaItemsAdvancement(Machines, "dust", PULVERIZER, listOf(
     Items.IRON_DUST, Items.GOLD_DUST, Items.DIAMOND_DUST,
     Items.NETHERITE_DUST, Items.EMERALD_DUST, Items.LAPIS_DUST,
@@ -85,7 +86,7 @@ private val ALL_DUSTS = obtainNovaItemsAdvancement(Machines, "all_dusts", DUST, 
 //</editor-fold>
 
 //<editor-fold desc="Mechanical Press" defaultstate="collapsed">
-private val MECHANICAL_PRESS = obtainNovaItemAdvancement(Machines, ROOT, Blocks.MECHANICAL_PRESS)
+private val MECHANICAL_PRESS = obtainNovaItemAdvancement(Machines, ROOT, Items.MECHANICAL_PRESS)
 private val GEAR = obtainNovaItemsAdvancement(Machines, "gears", MECHANICAL_PRESS, listOf(
     Items.IRON_GEAR, Items.GOLD_GEAR, Items.DIAMOND_GEAR,
     Items.NETHERITE_GEAR, Items.EMERALD_GEAR, Items.LAPIS_GEAR,
@@ -109,16 +110,18 @@ private val ALL_PLATES = obtainNovaItemsAdvancement(Machines, "all_plates", PLAT
 //</editor-fold>
 
 //<editor-fold desc="Charger" defaultstate="collapsed">
-private val CHARGER = obtainNovaItemAdvancement(Machines, ROOT, Blocks.CHARGER)
-private val WIRELESS_CHARGER = obtainNovaItemAdvancement(Machines, CHARGER, Blocks.WIRELESS_CHARGER)
+private val CHARGER = obtainNovaItemAdvancement(Machines, ROOT, Items.CHARGER)
+private val WIRELESS_CHARGER = obtainNovaItemAdvancement(Machines, CHARGER, Items.WIRELESS_CHARGER)
 //</editor-fold>
 
 //<editor-fold desc="Miscellaneous" defaultstate="collapsed">
-private val AUTO_FISHER = obtainNovaItemAdvancement(Machines, ROOT, Blocks.AUTO_FISHER)
+private val AUTO_FISHER = obtainNovaItemAdvancement(Machines, ROOT, Items.AUTO_FISHER)
 //</editor-fold>
 
+@Init
 object Advancements {
     
+    @InitFun
     fun register() {
         AdvancementLoader.registerAdvancements(
             ROOT, FURNACE_GENERATOR, LAVA_GENERATOR, SOLAR_PANEL, WIND_TURBINE, LIGHTNING_EXCHANGER, PLANTER,

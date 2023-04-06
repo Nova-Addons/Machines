@@ -1,8 +1,10 @@
 package xyz.xenondevs.nova.machines.registry
 
+import xyz.xenondevs.nova.initialize.Init
 import xyz.xenondevs.nova.machines.Machines
 import xyz.xenondevs.nova.ui.overlay.character.gui.GuiTexture
 
+@Init
 object GuiTextures {
     
     val CONFIGURE_POTION = GuiTexture.of(Machines, "configure_potion")
@@ -13,5 +15,6 @@ object GuiTextures {
     val RECIPE_FREEZER = GuiTexture.of(Machines, "recipe_freezer")
     val RECIPE_STAR_COLLECTOR = GuiTexture.of(Machines, "recipe_star_collector")
     val RECIPE_COBBLESTONE_GENERATOR = GuiTexture.of(Machines, "recipe_cobblestone_generator")
+    val RECIPE_ELECTRIC_BREWING_STAND = GuiTexture.of(Machines, "recipe_electric_brewing_stand")
     
 }

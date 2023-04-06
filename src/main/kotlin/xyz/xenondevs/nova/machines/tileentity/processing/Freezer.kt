@@ -13,10 +13,10 @@ import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
+import xyz.xenondevs.nova.item.NovaItem
 import xyz.xenondevs.nova.machines.gui.LeftRightFluidProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.FREEZER
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
-import xyz.xenondevs.nova.material.ItemNovaMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -151,7 +151,7 @@ class Freezer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         }
     }
     
-    enum class Mode(val product: ItemStack, val uiItem: ItemNovaMaterial, val maxCostMultiplier: Int) {
+    enum class Mode(val product: ItemStack, val uiItem: NovaItem, val maxCostMultiplier: Int) {
         ICE(ItemStack(Material.ICE), GuiMaterials.ICE_MODE_BTN, 1),
         PACKED_ICE(ItemStack(Material.PACKED_ICE), GuiMaterials.PACKED_ICE_MODE_BTN, 9),
         BLUE_ICE(ItemStack(Material.BLUE_ICE), GuiMaterials.BLUE_ICE_MODE_BTN, 81)

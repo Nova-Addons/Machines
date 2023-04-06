@@ -19,9 +19,9 @@ import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
+import xyz.xenondevs.nova.item.DefaultGuiItems
 import xyz.xenondevs.nova.machines.registry.Blocks.AUTO_FISHER
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
-import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -155,7 +155,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         )
         
         val idleBar = object : VerticalBar(height = 3) {
-            override val barMaterial = CoreGuiMaterial.BAR_GREEN
+            override val barItem = DefaultGuiItems.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
                 itemBuilder.setDisplayName(TranslatableComponent("menu.machines.auto_fisher.idle", maxIdleTime - timePassed))
         }

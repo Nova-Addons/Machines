@@ -22,17 +22,17 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.item.impl.CycleItem
 import xyz.xenondevs.invui.window.Window
 import xyz.xenondevs.invui.window.type.context.setTitle
+import xyz.xenondevs.nova.item.DefaultGuiItems
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.machines.registry.GuiTextures
 import xyz.xenondevs.nova.machines.tileentity.processing.brewing.ElectricBrewingStand.Companion.ALLOW_DURATION_AMPLIFIER_MIXING
 import xyz.xenondevs.nova.machines.tileentity.processing.brewing.ElectricBrewingStand.Companion.AVAILABLE_POTION_EFFECTS
-import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.ui.item.BackItem
 import xyz.xenondevs.nova.ui.item.clickableItem
 import xyz.xenondevs.nova.ui.menu.ColorPickerWindow
 import xyz.xenondevs.nova.ui.menu.ColorPreviewItem
 import xyz.xenondevs.nova.ui.menu.OpenColorPickerWindowItem
-import xyz.xenondevs.nova.ui.overlay.character.gui.CoreGuiTexture
+import xyz.xenondevs.nova.ui.overlay.character.gui.DefaultGuiTextures
 import xyz.xenondevs.nova.util.playClickSound
 import xyz.xenondevs.nova.util.playItemPickupSound
 import java.awt.Color
@@ -158,7 +158,7 @@ class PotionConfiguratorWindow(
                 val durationLevel = effect.durationLevel + 1
                 val maxDurationLevel = effect.maxDurationLevel + 1
                 
-                return CoreGuiMaterial.NUMBER.item.createItemBuilder(min(999, durationLevel))
+                return DefaultGuiItems.NUMBER.model.createItemBuilder(min(999, durationLevel))
                     .setDisplayName(TranslatableComponent("menu.machines.potion_configurator.duration", durationLevel, maxDurationLevel))
                     .addLoreLines(
                         Component.translatable("menu.machines.potion_configurator.left_inc", NamedTextColor.GRAY),
@@ -200,7 +200,7 @@ class PotionConfiguratorWindow(
                 val amplifierLevel = effect.amplifierLevel + 1
                 val maxAmplifierLevel = effect.maxAmplifierLevel + 1
                 
-                return CoreGuiMaterial.NUMBER.item.createItemBuilder(min(999, amplifierLevel))
+                return DefaultGuiItems.NUMBER.model.createItemBuilder(min(999, amplifierLevel))
                     .setDisplayName(TranslatableComponent("menu.machines.potion_configurator.amplifier", amplifierLevel, maxAmplifierLevel))
                     .addLoreLines(
                         Component.translatable("menu.machines.potion_configurator.left_inc", NamedTextColor.GRAY),
@@ -258,7 +258,7 @@ class PotionConfiguratorWindow(
         fun openPicker(player: Player) {
             Window.single {
                 it.setViewer(player)
-                it.setTitle(CoreGuiTexture.EMPTY_GUI.getTitle("menu.machines.electric_brewing_stand.pick_effect"))
+                it.setTitle(DefaultGuiTextures.EMPTY_GUI.getTitle("menu.machines.electric_brewing_stand.pick_effect"))
                 it.setGui(gui)
             }.open()
         }

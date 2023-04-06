@@ -18,6 +18,7 @@ import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.item.tool.ToolCategory
+import xyz.xenondevs.nova.item.tool.VanillaToolCategories
 import xyz.xenondevs.nova.machines.registry.Blocks.PLANTER
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
@@ -190,7 +191,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     }
     
     private fun handleHoeUpdate(event: ItemUpdateEvent) {
-        if ((event.isAdd || event.isSwap) && ToolCategory.ofItem(event.newItemStack) != ToolCategory.HOE)
+        if ((event.isAdd || event.isSwap) && ToolCategory.ofItem(event.newItemStack) != VanillaToolCategories.HOE)
             event.isCancelled = true
     }
     

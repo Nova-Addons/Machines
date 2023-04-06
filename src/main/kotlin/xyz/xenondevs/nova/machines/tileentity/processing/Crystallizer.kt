@@ -15,9 +15,9 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
+import xyz.xenondevs.nova.item.DefaultGuiItems
 import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
-import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntityPacketTask
 import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
@@ -163,7 +163,7 @@ class Crystallizer(
         )
         
         val progressBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGuiMaterial.BAR_GREEN
+            override val barItem = DefaultGuiItems.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
                 itemBuilder.setDisplayName(Component.translatable(
                     "menu.machines.crystallizer.idle",

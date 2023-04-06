@@ -20,7 +20,7 @@ import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
-import xyz.xenondevs.nova.util.item.novaMaterial
+import xyz.xenondevs.nova.util.item.novaItem
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
@@ -94,7 +94,7 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     }
     
     private fun chargeItemStack(alreadyTransferred: Long, itemStack: ItemStack?): Long {
-        val chargeable = itemStack?.novaMaterial?.novaItem?.getBehavior(Chargeable::class)
+        val chargeable = itemStack?.novaItem?.getBehavior(Chargeable::class)
         
         if (chargeable != null) {
             val maxEnergy = chargeable.options.maxEnergy

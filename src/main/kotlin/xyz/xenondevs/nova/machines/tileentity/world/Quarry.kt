@@ -21,15 +21,15 @@ import xyz.xenondevs.invui.item.builder.addLoreLines
 import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.nmsutils.particle.block
 import xyz.xenondevs.nmsutils.particle.particle
-import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
+import xyz.xenondevs.nova.api.NovaEventFactory
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
+import xyz.xenondevs.nova.item.DefaultGuiItems
 import xyz.xenondevs.nova.machines.registry.Blocks.QUARRY
 import xyz.xenondevs.nova.machines.registry.Items
-import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -45,7 +45,6 @@ import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.LocationUtils
 import xyz.xenondevs.nova.util.blockLocation
 import xyz.xenondevs.nova.util.breakTexture
-import xyz.xenondevs.nova.util.callEvent
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.concurrent.CombinedBooleanFuture
 import xyz.xenondevs.nova.util.getAllDrops
@@ -74,9 +73,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
-private val SCAFFOLDING_STACKS = Items.SCAFFOLDING.let { mat ->
-    (1..mat.item.dataArray.lastIndex).map { mat.clientsideProviders[it].get() }
-}
+private val SCAFFOLDING_STACKS = Items.SCAFFOLDING.let { item -> (1..item.model.dataArray.lastIndex).map { item.clientsideProviders[it].get() } }
 private val FULL_HORIZONTAL = SCAFFOLDING_STACKS[0]
 private val FULL_VERTICAL = SCAFFOLDING_STACKS[1]
 private val CORNER_DOWN = SCAFFOLDING_STACKS[2]
@@ -207,7 +204,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         
         if (owner == null || (checkPermission && !canBreak(owner!!, location, positions).get())) {
             if (sizeX == MIN_SIZE && sizeZ == MIN_SIZE) {
-                BlockManager.breakBlock(BlockBreakContext(pos, this, location))
+                BlockManager.breakBlockState(BlockBreakContext(pos, this, location))
                 return false
             } else resize(MIN_SIZE, MIN_SIZE)
         }
@@ -331,8 +328,8 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         
         if (drillProgress >= 1) { // is done drilling
             val ctx = BlockBreakContext(block.pos, this, location, BlockFace.UP)
-            var drops = block.getAllDrops(ctx).toMutableList()
-            drops = TileEntityBreakBlockEvent(this, block, drops).also(::callEvent).drops
+            val drops = block.getAllDrops(ctx).toMutableList()
+            NovaEventFactory.callTileEntityBlockBreakEvent(this, block, drops)
             
             if (!GlobalValues.DROP_EXCESS_ON_GROUND && !inventory.canHold(drops))
                 return
@@ -643,7 +640,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             
             override fun getItemProvider(): ItemProvider {
                 val number = getNumber()
-                return CoreGuiMaterial.NUMBER.item.createItemBuilder(getNumber())
+                return DefaultGuiItems.NUMBER.model.createItemBuilder(getNumber())
                     .setDisplayName(TranslatableComponent("menu.machines.quarry.size", number, number))
                     .addLoreLines(Component.translatable("menu.machines.quarry.size_tip", NamedTextColor.GRAY))
             }
@@ -656,7 +653,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             
             override fun getItemProvider(): ItemProvider {
                 val number = getNumber()
-                return CoreGuiMaterial.NUMBER.item.createItemBuilder(getNumber())
+                return DefaultGuiItems.NUMBER.model.createItemBuilder(getNumber())
                     .setDisplayName(TranslatableComponent("menu.machines.quarry.depth", number))
                     .addLoreLines(Component.translatable("menu.machines.quarry.depth_tip", NamedTextColor.GRAY))
             }

@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import org.bukkit.Bukkit
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Mob
@@ -22,11 +21,9 @@ import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.serialization.cbf.NamespacedCompound
-import xyz.xenondevs.nova.data.serialization.persistentdata.getLegacy
-import xyz.xenondevs.nova.data.serialization.persistentdata.set
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
-import xyz.xenondevs.nova.item.PacketItemData
 import xyz.xenondevs.nova.item.behavior.ItemBehavior
+import xyz.xenondevs.nova.item.logic.PacketItemData
 import xyz.xenondevs.nova.machines.Machines
 import xyz.xenondevs.nova.machines.registry.Items
 import xyz.xenondevs.nova.util.EntityUtils
@@ -35,10 +32,6 @@ import xyz.xenondevs.nova.util.data.NamespacedKey
 import xyz.xenondevs.nova.util.getTargetLocation
 import xyz.xenondevs.nova.util.item.retrieveData
 import xyz.xenondevs.nova.util.item.storeData
-
-private val LEGACY_DATA_KEY = NamespacedKey("nova", "entitydata1")
-private val LEGACY_TYPE_KEY = NamespacedKey("nova", "entitytype1")
-private val LEGACY_TIME_KEY = NamespacedKey("nova", "filltime1")
 
 private val DATA_KEY = NamespacedKey(Machines, "entitydata")
 private val TYPE_KEY = NamespacedKey(Machines, "entitytype")
@@ -53,14 +46,11 @@ private val BLACKLISTED_ENTITY_TYPES by configReloadable {
 object MobCatcherBehavior : ItemBehavior() {
     
     override fun handleEntityInteract(player: Player, itemStack: ItemStack, clicked: Entity, event: PlayerInteractAtEntityEvent) {
-        convertLegacyData(itemStack)
-        
         if (clicked is Mob
             && clicked.type !in BLACKLISTED_ENTITY_TYPES
             && ProtectionManager.canInteractWithEntity(player, clicked, itemStack).get()
             && getEntityData(itemStack) == null
         ) {
-            
             val fakeDamageEvent = EntityDamageByEntityEvent(player, clicked, EntityDamageEvent.DamageCause.ENTITY_ATTACK, Double.MAX_VALUE)
             Bukkit.getPluginManager().callEvent(fakeDamageEvent)
             
@@ -80,8 +70,6 @@ object MobCatcherBehavior : ItemBehavior() {
     }
     
     override fun handleInteract(player: Player, itemStack: ItemStack, action: Action, event: PlayerInteractEvent) {
-        convertLegacyData(itemStack)
-        
         if (action == Action.RIGHT_CLICK_BLOCK) {
             // Adds a small delay to prevent players from spamming the item
             if (System.currentTimeMillis() - (itemStack.retrieveData<Long>(TIME_KEY) ?: -1 ) < 50) return
@@ -132,38 +120,6 @@ object MobCatcherBehavior : ItemBehavior() {
             NamedTextColor.DARK_GRAY,
             Component.translatable(nmsType.descriptionId, NamedTextColor.YELLOW)
         ))
-    }
-    
-    private fun convertLegacyData(itemStack: ItemStack) {
-        val itemMeta = itemStack.itemMeta ?: return
-        val container = itemMeta.persistentDataContainer
-        
-        var changed = false
-        
-        val data = container.getLegacy<ByteArray>(LEGACY_DATA_KEY)
-        if (data != null) {
-            container.remove(LEGACY_DATA_KEY)
-            container.set(DATA_KEY, data)
-            changed = true
-        }
-        
-        val type = container.getLegacy<EntityType>(LEGACY_TYPE_KEY)
-        if (type != null) {
-            container.remove(LEGACY_TYPE_KEY)
-            container.set(TYPE_KEY, type)
-            changed = true
-        }
-        
-        val time = container.getLegacy<Long>(LEGACY_TIME_KEY)
-        if (time != null) {
-            container.remove(LEGACY_TIME_KEY)
-            container.set(TIME_KEY, time)
-            changed = true
-        }
-        
-        if (changed) {
-            itemStack.itemMeta = itemMeta
-        }
     }
     
 }

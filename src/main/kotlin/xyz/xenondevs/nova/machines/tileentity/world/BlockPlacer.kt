@@ -57,7 +57,7 @@ class BlockPlacer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         if (energyHolder.energy >= energyHolder.energyConsumption
             && !inventory.isEmpty
             && placeBlock.type.isReplaceable()
-            && BlockManager.getBlock(placePos) == null
+            && BlockManager.getBlockState(placePos) == null
             && ProtectionManager.canPlace(this, inventory.items.firstNotNullOf { it }, placePos.location).get()
         ) {
             if (placeBlock()) energyHolder.energy -= energyHolder.energyConsumption

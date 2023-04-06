@@ -14,10 +14,10 @@ import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
-import xyz.xenondevs.nova.machines.registry.Blocks
+import xyz.xenondevs.nova.item.NovaItem
 import xyz.xenondevs.nova.machines.registry.Blocks.TREE_FACTORY
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
-import xyz.xenondevs.nova.material.ItemNovaMaterial
+import xyz.xenondevs.nova.machines.registry.Models
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -37,20 +37,20 @@ import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.awt.Color
 
-private class PlantConfiguration(val miniature: ItemNovaMaterial, val loot: ItemStack, val color: Color)
+private class PlantConfiguration(val miniature: NovaItem, val loot: ItemStack, val color: Color)
 
 private val PLANTS = mapOf(
-    Material.OAK_SAPLING to PlantConfiguration(Blocks.OAK_TREE_MINIATURE, ItemStack(Material.OAK_LOG), Color(43, 82, 39)),
-    Material.SPRUCE_SAPLING to PlantConfiguration(Blocks.SPRUCE_TREE_MINIATURE, ItemStack(Material.SPRUCE_LOG), Color(43, 87, 60)),
-    Material.BIRCH_SAPLING to PlantConfiguration(Blocks.BIRCH_TREE_MINIATURE, ItemStack(Material.BIRCH_LOG), Color(49, 63, 35)),
-    Material.JUNGLE_SAPLING to PlantConfiguration(Blocks.JUNGLE_TREE_MINIATURE, ItemStack(Material.JUNGLE_LOG), Color(51, 127, 43)),
-    Material.ACACIA_SAPLING to PlantConfiguration(Blocks.ACACIA_TREE_MINIATURE, ItemStack(Material.ACACIA_LOG), Color(113, 125, 75)),
-    Material.DARK_OAK_SAPLING to PlantConfiguration(Blocks.DARK_OAK_TREE_MINIATURE, ItemStack(Material.DARK_OAK_LOG), Color(26, 65, 17)),
-    Material.MANGROVE_PROPAGULE to PlantConfiguration(Blocks.MANGROVE_TREE_MINIATURE, ItemStack(Material.MANGROVE_LOG), Color(32, 47, 14)),
-    Material.CRIMSON_FUNGUS to PlantConfiguration(Blocks.CRIMSON_TREE_MINIATURE, ItemStack(Material.CRIMSON_STEM), Color(121, 0, 0)),
-    Material.WARPED_FUNGUS to PlantConfiguration(Blocks.WARPED_TREE_MINIATURE, ItemStack(Material.WARPED_STEM), Color(22, 124, 132)),
-    Material.RED_MUSHROOM to PlantConfiguration(Blocks.GIANT_RED_MUSHROOM_MINIATURE, ItemStack(Material.RED_MUSHROOM, 3), Color(192, 39, 37)),
-    Material.BROWN_MUSHROOM to PlantConfiguration(Blocks.GIANT_BROWN_MUSHROOM_MINIATURE, ItemStack(Material.BROWN_MUSHROOM, 3), Color(149, 112, 80))
+    Material.OAK_SAPLING to PlantConfiguration(Models.OAK_TREE_MINIATURE, ItemStack(Material.OAK_LOG), Color(43, 82, 39)),
+    Material.SPRUCE_SAPLING to PlantConfiguration(Models.SPRUCE_TREE_MINIATURE, ItemStack(Material.SPRUCE_LOG), Color(43, 87, 60)),
+    Material.BIRCH_SAPLING to PlantConfiguration(Models.BIRCH_TREE_MINIATURE, ItemStack(Material.BIRCH_LOG), Color(49, 63, 35)),
+    Material.JUNGLE_SAPLING to PlantConfiguration(Models.JUNGLE_TREE_MINIATURE, ItemStack(Material.JUNGLE_LOG), Color(51, 127, 43)),
+    Material.ACACIA_SAPLING to PlantConfiguration(Models.ACACIA_TREE_MINIATURE, ItemStack(Material.ACACIA_LOG), Color(113, 125, 75)),
+    Material.DARK_OAK_SAPLING to PlantConfiguration(Models.DARK_OAK_TREE_MINIATURE, ItemStack(Material.DARK_OAK_LOG), Color(26, 65, 17)),
+    Material.MANGROVE_PROPAGULE to PlantConfiguration(Models.MANGROVE_TREE_MINIATURE, ItemStack(Material.MANGROVE_LOG), Color(32, 47, 14)),
+    Material.CRIMSON_FUNGUS to PlantConfiguration(Models.CRIMSON_TREE_MINIATURE, ItemStack(Material.CRIMSON_STEM), Color(121, 0, 0)),
+    Material.WARPED_FUNGUS to PlantConfiguration(Models.WARPED_TREE_MINIATURE, ItemStack(Material.WARPED_STEM), Color(22, 124, 132)),
+    Material.RED_MUSHROOM to PlantConfiguration(Models.GIANT_RED_MUSHROOM_MINIATURE, ItemStack(Material.RED_MUSHROOM, 3), Color(192, 39, 37)),
+    Material.BROWN_MUSHROOM to PlantConfiguration(Models.GIANT_BROWN_MUSHROOM_MINIATURE, ItemStack(Material.BROWN_MUSHROOM, 3), Color(149, 112, 80))
 )
 
 private val MAX_ENERGY = configReloadable { NovaConfig[TREE_FACTORY].getLong("capacity") }

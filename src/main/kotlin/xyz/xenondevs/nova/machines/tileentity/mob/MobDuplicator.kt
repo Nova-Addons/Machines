@@ -26,10 +26,10 @@ import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
+import xyz.xenondevs.nova.item.DefaultGuiItems
 import xyz.xenondevs.nova.machines.item.MobCatcherBehavior
 import xyz.xenondevs.nova.machines.registry.Blocks.MOB_DUPLICATOR
 import xyz.xenondevs.nova.machines.registry.GuiMaterials
-import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -45,7 +45,7 @@ import xyz.xenondevs.nova.util.EntityUtils
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.data.NBTUtils
 import xyz.xenondevs.nova.util.isBetweenXZ
-import xyz.xenondevs.nova.util.item.novaMaterial
+import xyz.xenondevs.nova.util.item.novaItem
 import xyz.xenondevs.nova.util.nmsEntity
 import xyz.xenondevs.nova.util.runAsyncTask
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
@@ -120,7 +120,7 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     }
     
     private fun updateEntityData(itemStack: ItemStack?): Boolean {
-        val catcher = itemStack?.novaMaterial?.novaItem?.getBehavior(MobCatcherBehavior::class)
+        val catcher = itemStack?.novaItem?.getBehavior(MobCatcherBehavior::class)
         if (catcher != null) {
             setEntityData(catcher.getEntityType(itemStack), catcher.getEntityData(itemStack))
             return true
@@ -169,7 +169,7 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         )
         
         private val idleBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGuiMaterial.BAR_GREEN
+            override val barItem = DefaultGuiItems.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
                 itemBuilder.setDisplayName(Component.translatable(
                     "menu.machines.mob_duplicator.idle",

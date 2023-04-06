@@ -12,8 +12,8 @@ import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
+import xyz.xenondevs.nova.item.DefaultGuiItems
 import xyz.xenondevs.nova.machines.registry.Blocks.MOB_KILLER
-import xyz.xenondevs.nova.material.CoreGuiMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
@@ -126,7 +126,7 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         private val rangeItems = ArrayList<Item>()
         
         val idleBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGuiMaterial.BAR_GREEN
+            override val barItem = DefaultGuiItems.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
                 itemBuilder.setDisplayName(Component.translatable(
                     "menu.machines.mob_killer.idle",
