@@ -6,10 +6,10 @@ import org.bukkit.entity.Animals
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.setDisplayName
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -136,7 +136,7 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 
                 val remains = FoodUtils.getItemRemains(item.type)
                 if (remains != null)
-                    inventory.setItemStack(SELF_UPDATE_REASON, index, ItemStack(remains))
+                    inventory.setItem(SELF_UPDATE_REASON, index, ItemStack(remains))
                 
                 return true
             }
@@ -155,7 +155,7 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 
                 val remains = FoodUtils.getItemRemains(item.type)
                 if (remains != null)
-                    inventory.setItemStack(SELF_UPDATE_REASON, index, ItemStack(remains))
+                    inventory.setItem(SELF_UPDATE_REASON, index, ItemStack(remains))
                 
                 return true
             }
@@ -164,8 +164,8 @@ class Breeder(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         return false
     }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
-        if (event.updateReason != SELF_UPDATE_REASON && !event.isRemove && !FoodUtils.isFood(event.newItemStack.type))
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
+        if (event.updateReason != SELF_UPDATE_REASON && !event.isRemove && !FoodUtils.isFood(event.newItem.type))
             event.isCancelled = true
     }
     

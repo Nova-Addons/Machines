@@ -9,9 +9,8 @@ import org.bukkit.World
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.commons.provider.mutable.map
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.SlotElement
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
-import xyz.xenondevs.invui.virtualinventory.event.PlayerUpdateReason
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.inventory.event.PlayerUpdateReason
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -87,25 +86,25 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         cookSpeed = (COOK_SPEED * upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
     }
     
-    private fun handleInputInventoryUpdate(event: ItemUpdateEvent) {
-        if (event.newItemStack != null) {
-            val itemStack = event.newItemStack
+    private fun handleInputInventoryUpdate(event: ItemPreUpdateEvent) {
+        if (event.newItem != null) {
+            val itemStack = event.newItem
             if (getRecipe(itemStack, world) == null) event.isCancelled = true
         }
     }
     
-    private fun handleOutputInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleOutputInventoryUpdate(event: ItemPreUpdateEvent) {
         val updateReason = event.updateReason
         if (updateReason == SELF_UPDATE_REASON) return
         
         if (event.isRemove) {
             if (updateReason is PlayerUpdateReason) {
                 val player = updateReason.player
-                if (event.newItemStack == null) { // took all items
+                if (event.newItem == null) { // took all items
                     experience -= pos.block.spawnExpOrb(experience.toInt(), player.location)
                 } else {
                     val amount = event.removedAmount
-                    val experiencePerItem = experience / event.previousItemStack.amount
+                    val experiencePerItem = experience / event.previousItem.amount
                     val experience = amount * experiencePerItem
                     
                     this.experience -= pos.block.spawnExpOrb(experience.toInt(), player.location)
@@ -119,7 +118,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     override fun handleTick() {
         if (energyHolder.energy >= energyHolder.energyConsumption) {
             if (currentRecipe == null) {
-                val item = inputInventory.getItemStack(0)
+                val item = inputInventory.getItem(0)
                 if (item != null) {
                     val recipe = getRecipe(item, world)
                     if (recipe != null && outputInventory.canHold(recipe.getResultItem(REGISTRY_ACCESS).bukkitCopy)) {
@@ -169,8 +168,8 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 "| i # > # o # e |",
                 "| # # # # # # e |",
                 "3 - - - - - - - 4")
-            .addIngredient('i', SlotElement.VISlotElement(inputInventory, 0))
-            .addIngredient('o', SlotElement.VISlotElement(outputInventory, 0))
+            .addIngredient('i', inputInventory)
+            .addIngredient('o', outputInventory)
             .addIngredient('>', progressItem)
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))

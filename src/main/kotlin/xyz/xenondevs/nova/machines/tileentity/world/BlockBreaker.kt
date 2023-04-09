@@ -2,7 +2,7 @@ package xyz.xenondevs.nova.machines.tileentity.world
 
 import org.bukkit.Material
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.nova.api.NovaEventFactory
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -60,7 +60,7 @@ class BlockBreaker(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
         storeData("breakProgress", breakProgress)
     }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         if (event.isAdd && event.updateReason != SELF_UPDATE_REASON)
             event.isCancelled = true
     }

@@ -1,8 +1,7 @@
 package xyz.xenondevs.nova.machines.tileentity.energy
 
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -32,22 +31,22 @@ class Charger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.BUFFER) { createSideConfig(NetworkConnectionType.BUFFER) }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         if (event.isAdd || event.isSwap) {
             // cancel adding non-chargeable or fully charged items
-            val newStack = event.newItemStack
+            val newStack = event.newItem
             val chargeable = newStack.novaItem?.getBehavior(Chargeable::class)
             event.isCancelled = chargeable == null || chargeable.getEnergy(newStack) >= chargeable.options.maxEnergy
         } else if (event.updateReason == NetworkedVirtualInventory.UPDATE_REASON) {
             // prevent item networks from removing not fully charged items
-            val previousStack = event.previousItemStack
+            val previousStack = event.previousItem
             val chargeable = previousStack?.novaItem?.getBehavior(Chargeable::class) ?: return
             event.isCancelled = chargeable.getEnergy(previousStack) < chargeable.options.maxEnergy
         }
     }
     
     override fun handleTick() {
-        val currentItem = inventory.getUnsafeItemStack(0)
+        val currentItem = inventory.getUnsafeItem(0)
         val chargeable = currentItem?.novaItem?.getBehavior(Chargeable::class)
         if (chargeable != null) {
             val itemCharge = chargeable.getEnergy(currentItem)
@@ -78,7 +77,7 @@ class Charger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 "| # # # # # # e |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
-            .addIngredient('i', VISlotElement(inventory, 0))
+            .addIngredient('i', inventory)
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .build()

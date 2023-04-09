@@ -9,10 +9,9 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.impl.AbstractItem
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -28,6 +27,7 @@ import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
+import xyz.xenondevs.nova.ui.addIngredient
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
@@ -168,7 +168,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 
                 // the block can be tilled, now check for both planting and tilling permissions
                 return@indexOfFirst ProtectionManager.canPlace(this, seedStack, block.location).get() &&
-                    ProtectionManager.canUseBlock(this, hoesInventory.getItemStack(0), soilBlock.location).get()
+                    ProtectionManager.canUseBlock(this, hoesInventory.getItem(0), soilBlock.location).get()
             }
         }
         
@@ -180,7 +180,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     private fun getNextTillableBlock(): Block? {
         return plantRegion.firstOrNull {
             it.type.isTillable()
-                && ProtectionManager.canUseBlock(this, hoesInventory.getItemStack(0), it.location).get()
+                && ProtectionManager.canUseBlock(this, hoesInventory.getItem(0), it.location).get()
         }
     }
     
@@ -190,18 +190,21 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         useHoe()
     }
     
-    private fun handleHoeUpdate(event: ItemUpdateEvent) {
-        if ((event.isAdd || event.isSwap) && ToolCategory.ofItem(event.newItemStack) != VanillaToolCategories.HOE)
+    private fun handleHoeUpdate(event: ItemPreUpdateEvent) {
+        if ((event.isAdd || event.isSwap) && ToolCategory.ofItem(event.newItem) != VanillaToolCategories.HOE)
             event.isCancelled = true
     }
     
-    private fun handleSeedUpdate(event: ItemUpdateEvent) {
-        if (!event.isRemove && !PlantUtils.isSeed(event.newItemStack))
+    private fun handleSeedUpdate(event: ItemPreUpdateEvent) {
+        if (!event.isRemove && !PlantUtils.isSeed(event.newItem))
             event.isCancelled = true
     }
     
     private fun useHoe() {
-        hoesInventory.setItemStack(null, 0, DamageableUtils.damageItem(hoesInventory.items[0]))
+        if (hoesInventory.isEmpty)
+            return
+        
+        hoesInventory.setItem(null, 0, DamageableUtils.damageItem(hoesInventory.getItem(0)!!))
     }
     
     override fun handleRemoved(unload: Boolean) {
@@ -237,7 +240,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 "| i i i # f m e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inputInventory)
-            .addIngredient('h', VISlotElement(hoesInventory, 0, GuiMaterials.HOE_PLACEHOLDER.clientsideProvider))
+            .addIngredient('h', hoesInventory, GuiMaterials.HOE_PLACEHOLDER)
             .addIngredient('v', VisualizeRegionItem(player, uuid) { plantRegion })
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('f', AutoTillingItem())

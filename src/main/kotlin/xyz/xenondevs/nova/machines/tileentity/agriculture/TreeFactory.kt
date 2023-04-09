@@ -6,8 +6,7 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.joml.Vector3f
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.nmsutils.particle.color
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.GlobalValues
@@ -25,6 +24,7 @@ import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
+import xyz.xenondevs.nova.ui.addIngredient
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
@@ -73,7 +73,7 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         inputInventory to NetworkConnectionType.INSERT,
     ) { createExclusiveSideConfig(NetworkConnectionType.BUFFER, BlockSide.BOTTOM, BlockSide.BACK) }
     
-    private var plantType = inputInventory.getItemStack(0)?.type
+    private var plantType = inputInventory.getItem(0)?.type
     private val plant: FakeItemDisplay
     
     private var progressPerTick = 0.0
@@ -140,17 +140,17 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         }
     }
     
-    private fun handleInputInventoryUpdate(event: ItemUpdateEvent) {
-        if (event.newItemStack != null && event.newItemStack.type !in PLANTS.keys) {
+    private fun handleInputInventoryUpdate(event: ItemPreUpdateEvent) {
+        if (event.newItem != null && event.newItem.type !in PLANTS.keys) {
             event.isCancelled = true
         } else {
-            plantType = event.newItemStack?.type
+            plantType = event.newItem?.type
             growthProgress = 0.0
             updatePlantArmorStand()
         }
     }
     
-    private fun handleOutputInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleOutputInventoryUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = event.updateReason != SELF_UPDATE_REASON && !event.isRemove
     }
     
@@ -179,7 +179,7 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
                 "| # i # o o o e |",
                 "| # # # o o o e |",
                 "3 - - - - - - - 4")
-            .addIngredient('i', VISlotElement(inputInventory, 0, GuiMaterials.SAPLING_PLACEHOLDER.clientsideProvider))
+            .addIngredient('i', inputInventory, GuiMaterials.SAPLING_PLACEHOLDER)
             .addIngredient('o', outputInventory)
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))

@@ -12,9 +12,8 @@ import org.bukkit.Material
 import org.bukkit.craftbukkit.v1_19_R3.util.RandomSourceWrapper
 import org.bukkit.enchantments.Enchantment
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.item.builder.ItemBuilder
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -30,6 +29,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
+import xyz.xenondevs.nova.ui.addIngredient
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
@@ -98,7 +98,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private fun fish() {
         // Bukkit's LootTable API isn't applicable in this use case
         
-        val rodItem = fishingRodInventory.getItemStack(0)
+        val rodItem = fishingRodInventory.getItem(0)!!
         val luck = rodItem.enchantments[Enchantment.LUCK] ?: 0
         
         // the fake fishing hook is required for the "in_open_water" check as the
@@ -130,16 +130,16 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     }
     
     private fun useRod() {
-        val itemStack = fishingRodInventory.getItemStack(0)!!
-        fishingRodInventory.setItemStack(SELF_UPDATE_REASON, 0, DamageableUtils.damageItem(itemStack))
+        val itemStack = fishingRodInventory.getItem(0)!!
+        fishingRodInventory.setItem(SELF_UPDATE_REASON, 0, DamageableUtils.damageItem(itemStack))
     }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = event.updateReason != SELF_UPDATE_REASON && event.isAdd
     }
     
-    private fun handleFishingRodInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.isAdd && event.newItemStack.type != Material.FISHING_ROD
+    private fun handleFishingRodInventoryUpdate(event: ItemPreUpdateEvent) {
+        event.isCancelled = event.isAdd && event.newItem.type != Material.FISHING_ROD
     }
     
     @TileEntityMenuClass
@@ -169,7 +169,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
-            .addIngredient('f', VISlotElement(fishingRodInventory, 0, GuiMaterials.FISHING_ROD_PLACEHOLDER.clientsideProvider))
+            .addIngredient('f', fishingRodInventory, GuiMaterials.FISHING_ROD_PLACEHOLDER)
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .addIngredient('p', idleBar)

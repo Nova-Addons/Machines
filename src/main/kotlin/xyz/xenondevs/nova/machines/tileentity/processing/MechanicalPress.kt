@@ -6,11 +6,10 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AbstractItem
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.ConversionNovaRecipe
@@ -82,7 +81,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 energyHolder.energy -= energyHolder.energyConsumption
                 
                 if (timeLeft == 0) {
-                    outputInv.putItemStack(SELF_UPDATE_REASON, 0, currentRecipe!!.result)
+                    outputInv.putItem(SELF_UPDATE_REASON, 0, currentRecipe!!.result)
                     currentRecipe = null
                 }
                 
@@ -92,7 +91,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     }
     
     private fun takeItem() {
-        val inputItem = inputInv.getItemStack(0)
+        val inputItem = inputInv.getItem(0)
         if (inputItem != null) {
             val recipe = RecipeManager.getConversionRecipeFor(type.recipeType, inputItem)
             if (recipe != null && outputInv.canHold(recipe.result)) {
@@ -103,16 +102,16 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         }
     }
     
-    private fun handleInputUpdate(event: ItemUpdateEvent) {
+    private fun handleInputUpdate(event: ItemPreUpdateEvent) {
         if (event.updateReason != SELF_UPDATE_REASON
-            && event.newItemStack != null
-            && RecipeManager.getConversionRecipeFor(type.recipeType, event.newItemStack) == null) {
+            && event.newItem != null
+            && RecipeManager.getConversionRecipeFor(type.recipeType, event.newItem) == null) {
             
             event.isCancelled = true
         }
     }
     
-    private fun handleOutputUpdate(event: ItemUpdateEvent) {
+    private fun handleOutputUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = !event.isRemove && event.updateReason != SELF_UPDATE_REASON
     }
     
@@ -146,8 +145,8 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 "| # # # , # # e |",
                 "| s u # o # # e |",
                 "3 - - - - - - - 4")
-            .addIngredient('i', VISlotElement(inputInv, 0))
-            .addIngredient('o', VISlotElement(outputInv, 0))
+            .addIngredient('i', inputInv)
+            .addIngredient('o', outputInv)
             .addIngredient(',', pressProgress)
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('p', PressTypeItem(PressType.PLATE).apply(pressTypeItems::add))

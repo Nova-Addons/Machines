@@ -2,8 +2,7 @@ package xyz.xenondevs.nova.machines.tileentity.energy
 
 import net.minecraft.core.particles.ParticleTypes
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.SlotElement
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -101,7 +100,7 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
     }
     
     private fun burnItem() {
-        val fuelStack = inventory.getItemStack(0)
+        val fuelStack = inventory.getItem(0)
         if (energyHolder.energy < energyHolder.maxEnergy && fuelStack != null) {
             val itemBurnTime = fuelStack.burnTime
             if (itemBurnTime != null) {
@@ -109,15 +108,15 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
                 totalBurnTime = burnTime
                 val remains = fuelStack.craftingRemainingItem
                 if (remains != null) {
-                    inventory.setItemStack(null, 0, remains)
+                    inventory.setItem(null, 0, remains)
                 } else inventory.addItemAmount(null, 0, -1)
             }
         }
     }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         if (event.updateReason != null) { // not done by the tileEntity itself
-            if (event.newItemStack != null && event.newItemStack.isFuel) {
+            if (event.newItem != null && event.newItem.isFuel) {
                 // illegal item
                 event.isCancelled = true
             }
@@ -149,7 +148,7 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
                 "| # # # ! # # e |",
                 "| # # # # # # e |",
                 "3 - - - - - - - 4")
-            .addIngredient('i', SlotElement.VISlotElement(inventory, 0))
+            .addIngredient('i', inventory)
             .addIngredient('!', progressItem)
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))

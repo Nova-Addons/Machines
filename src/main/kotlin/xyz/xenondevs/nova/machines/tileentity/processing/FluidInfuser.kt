@@ -6,11 +6,11 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.invui.item.impl.CycleItem
 import xyz.xenondevs.invui.item.impl.SimpleItem
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
@@ -86,12 +86,12 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
         storeData("mode", mode)
     }
     
-    private fun handleInputInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = !event.isRemove && RecipeManager.getConversionRecipeFor(RecipeTypes.FLUID_INFUSER, event.newItemStack) == null
+    private fun handleInputInventoryUpdate(event: ItemPreUpdateEvent) {
+        event.isCancelled = !event.isRemove && RecipeManager.getConversionRecipeFor(RecipeTypes.FLUID_INFUSER, event.newItem) == null
         if (!event.isAdd) reset()
     }
     
-    private fun handleOutputInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleOutputInventoryUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = event.updateReason != SELF_UPDATE_REASON && !event.isRemove
     }
     
@@ -104,7 +104,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     override fun handleTick() {
         if (energyHolder.energy >= energyHolder.energyConsumption) {
             if (recipe == null && !input.isEmpty) {
-                val item = input.getItemStack(0)
+                val item = input.getItem(0)!!
                 
                 if (mode == FluidInfuserRecipe.InfuserMode.INSERT && tank.hasFluid()) {
                     recipe = getFluidInfuserInsertRecipeFor(tank.type!!, item)

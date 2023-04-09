@@ -5,10 +5,10 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.block.BlockFace
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.inventory.event.ItemPostUpdateEvent
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.setDisplayName
-import xyz.xenondevs.invui.virtualinventory.event.InventoryUpdatedEvent
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nmsutils.particle.vibration
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -58,7 +58,7 @@ class Crystallizer(
     
     private val progressPerTick by upgradeHolder.getValueProvider(UpgradeTypes.SPEED)
     private var progress by storedValue("progress") { 0.0 }
-    private var recipe = inventory.getItemStack(0)?.let { RecipeManager.getConversionRecipeFor(RecipeTypes.CRYSTALLIZER, it) }
+    private var recipe = inventory.getItem(0)?.let { RecipeManager.getConversionRecipeFor(RecipeTypes.CRYSTALLIZER, it) }
     
     private val particleTask: TileEntityPacketTask
     private var displayState: Boolean
@@ -66,7 +66,7 @@ class Crystallizer(
     
     init {
         // item display
-        val itemStack = inventory.getItemStack(0).nmsCopy
+        val itemStack = inventory.getItem(0).nmsCopy
         displayState = !itemStack.isEmpty
         itemDisplay = FakeItem(location.add(.5, .2, .5), displayState) { _, data ->
             data.item = itemStack
@@ -90,7 +90,7 @@ class Crystallizer(
         itemDisplay.remove()
     }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         if (event.isRemove) {
             // prevent item networks from extracting items that are currently being processed
             if (event.updateReason == NetworkedVirtualInventory.UPDATE_REASON && recipe != null) {
@@ -103,7 +103,7 @@ class Crystallizer(
             return
         }
         
-        val recipe = RecipeManager.getConversionRecipeFor(RecipeTypes.CRYSTALLIZER, event.newItemStack)
+        val recipe = RecipeManager.getConversionRecipeFor(RecipeTypes.CRYSTALLIZER, event.newItem)
         if (recipe == null && event.updateReason != SELF_UPDATE_REASON) {
             event.isCancelled = true
         } else {
@@ -112,8 +112,8 @@ class Crystallizer(
         }
     }
     
-    private fun handleInventoryUpdated(event: InventoryUpdatedEvent) {
-        val itemStack = event.newItemStack.nmsCopy
+    private fun handleInventoryUpdated(event: ItemPostUpdateEvent) {
+        val itemStack = event.newItem.nmsCopy
         if (itemStack.isEmpty) {
             if (displayState) {
                 itemDisplay.remove()
@@ -123,7 +123,7 @@ class Crystallizer(
         }
         
         itemDisplay.updateEntityData(displayState) {
-            item = event.newItemStack.nmsCopy
+            item = event.newItem.nmsCopy
         }
         
         if (!displayState) {
@@ -142,7 +142,7 @@ class Crystallizer(
             progress += progressPerTick
             
             if (progress >= recipe.time) {
-                inventory.setItemStack(SELF_UPDATE_REASON, 0, recipe.result)
+                inventory.setItem(SELF_UPDATE_REASON, 0, recipe.result)
             }
             
             menuContainer.forEachMenu<CrystallizerMenu> { it.progressBar.percentage = progress / recipe.time }

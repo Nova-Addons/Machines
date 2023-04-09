@@ -15,14 +15,13 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.commons.gson.isString
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.SkullBuilder
 import xyz.xenondevs.invui.item.builder.SkullBuilder.HeadTexture
 import xyz.xenondevs.invui.item.builder.setDisplayName
 import xyz.xenondevs.invui.item.impl.AbstractItem
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -38,6 +37,7 @@ import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
+import xyz.xenondevs.nova.ui.addIngredient
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
@@ -84,7 +84,7 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     
     init {
         reload()
-        updateEntityData(inventory.getItemStack(0))
+        updateEntityData(inventory.getItem(0))
     }
     
     override fun reload() {
@@ -113,9 +113,9 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         }
     }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
-        if (event.newItemStack != null) {
-            event.isCancelled = !updateEntityData(event.newItemStack)
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
+        if (event.newItem != null) {
+            event.isCancelled = !updateEntityData(event.newItem)
         } else setEntityData(null, null)
     }
     
@@ -186,7 +186,7 @@ class MobDuplicator(blockState: NovaTileEntityState) : NetworkedTileEntity(block
                 "| u # # # # p e |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
-            .addIngredient('i', VISlotElement(inventory, 0, GuiMaterials.MOB_CATCHER_PLACEHOLDER.clientsideProvider))
+            .addIngredient('i', inventory, GuiMaterials.MOB_CATCHER_PLACEHOLDER)
             .addIngredient('n', ToggleNBTModeItem())
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))

@@ -3,8 +3,7 @@ package xyz.xenondevs.nova.machines.tileentity.processing
 import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.NamespacedKey
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -95,7 +94,7 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     }
     
     private fun takeItem() {
-        val inputItem = inputInv.getItemStack(0)
+        val inputItem = inputInv.getItem(0)
         if (inputItem != null) {
             val recipe = RecipeManager.getConversionRecipeFor(RecipeTypes.PULVERIZER, inputItem)!!
             val result = recipe.result
@@ -107,11 +106,11 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         }
     }
     
-    private fun handleInputUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.newItemStack != null && RecipeManager.getConversionRecipeFor(RecipeTypes.PULVERIZER, event.newItemStack) == null
+    private fun handleInputUpdate(event: ItemPreUpdateEvent) {
+        event.isCancelled = event.newItem != null && RecipeManager.getConversionRecipeFor(RecipeTypes.PULVERIZER, event.newItem) == null
     }
     
-    private fun handleOutputUpdate(event: ItemUpdateEvent) {
+    private fun handleOutputUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = !event.isRemove && event.updateReason != SELF_UPDATE_REASON
     }
     
@@ -143,9 +142,8 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
                 "| i # , # o a e |",
                 "| c # # # # # e |",
                 "3 - - - - - - - 4")
-            .addIngredient('i', VISlotElement(inputInv, 0))
-            .addIngredient('o', VISlotElement(outputInv, 0))
-            .addIngredient('a', VISlotElement(outputInv, 1))
+            .addIngredient('i', inputInv)
+            .addIngredient('o', outputInv)
             .addIngredient(',', mainProgress)
             .addIngredient('c', pulverizerProgress)
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))

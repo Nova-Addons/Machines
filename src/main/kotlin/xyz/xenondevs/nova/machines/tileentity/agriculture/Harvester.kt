@@ -5,10 +5,9 @@ import org.bukkit.Tag
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.gui.SlotElement.VISlotElement
+import xyz.xenondevs.invui.inventory.VirtualInventory
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.item.Item
-import xyz.xenondevs.invui.virtualinventory.VirtualInventory
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.api.NovaEventFactory
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -26,6 +25,7 @@ import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
+import xyz.xenondevs.nova.ui.addIngredient
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
@@ -156,7 +156,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                         else -> null
                     }
                     
-                    val tool = toolInventory?.getItemStack(0)
+                    val tool = toolInventory?.getItem(0)
                     if (!ProtectionManager.canBreak(this, tool, block.location).get()) {
                         // skip block if it is protected
                         tryAgain = true
@@ -181,7 +181,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                             continue
                         }
                         
-                        toolInventory.setItemStack(SELF_UPDATE_REASON, 0, DamageableUtils.damageItem(tool))
+                        toolInventory.setItem(SELF_UPDATE_REASON, 0, DamageableUtils.damageItem(tool))
                     }
                     
                     // harvest the plant
@@ -201,20 +201,20 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         } while (tryAgain)
     }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = event.updateReason != SELF_UPDATE_REASON && event.isAdd
     }
     
-    private fun handleShearInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.newItemStack != null && event.newItemStack.type != Material.SHEARS
+    private fun handleShearInventoryUpdate(event: ItemPreUpdateEvent) {
+        event.isCancelled = event.newItem != null && event.newItem.type != Material.SHEARS
     }
     
-    private fun handleAxeInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.newItemStack != null && ToolCategory.ofItem(event.newItemStack) != VanillaToolCategories.AXE
+    private fun handleAxeInventoryUpdate(event: ItemPreUpdateEvent) {
+        event.isCancelled = event.newItem != null && ToolCategory.ofItem(event.newItem) != VanillaToolCategories.AXE
     }
     
-    private fun handleHoeInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.newItemStack != null && ToolCategory.ofItem(event.newItemStack) != VanillaToolCategories.HOE
+    private fun handleHoeInventoryUpdate(event: ItemPreUpdateEvent) {
+        event.isCancelled = event.newItem != null && ToolCategory.ofItem(event.newItem) != VanillaToolCategories.HOE
     }
     
     override fun handleRemoved(unload: Boolean) {
@@ -249,9 +249,9 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
             .addIngredient('i', inventory)
             .addIngredient('c', OpenSideConfigItem(sideConfigGui))
             .addIngredient('v', VisualizeRegionItem(player, uuid) { harvestRegion })
-            .addIngredient('s', VISlotElement(shearInventory, 0, GuiMaterials.SHEARS_PLACEHOLDER.clientsideProvider))
-            .addIngredient('a', VISlotElement(axeInventory, 0, GuiMaterials.AXE_PLACEHOLDER.clientsideProvider))
-            .addIngredient('h', VISlotElement(hoeInventory, 0, GuiMaterials.HOE_PLACEHOLDER.clientsideProvider))
+            .addIngredient('s', shearInventory, GuiMaterials.SHEARS_PLACEHOLDER)
+            .addIngredient('a', axeInventory, GuiMaterials.AXE_PLACEHOLDER)
+            .addIngredient('h', hoeInventory, GuiMaterials.HOE_PLACEHOLDER)
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))

@@ -17,14 +17,14 @@ import org.bukkit.potion.PotionEffectType
 import org.bukkit.potion.PotionType
 import xyz.xenondevs.cbf.Compound
 import xyz.xenondevs.invui.gui.ScrollGui
+import xyz.xenondevs.invui.inventory.event.ItemPostUpdateEvent
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.inventory.event.UpdateReason
 import xyz.xenondevs.invui.item.ItemProvider
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.PotionBuilder
 import xyz.xenondevs.invui.item.builder.setDisplayName
 import xyz.xenondevs.invui.item.impl.AbstractItem
-import xyz.xenondevs.invui.virtualinventory.event.InventoryUpdatedEvent
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
-import xyz.xenondevs.invui.virtualinventory.event.UpdateReason
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
@@ -186,11 +186,11 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         }
     }
     
-    private fun handleOutputPreUpdate(event: ItemUpdateEvent) {
+    private fun handleOutputPreUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = !event.isRemove && event.updateReason != SELF_UPDATE_REASON
     }
     
-    private fun handleIngredientsInventoryAfterUpdate(event: InventoryUpdatedEvent) {
+    private fun handleIngredientsInventoryAfterUpdate(event: ItemPostUpdateEvent) {
         if (event.updateReason != IGNORE_UPDATE_REASON) {
             if (event.isAdd) updateFalseRequiredStatus()
             else updateAllRequiredStatus()
@@ -199,7 +199,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         }
     }
     
-    private fun handleOutputInventoryAfterUpdate(event: InventoryUpdatedEvent) {
+    private fun handleOutputInventoryAfterUpdate(event: ItemPostUpdateEvent) {
         checkBrewingPossibility()
     }
     
@@ -241,7 +241,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
             energyHolder.energy -= energyHolder.energyConsumption
             
             if (++timePassed >= maxBrewTime) {
-                outputInventory.addItem(SELF_UPDATE_REASON, nextPotion)
+                outputInventory.addItem(SELF_UPDATE_REASON, nextPotion!!)
                 
                 nextPotion = null
                 timePassed = 0

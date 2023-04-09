@@ -6,8 +6,8 @@ import org.bukkit.block.data.Ageable
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.item.Item
-import xyz.xenondevs.invui.virtualinventory.event.ItemUpdateEvent
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -116,8 +116,8 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
                     && ProtectionManager.canUseBlock(this, ItemStack(Material.BONE_MEAL), it.location).get()
             }
     
-    private fun handleFertilizerUpdate(event: ItemUpdateEvent) {
-        if ((event.isAdd || event.isSwap) && event.newItemStack.type != Material.BONE_MEAL)
+    private fun handleFertilizerUpdate(event: ItemPreUpdateEvent) {
+        if ((event.isAdd || event.isSwap) && event.newItem.type != Material.BONE_MEAL)
             event.isCancelled = true
     }
     
