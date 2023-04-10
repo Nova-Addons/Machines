@@ -211,7 +211,6 @@
   "item.machines.star_hoe": "Sternhacke",
   "block.machines.crystallizer": "Kristallisator",
   "item.machines.star_crystal": "Sternkristall",
-  "menu.machines.items.category.tools": "Werkzeuge",
   "menu.machines.crystallizer.idle": "Kristallisiere...",
   "advancement.machines.crystallizer.title": "Kristallisierung",
   "advancement.machines.crystallizer.description": "Stelle einen Kristallisator her",
