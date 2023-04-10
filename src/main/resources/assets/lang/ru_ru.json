@@ -214,5 +214,14 @@
   "block.machines.ultimate_machine_frame": "Совершенный Машинный Корпус",
   "item.machines.star_shovel": "Звёздная лопата",
   "block.machines.crystallizer": "Кристаллизатор",
-  "block.machines.elite_machine_frame": "Элитный Машинный Корпус"
+  "block.machines.elite_machine_frame": "Элитный Машинный Корпус",
+  "block.machines.star_shards_ore": "Руда Звёздных Осколков",
+  "block.machines.deepslate_star_shards_ore": "Глубинносланцевая руда Звёздных Осколков",
+  "menu.machines.items.category.equipment": "Снаряжение",
+  "subtitles.machines.item.armor.equip_star": "Звон звёздных доспехов",
+  "item.machines.star_helmet": "Звёздный шлем",
+  "item.machines.star_chestplate": "Звёздный нагрудник",
+  "item.machines.star_leggings": "Звёздные поножи",
+  "item.machines.star_boots": "Звёздные ботинки",
+  "menu.machines.items.category.resources": "Ресурсы"
 }
