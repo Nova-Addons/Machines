@@ -2,7 +2,7 @@ import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "xyz.xenondevs"
-version = "0.3.2"
+version = "0.4-RC"
 
 val mojangMapped = System.getProperty("mojang-mapped") != null
 
