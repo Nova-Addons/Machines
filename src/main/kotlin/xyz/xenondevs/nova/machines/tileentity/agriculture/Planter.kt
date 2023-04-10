@@ -1,12 +1,5 @@
 package xyz.xenondevs.nova.machines.tileentity.agriculture
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement.VISlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
-import de.studiocode.invui.item.impl.BaseItem
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.block.Block
@@ -15,23 +8,28 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.item.tool.ToolCategory
+import xyz.xenondevs.nova.item.tool.VanillaToolCategories
 import xyz.xenondevs.nova.machines.registry.Blocks.PLANTER
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
+import xyz.xenondevs.nova.ui.addIngredient
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -43,6 +41,8 @@ import xyz.xenondevs.nova.util.item.PlantUtils
 import xyz.xenondevs.nova.util.item.isTillable
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 
 private val MAX_ENERGY = configReloadable { NovaConfig[PLANTER].getLong("capacity") }
 private val ENERGY_PER_TICK = configReloadable { NovaConfig[PLANTER].getLong("energy_per_tick") }
@@ -56,13 +56,12 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     
     private val inputInventory = getInventory("input", 6, ::handleSeedUpdate)
     private val hoesInventory = getInventory("hoes", 1, ::handleHoeUpdate)
-    override val gui = lazy(::PlanterGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_PLANT, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
-        inputInventory to NetworkConnectionType.BUFFER,
-        hoesInventory to NetworkConnectionType.BUFFER
+        inputInventory to NetworkConnectionType.INSERT,
+        hoesInventory to NetworkConnectionType.INSERT
     ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     
     private var autoTill = retrieveData("autoTill") { true }
@@ -74,7 +73,8 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         set(value) {
             field = value
             updateRegion()
-            if (gui.isInitialized()) gui.value.updateRangeItems()
+    
+            menuContainer.forEachMenu(PlanterMenu::updateRangeItems)
         }
     
     private lateinit var plantRegion: Region
@@ -88,10 +88,10 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     override fun reload() {
         super.reload()
         
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
         if (maxRange < range) range = maxRange
     }
     
@@ -168,7 +168,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 
                 // the block can be tilled, now check for both planting and tilling permissions
                 return@indexOfFirst ProtectionManager.canPlace(this, seedStack, block.location).get() &&
-                    ProtectionManager.canUseBlock(this, hoesInventory.getItemStack(0), soilBlock.location).get()
+                    ProtectionManager.canUseBlock(this, hoesInventory.getItem(0), soilBlock.location).get()
             }
         }
         
@@ -180,7 +180,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     private fun getNextTillableBlock(): Block? {
         return plantRegion.firstOrNull {
             it.type.isTillable()
-                && ProtectionManager.canUseBlock(this, hoesInventory.getItemStack(0), it.location).get()
+                && ProtectionManager.canUseBlock(this, hoesInventory.getItem(0), it.location).get()
         }
     }
     
@@ -190,18 +190,21 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         useHoe()
     }
     
-    private fun handleHoeUpdate(event: ItemUpdateEvent) {
-        if ((event.isAdd || event.isSwap) && ToolCategory.ofItem(event.newItemStack) != ToolCategory.HOE)
+    private fun handleHoeUpdate(event: ItemPreUpdateEvent) {
+        if ((event.isAdd || event.isSwap) && ToolCategory.ofItem(event.newItem) != VanillaToolCategories.HOE)
             event.isCancelled = true
     }
     
-    private fun handleSeedUpdate(event: ItemUpdateEvent) {
-        if (!event.isRemove && !PlantUtils.isSeed(event.newItemStack))
+    private fun handleSeedUpdate(event: ItemPreUpdateEvent) {
+        if (!event.isRemove && !PlantUtils.isSeed(event.newItem))
             event.isCancelled = true
     }
     
     private fun useHoe() {
-        hoesInventory.setItemStack(null, 0, DamageableUtils.damageItem(hoesInventory.items[0]))
+        if (hoesInventory.isEmpty)
+            return
+        
+        hoesInventory.setItem(null, 0, DamageableUtils.damageItem(hoesInventory.getItem(0)!!))
     }
     
     override fun handleRemoved(unload: Boolean) {
@@ -215,9 +218,10 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         storeData("range", range)
     }
     
-    inner class PlanterGUI : TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class PlanterMenu(player: Player) : IndividualTileEntityMenu(player) {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@Planter,
             listOf(
                 itemHolder.getNetworkedInventory(inputInventory) to "inventory.nova.input",
@@ -228,7 +232,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s u v # # p e |",
@@ -236,9 +240,9 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 "| i i i # f m e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inputInventory)
-            .addIngredient('h', VISlotElement(hoesInventory, 0, GUIMaterials.HOE_PLACEHOLDER.clientsideProvider))
-            .addIngredient('v', VisualizeRegionItem(uuid) { plantRegion })
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('h', hoesInventory, GuiMaterials.HOE_PLACEHOLDER)
+            .addIngredient('v', VisualizeRegionItem(player, uuid) { plantRegion })
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('f', AutoTillingItem())
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
@@ -249,10 +253,10 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         
         fun updateRangeItems() = rangeItems.forEach(Item::notifyWindows)
         
-        private inner class AutoTillingItem : BaseItem() {
+        private inner class AutoTillingItem : AbstractItem() {
             
             override fun getItemProvider() =
-                (if (autoTill) GUIMaterials.HOE_BTN_ON else GUIMaterials.HOE_BTN_OFF).clientsideProvider
+                (if (autoTill) GuiMaterials.HOE_BTN_ON else GuiMaterials.HOE_BTN_OFF).clientsideProvider
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
                 autoTill = !autoTill

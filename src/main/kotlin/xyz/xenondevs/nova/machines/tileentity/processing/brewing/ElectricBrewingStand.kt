@@ -1,15 +1,7 @@
 package xyz.xenondevs.nova.machines.tileentity.processing.brewing
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.ItemProvider
-import de.studiocode.invui.item.builder.ItemBuilder
-import de.studiocode.invui.item.builder.PotionBuilder
-import de.studiocode.invui.item.impl.BaseItem
-import de.studiocode.invui.virtualinventory.event.InventoryUpdatedEvent
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
-import de.studiocode.invui.virtualinventory.event.UpdateReason
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.TranslatableComponent
@@ -24,35 +16,42 @@ import org.bukkit.potion.PotionData
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.potion.PotionType
 import xyz.xenondevs.cbf.Compound
+import xyz.xenondevs.invui.gui.ScrollGui
+import xyz.xenondevs.invui.inventory.event.ItemPostUpdateEvent
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.inventory.event.UpdateReason
+import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.builder.ItemBuilder
+import xyz.xenondevs.invui.item.builder.PotionBuilder
+import xyz.xenondevs.invui.item.builder.setDisplayName
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
-import xyz.xenondevs.nova.data.world.legacy.impl.v0_10.cbf.LegacyCompound
 import xyz.xenondevs.nova.machines.gui.BrewProgressItem
 import xyz.xenondevs.nova.machines.recipe.ElectricBrewingStandRecipe
 import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_BREWING_STAND
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
-import xyz.xenondevs.nova.machines.registry.GUITextures
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
+import xyz.xenondevs.nova.machines.registry.GuiTextures
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
-import xyz.xenondevs.nova.util.contains
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.item.localizedName
-import xyz.xenondevs.nova.util.removeFirstMatching
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.getFluidContainer
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -65,8 +64,7 @@ private val IGNORE_UPDATE_REASON = object : UpdateReason {}
 
 class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::ElectricBrewingStandGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     private val fluidTank = getFluidContainer("tank", setOf(FluidType.WATER), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
     private val ingredientsInventory = getInventory("ingredients", 27, null, ::handleIngredientsInventoryAfterUpdate)
     private val outputInventory = getInventory("output", 3, ::handleOutputPreUpdate, ::handleOutputInventoryAfterUpdate)
@@ -77,9 +75,9 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     
     override val itemHolder = NovaItemHolder(
         this,
-        ingredientsInventory to NetworkConnectionType.BUFFER,
-        outputInventory to NetworkConnectionType.BUFFER
-    ) { createSideConfig(NetworkConnectionType.INSERT) }
+        ingredientsInventory to NetworkConnectionType.INSERT,
+        outputInventory to NetworkConnectionType.EXTRACT
+    ) { createSideConfig(NetworkConnectionType.BUFFER) }
     
     override val fluidHolder = NovaFluidHolder(
         this,
@@ -99,22 +97,12 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     init {
         val potionEffects = ArrayList<PotionEffectBuilder>()
         
-        if (legacyData != null) {
-            retrieveDataOrNull<List<LegacyCompound>>("potionEffects")?.forEach { potionCompound ->
-                val type = PotionEffectType.getByKey(potionCompound.get<NamespacedKey>("type"))!!
-                val duration: Int = potionCompound["duration"]!!
-                val amplifier: Int = potionCompound["amplifier"]!!
-        
-                potionEffects += PotionEffectBuilder(type, duration, amplifier)
-            }
-        } else {
-            retrieveDataOrNull<List<Compound>>("potionEffects")?.forEach { potionCompound ->
-                val type = PotionEffectType.getByKey(potionCompound.get<NamespacedKey>("type"))!!
-                val duration: Int = potionCompound["duration"]!!
-                val amplifier: Int = potionCompound["amplifier"]!!
-        
-                potionEffects += PotionEffectBuilder(type, duration, amplifier)
-            }
+        retrieveDataOrNull<List<Compound>>("potionEffects")?.forEach { potionCompound ->
+            val type = PotionEffectType.getByKey(potionCompound.get<NamespacedKey>("type"))!!
+            val duration: Int = potionCompound["duration"]!!
+            val amplifier: Int = potionCompound["amplifier"]!!
+            
+            potionEffects += PotionEffectBuilder(type, duration, amplifier)
         }
         
         updatePotionData(potionType, potionEffects, color)
@@ -139,7 +127,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
     
     override fun reload() {
         super.reload()
-        maxBrewTime = (BREW_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).roundToInt()
+        maxBrewTime = (BREW_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).roundToInt()
     }
     
     private fun updatePotionData(type: PotionBuilder.PotionType, effects: List<PotionEffectBuilder>, color: Color) {
@@ -191,17 +179,18 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         // Update
         updateAllRequiredStatus()
         checkBrewingPossibility()
-        if (gui.isInitialized()) {
-            gui.value.configurePotionItem.notifyWindows()
-            gui.value.ingredientsDisplay.notifyWindows()
+        
+        menuContainer.forEachMenu<ElectricBrewingStandMenu> {
+            it.configurePotionItem.notifyWindows()
+            it.ingredientsDisplay.notifyWindows()
         }
     }
     
-    private fun handleOutputPreUpdate(event: ItemUpdateEvent) {
+    private fun handleOutputPreUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = !event.isRemove && event.updateReason != SELF_UPDATE_REASON
     }
     
-    private fun handleIngredientsInventoryAfterUpdate(event: InventoryUpdatedEvent) {
+    private fun handleIngredientsInventoryAfterUpdate(event: ItemPostUpdateEvent) {
         if (event.updateReason != IGNORE_UPDATE_REASON) {
             if (event.isAdd) updateFalseRequiredStatus()
             else updateAllRequiredStatus()
@@ -210,7 +199,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         }
     }
     
-    private fun handleOutputInventoryAfterUpdate(event: InventoryUpdatedEvent) {
+    private fun handleOutputInventoryAfterUpdate(event: ItemPostUpdateEvent) {
         checkBrewingPossibility()
     }
     
@@ -218,18 +207,16 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         if (requiredItems == null) return
         requiredItemsStatus!!
             .filter { !it.value }
-            .forEach { (item, _) -> requiredItemsStatus!![item] = ingredientsInventory.contains(item) }
+            .forEach { (item, _) -> requiredItemsStatus!![item] = ingredientsInventory.containsSimilar(item) }
         
-        if (gui.isInitialized())
-            gui.value.ingredientsDisplay.notifyWindows()
+        menuContainer.forEachMenu<ElectricBrewingStandMenu> { it.ingredientsDisplay.notifyWindows() }
     }
     
     private fun updateAllRequiredStatus() {
         if (requiredItems == null) return
-        requiredItemsStatus = requiredItems!!.associateWithTo(HashMap()) { ingredientsInventory.contains(it) }
+        requiredItemsStatus = requiredItems!!.associateWithTo(HashMap()) { ingredientsInventory.containsSimilar(it) }
         
-        if (gui.isInitialized())
-            gui.value.ingredientsDisplay.notifyWindows()
+        menuContainer.forEachMenu<ElectricBrewingStandMenu> { it.ingredientsDisplay.notifyWindows() }
     }
     
     private fun checkBrewingPossibility() {
@@ -244,7 +231,8 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         } else {
             nextPotion = null
             timePassed = 0
-            if (gui.isInitialized()) gui.value.progressItem.percentage = 0.0
+            
+            menuContainer.forEachMenu<ElectricBrewingStandMenu> { it.progressItem.percentage = 0.0 }
         }
     }
     
@@ -253,17 +241,19 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
             energyHolder.energy -= energyHolder.energyConsumption
             
             if (++timePassed >= maxBrewTime) {
-                outputInventory.addItem(SELF_UPDATE_REASON, nextPotion)
+                outputInventory.addItem(SELF_UPDATE_REASON, nextPotion!!)
                 
                 nextPotion = null
                 timePassed = 0
                 fluidTank.takeFluid(1000)
-                if (!requiredItems!!.all { ingredientsInventory.removeFirstMatching(it, IGNORE_UPDATE_REASON) == 0 })
+                if (!requiredItems!!.all { ingredientsInventory.removeFirstSimilar(IGNORE_UPDATE_REASON, 1, it) == 0 })
                     throw IllegalStateException("Could not remove all ingredients from the ingredients inventory")
                 updateAllRequiredStatus()
             }
             
-            if (gui.isInitialized()) gui.value.progressItem.percentage = timePassed.toDouble() / maxBrewTime.toDouble()
+            menuContainer.forEachMenu<ElectricBrewingStandMenu> {
+                it.progressItem.percentage = timePassed.toDouble() / maxBrewTime.toDouble()
+            }
         }
     }
     
@@ -277,9 +267,10 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         val ALLOW_DURATION_AMPLIFIER_MIXING = NovaConfig[ELECTRIC_BREWING_STAND].getBoolean("duration_amplifier_mixing")
     }
     
-    inner class ElectricBrewingStandGUI : TileEntityGUI(GUITextures.ELECTRIC_BREWING_STAND) {
+    @TileEntityMenuClass
+    inner class ElectricBrewingStandMenu : GlobalTileEntityMenu(GuiTextures.ELECTRIC_BREWING_STAND) {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@ElectricBrewingStand,
             listOf(
                 itemHolder.getNetworkedInventory(ingredientsInventory) to "inventory.machines.ingredients",
@@ -293,7 +284,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
         val progressItem = BrewProgressItem()
         val ingredientsDisplay = IngredientsDisplay()
         
-        override val gui: GUI = GUIBuilder(GUIType.SCROLL_INVENTORY)
+        override val gui = ScrollGui.inventories()
             .setStructure(
                 ". x x x u i . U s",
                 ". x x x . p . . .",
@@ -301,14 +292,14 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
                 ". ^ . ^ . . . f e",
                 ". o . o . . . f e",
                 ". . o . . . . f e")
-            .setInventory(ingredientsInventory)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addContent(ingredientsInventory)
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('U', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(4, energyHolder))
             .addIngredient('f', FluidBar(4, fluidHolder, fluidTank))
             .addIngredient('i', ingredientsDisplay)
             .addIngredient('p', configurePotionItem)
-            .addIngredient('o', outputInventory, GUIMaterials.BOTTLE_PLACEHOLDER.clientsideProvider)
+            .addIngredient('o', outputInventory, GuiMaterials.BOTTLE_PLACEHOLDER.clientsideProvider)
             .addIngredient('^', progressItem)
             .build()
         
@@ -320,7 +311,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
             ::openWindow
         )
         
-        inner class ConfigurePotionItem : BaseItem() {
+        inner class ConfigurePotionItem : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 val builder = PotionBuilder(potionType)
@@ -337,12 +328,12 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
             
         }
         
-        inner class IngredientsDisplay : BaseItem() {
+        inner class IngredientsDisplay : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 val hasAll = requiredItemsStatus?.all { it.value } ?: false
                 val builder = ItemBuilder(Material.KNOWLEDGE_BOOK)
-                    .setDisplayName(localized(if (hasAll) ChatColor.GREEN else ChatColor.RED, "menu.machines.electric_brewing_stand.ingredients"))
+                    .setDisplayName(Component.translatable("menu.machines.electric_brewing_stand.ingredients", if (hasAll) NamedTextColor.GREEN else NamedTextColor.RED))
                 requiredItems
                     ?.asSequence()
                     ?.sortedByDescending { it.amount }

@@ -5,17 +5,18 @@ import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
 import org.bukkit.potion.PotionEffectType
-import xyz.xenondevs.nova.data.serialization.json.ConversionRecipeDeserializer
-import xyz.xenondevs.nova.data.serialization.json.RecipeDeserializer
-import xyz.xenondevs.nova.data.serialization.json.RecipeDeserializer.Companion.getRecipeKey
-import xyz.xenondevs.nova.data.serialization.json.RecipeDeserializer.Companion.parseRecipeChoice
+import xyz.xenondevs.commons.gson.getDoubleOrNull
+import xyz.xenondevs.commons.gson.getInt
+import xyz.xenondevs.commons.gson.getIntOrNull
+import xyz.xenondevs.commons.gson.getLong
+import xyz.xenondevs.commons.gson.getString
+import xyz.xenondevs.nova.data.serialization.json.getDeserialized
+import xyz.xenondevs.nova.data.serialization.json.serializer.ConversionRecipeDeserializer
+import xyz.xenondevs.nova.data.serialization.json.serializer.RecipeDeserializer
+import xyz.xenondevs.nova.data.serialization.json.serializer.RecipeDeserializer.Companion.getRecipeKey
+import xyz.xenondevs.nova.data.serialization.json.serializer.RecipeDeserializer.Companion.parseRecipeChoice
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
-import xyz.xenondevs.nova.util.data.getDeserialized
-import xyz.xenondevs.nova.util.data.getDouble
 import xyz.xenondevs.nova.util.data.getInputStacks
-import xyz.xenondevs.nova.util.data.getInt
-import xyz.xenondevs.nova.util.data.getLong
-import xyz.xenondevs.nova.util.data.getString
 import xyz.xenondevs.nova.util.item.ItemUtils
 import java.io.File
 
@@ -37,12 +38,12 @@ object GearPressRecipeDeserializer : ConversionRecipeDeserializer<GearPressRecip
 object FluidInfuserRecipeDeserializer : RecipeDeserializer<FluidInfuserRecipe> {
     
     override fun deserialize(json: JsonObject, file: File): FluidInfuserRecipe {
-        val mode = json.getDeserialized<FluidInfuserRecipe.InfuserMode>("mode")!!
-        val fluidType = json.getDeserialized<FluidType>("fluid_type")!!
-        val fluidAmount = json.getLong("fluid_amount")!!
+        val mode = json.getDeserialized<FluidInfuserRecipe.InfuserMode>("mode")
+        val fluidType = json.getDeserialized<FluidType>("fluid_type")
+        val fluidAmount = json.getLong("fluid_amount")
         val input = parseRecipeChoice(json.get("input"))
-        val time = json.getInt("time")!!
-        val result = ItemUtils.getItemBuilder(json.getString("result")!!).get()
+        val time = json.getInt("time")
+        val result = ItemUtils.getItemBuilder(json.getString("result")).get()
         
         return FluidInfuserRecipe(getRecipeKey(file), mode, fluidType, fluidAmount, input, result, time)
     }
@@ -56,15 +57,14 @@ object ElectricBrewingStandRecipeDeserializer : RecipeDeserializer<ElectricBrewi
         require(inputs.all { it.getInputStacks().size == 1 })
         
         val resultName = json.getString("result")
-            ?: throw IllegalArgumentException("No result provided")
         val result = PotionEffectType.getByKey(NamespacedKey.fromString(resultName))
             ?: throw IllegalArgumentException("Invalid result")
         
-        val defaultTime = json.getInt("default_time", 0)
-        val redstoneMultiplier = json.getDouble("redstone_multiplier", 0.0)
-        val glowstoneMultiplier = json.getDouble("glowstone_multiplier", 0.0)
-        val maxDurationLevel = json.getInt("max_duration_level", 0)
-        val maxAmplifierLevel = json.getInt("max_amplifier_level", 0)
+        val defaultTime = json.getIntOrNull("default_time") ?: 0
+        val redstoneMultiplier = json.getDoubleOrNull("redstone_multiplier") ?: 0.0
+        val glowstoneMultiplier = json.getDoubleOrNull("glowstone_multiplier") ?: 0.0
+        val maxDurationLevel = json.getIntOrNull("max_duration_level") ?: 0
+        val maxAmplifierLevel = json.getIntOrNull("max_amplifier_level") ?: 0
         
         return ElectricBrewingStandRecipe(
             getRecipeKey(file),

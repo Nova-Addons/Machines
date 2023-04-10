@@ -1,29 +1,28 @@
 package xyz.xenondevs.nova.machines.tileentity.energy
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.weather.LightningStrikeEvent
 import org.bukkit.event.weather.LightningStrikeEvent.Cause
+import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.LIGHTNING_EXCHANGER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
 import xyz.xenondevs.nova.tileentity.TileEntityManager
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ProviderEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.registerEvents
+import xyz.xenondevs.simpleupgrades.ProviderEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -34,9 +33,8 @@ private val MAX_BURST by configReloadable { NovaConfig[LIGHTNING_EXCHANGER].getL
 
 class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { LightningExchangerGUI() }
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
-    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, null, upgradeHolder) {
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
+    override val energyHolder = ProviderEnergyHolder(this, MAX_ENERGY, upgradeHolder) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
     }
     
@@ -50,8 +48,8 @@ class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(
     
     override fun reload() {
         super.reload()
-        minBurst = (MIN_BURST * upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toLong()
-        maxBurst = (MAX_BURST * upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toLong()
+        minBurst = (MIN_BURST * upgradeHolder.getValue(UpgradeTypes.EFFICIENCY)).toLong()
+        maxBurst = (MAX_BURST * upgradeHolder.getValue(UpgradeTypes.EFFICIENCY)).toLong()
     }
     
     override fun handleTick() {
@@ -65,9 +63,10 @@ class LightningExchanger(blockState: NovaTileEntityState) : NetworkedTileEntity(
         toCharge += (if (leeway <= maxBurst) leeway else Random.nextLong(minBurst, maxBurst))
     }
     
-    inner class LightningExchangerGUI : TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class LightningExchangerMenu : GlobalTileEntityMenu() {
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| u # # e # # # |",

@@ -1,4 +1,4 @@
-tool_level: minecraft:iron
+tool_tier: minecraft:iron
 tool_category: minecraft:pickaxe
 break_speed: 40
 attack_damage: 4

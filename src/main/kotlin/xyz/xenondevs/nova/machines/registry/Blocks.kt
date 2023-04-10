@@ -1,11 +1,14 @@
 package xyz.xenondevs.nova.machines.registry
 
 import org.bukkit.Material
+import xyz.xenondevs.nova.addon.registry.BlockRegistry
 import xyz.xenondevs.nova.data.world.block.property.Directional
-import xyz.xenondevs.nova.data.world.block.property.LegacyDirectional
-import xyz.xenondevs.nova.item.tool.ToolCategory
-import xyz.xenondevs.nova.item.tool.ToolLevel
+import xyz.xenondevs.nova.initialize.Init
+import xyz.xenondevs.nova.item.options.BlockOptions
+import xyz.xenondevs.nova.item.tool.VanillaToolCategories
+import xyz.xenondevs.nova.item.tool.VanillaToolTiers
 import xyz.xenondevs.nova.machines.Machines
+import xyz.xenondevs.nova.machines.block.StarShardsOre
 import xyz.xenondevs.nova.machines.tileentity.agriculture.AutoFisher
 import xyz.xenondevs.nova.machines.tileentity.agriculture.Fertilizer
 import xyz.xenondevs.nova.machines.tileentity.agriculture.Harvester
@@ -37,79 +40,63 @@ import xyz.xenondevs.nova.machines.tileentity.world.Pump
 import xyz.xenondevs.nova.machines.tileentity.world.Quarry
 import xyz.xenondevs.nova.machines.tileentity.world.Sprinkler
 import xyz.xenondevs.nova.machines.tileentity.world.StarCollector
-import xyz.xenondevs.nova.material.BlockOptions
-import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerBlock
-import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerItem
-import xyz.xenondevs.nova.material.NovaMaterialRegistry.registerTileEntity
 import xyz.xenondevs.nova.world.block.sound.SoundGroup
 
-object Blocks {
+@Init
+object Blocks : BlockRegistry by Machines.registry {
     
-    private val SAND = BlockOptions(0.5, ToolCategory.SHOVEL, null, false, SoundGroup.SAND, Material.PURPLE_CONCRETE_POWDER)
-    private val SANDSTONE = BlockOptions(0.8, ToolCategory.PICKAXE, null, true, SoundGroup.STONE, Material.SANDSTONE)
-    private val STONE = BlockOptions(3.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundGroup.STONE, Material.NETHERITE_BLOCK)
-    private val LIGHT_METAL = BlockOptions(0.5, ToolCategory.PICKAXE, null, false, SoundGroup.METAL, Material.IRON_BLOCK)
-    private val METAL = BlockOptions(5.0, ToolCategory.PICKAXE, ToolLevel.STONE, true, SoundGroup.METAL, Material.IRON_BLOCK)
-    private val MACHINE_FRAME = BlockOptions(2.0, ToolCategory.PICKAXE, null, true, SoundGroup.METAL, Material.STONE)
+    private val SAND = BlockOptions(0.5, VanillaToolCategories.SHOVEL, VanillaToolTiers.WOOD, false, SoundGroup.SAND, Material.PURPLE_CONCRETE_POWDER)
+    private val SANDSTONE = BlockOptions(0.8, VanillaToolCategories.PICKAXE, VanillaToolTiers.WOOD, true, SoundGroup.STONE, Material.SANDSTONE)
+    private val STONE = BlockOptions(3.0, VanillaToolCategories.PICKAXE, VanillaToolTiers.WOOD, true, SoundGroup.STONE, Material.NETHERITE_BLOCK)
+    private val LIGHT_METAL = BlockOptions(0.5, VanillaToolCategories.PICKAXE, VanillaToolTiers.WOOD, false, SoundGroup.METAL, Material.IRON_BLOCK)
+    private val STONE_ORE = BlockOptions(3.0, VanillaToolCategories.PICKAXE, VanillaToolTiers.STONE, true, SoundGroup.STONE, Material.STONE)
+    private val DEEPSLATE_ORE = BlockOptions(3.0, VanillaToolCategories.PICKAXE, VanillaToolTiers.STONE, true, SoundGroup.DEEPSLATE, Material.DEEPSLATE)
+    private val METAL = BlockOptions(5.0, VanillaToolCategories.PICKAXE, VanillaToolTiers.WOOD, true, SoundGroup.METAL, Material.IRON_BLOCK)
+    private val MACHINE_FRAME = BlockOptions(2.0, VanillaToolCategories.PICKAXE, VanillaToolTiers.WOOD, true, SoundGroup.METAL, Material.STONE)
     
     // TileEntities
-    val AUTO_FISHER = registerTileEntity(Machines, "auto_fisher", STONE, ::AutoFisher, properties = listOf(Directional.NORMAL))
-    val FERTILIZER = registerTileEntity(Machines, "fertilizer", STONE, ::Fertilizer, properties = listOf(Directional.NORMAL))
-    val HARVESTER = registerTileEntity(Machines, "harvester", STONE, ::Harvester, properties = listOf(Directional.NORMAL))
-    val PLANTER = registerTileEntity(Machines, "planter", STONE, ::Planter, properties = listOf(Directional.NORMAL))
-    val TREE_FACTORY = registerTileEntity(Machines, "tree_factory", STONE, ::TreeFactory, properties = listOf(Directional.NORMAL))
-    val CHARGER = registerTileEntity(Machines, "charger", STONE, ::Charger, properties = listOf(Directional.NORMAL))
-    val WIRELESS_CHARGER = registerTileEntity(Machines, "wireless_charger", STONE, ::WirelessCharger, properties = listOf(Directional.NORMAL))
-    val BREEDER = registerTileEntity(Machines, "breeder", STONE, ::Breeder, properties = listOf(Directional.NORMAL))
-    val MOB_DUPLICATOR = registerTileEntity(Machines, "mob_duplicator", STONE, ::MobDuplicator, properties = listOf(Directional.NORMAL))
-    val MOB_KILLER = registerTileEntity(Machines, "mob_killer", STONE, ::MobKiller, properties = listOf(Directional.NORMAL))
-    val COBBLESTONE_GENERATOR = registerTileEntity(Machines, "cobblestone_generator", STONE, ::CobblestoneGenerator, properties = listOf(Directional.NORMAL))
-    val ELECTRIC_FURNACE = registerTileEntity(Machines, "electric_furnace", STONE, ::ElectricFurnace, properties = listOf(Directional.NORMAL))
-    val MECHANICAL_PRESS = registerTileEntity(Machines, "mechanical_press", STONE, ::MechanicalPress, properties = listOf(Directional.NORMAL))
-    val PULVERIZER = registerTileEntity(Machines, "pulverizer", STONE, ::Pulverizer, properties = listOf(Directional.NORMAL))
-    val BLOCK_BREAKER = registerTileEntity(Machines, "block_breaker", STONE, ::BlockBreaker, properties = listOf(Directional.NORMAL))
-    val BLOCK_PLACER = registerTileEntity(Machines, "block_placer", STONE, ::BlockPlacer, properties = listOf(Directional.NORMAL))
-    val STAR_COLLECTOR = registerTileEntity(Machines, "star_collector", STONE, ::StarCollector, properties = listOf(LegacyDirectional))
-    val CHUNK_LOADER = registerTileEntity(Machines, "chunk_loader", STONE, ::ChunkLoader, properties = listOf(Directional.NORMAL))
-    val QUARRY = registerTileEntity(Machines, "quarry", STONE, ::Quarry, Quarry::canPlace, properties = listOf(Directional.NORMAL))
-    val ELECTRIC_BREWING_STAND = registerTileEntity(Machines, "electric_brewing_stand", STONE, ::ElectricBrewingStand, properties = listOf(Directional.NORMAL))
-    val PUMP = registerTileEntity(Machines, "pump", STONE, ::Pump, properties = listOf(LegacyDirectional))
-    val FREEZER = registerTileEntity(Machines, "freezer", STONE, ::Freezer, properties = listOf(Directional.NORMAL))
-    val FLUID_INFUSER = registerTileEntity(Machines, "fluid_infuser", STONE, ::FluidInfuser, properties = listOf(Directional.NORMAL))
-    val SPRINKLER = registerTileEntity(Machines, "sprinkler", LIGHT_METAL, ::Sprinkler, properties = listOf(LegacyDirectional))
-    val SOLAR_PANEL = registerTileEntity(Machines, "solar_panel", STONE, ::SolarPanel, properties = listOf(Directional.NORMAL))
-    val LIGHTNING_EXCHANGER = registerTileEntity(Machines, "lightning_exchanger", STONE, ::LightningExchanger, properties = listOf(LegacyDirectional))
-    val WIND_TURBINE = registerTileEntity(Machines, "wind_turbine", METAL, ::WindTurbine, WindTurbine::canPlace, WindTurbine::loadMultiBlock, properties = listOf(Directional.NORMAL))
-    val FURNACE_GENERATOR = registerTileEntity(Machines, "furnace_generator", STONE, ::FurnaceGenerator, properties = listOf(Directional.NORMAL))
-    val LAVA_GENERATOR = registerTileEntity(Machines, "lava_generator", STONE, ::LavaGenerator, properties = listOf(Directional.NORMAL))
-    val INFINITE_WATER_SOURCE = registerTileEntity(Machines, "infinite_water_source", SANDSTONE, ::InfiniteWaterSource, properties = listOf(LegacyDirectional))
-    val CRYSTALLIZER = registerTileEntity(Machines, "crystallizer", STONE, ::Crystallizer)
+    val AUTO_FISHER = tileEntity("auto_fisher", ::AutoFisher).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val FERTILIZER = tileEntity("fertilizer", ::Fertilizer).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val HARVESTER = tileEntity("harvester", ::Harvester).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val PLANTER = tileEntity("planter", ::Planter).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val TREE_FACTORY = tileEntity("tree_factory", ::TreeFactory).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val CHARGER = tileEntity("charger", ::Charger).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val WIRELESS_CHARGER = tileEntity("wireless_charger", ::WirelessCharger).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val BREEDER = tileEntity("breeder", ::Breeder).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val MOB_DUPLICATOR = tileEntity("mob_duplicator", ::MobDuplicator).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val MOB_KILLER = tileEntity("mob_killer", ::MobKiller).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val COBBLESTONE_GENERATOR = tileEntity("cobblestone_generator", ::CobblestoneGenerator).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val ELECTRIC_FURNACE = tileEntity("electric_furnace", ::ElectricFurnace).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val MECHANICAL_PRESS = tileEntity("mechanical_press", ::MechanicalPress).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val PULVERIZER = tileEntity("pulverizer", ::Pulverizer).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val BLOCK_BREAKER = tileEntity("block_breaker", ::BlockBreaker).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val BLOCK_PLACER = tileEntity("block_placer", ::BlockPlacer).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val STAR_COLLECTOR = tileEntity("star_collector", ::StarCollector).blockOptions(STONE).register()
+    val CHUNK_LOADER = tileEntity("chunk_loader", ::ChunkLoader).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val QUARRY = tileEntity("quarry", ::Quarry).blockOptions(STONE).properties(Directional.NORMAL).placeCheck(Quarry::canPlace).register()
+    val ELECTRIC_BREWING_STAND = tileEntity("electric_brewing_stand", ::ElectricBrewingStand).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val PUMP = tileEntity("pump", ::Pump).blockOptions(STONE).register()
+    val FREEZER = tileEntity("freezer", ::Freezer).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val FLUID_INFUSER = tileEntity("fluid_infuser", ::FluidInfuser).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val SPRINKLER = tileEntity("sprinkler", ::Sprinkler).blockOptions(LIGHT_METAL).register()
+    val SOLAR_PANEL = tileEntity("solar_panel", ::SolarPanel).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val LIGHTNING_EXCHANGER = tileEntity("lightning_exchanger", ::LightningExchanger).blockOptions(STONE).register()
+    val WIND_TURBINE = tileEntity("wind_turbine", ::WindTurbine).blockOptions(METAL).properties(Directional.NORMAL).placeCheck(WindTurbine::canPlace).multiBlockLoader(WindTurbine::loadMultiBlock).register()
+    val FURNACE_GENERATOR = tileEntity("furnace_generator", ::FurnaceGenerator).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val LAVA_GENERATOR = tileEntity("lava_generator", ::LavaGenerator).blockOptions(STONE).properties(Directional.NORMAL).register()
+    val INFINITE_WATER_SOURCE = tileEntity("infinite_water_source", ::InfiniteWaterSource).blockOptions(SANDSTONE).register()
+    val CRYSTALLIZER = tileEntity("crystallizer", ::Crystallizer).blockOptions(STONE).register()
     
     // Normal blocks
-    val STAR_DUST_BLOCK = registerBlock(Machines, "star_dust_block", SAND)
-    val BASIC_MACHINE_FRAME = registerBlock(Machines, "basic_machine_frame", MACHINE_FRAME)
-    val ADVANCED_MACHINE_FRAME = registerBlock(Machines, "advanced_machine_frame", MACHINE_FRAME)
-    val ELITE_MACHINE_FRAME = registerBlock(Machines, "elite_machine_frame", MACHINE_FRAME)
-    val ULTIMATE_MACHINE_FRAME = registerBlock(Machines, "ultimate_machine_frame", MACHINE_FRAME)
-    val CREATIVE_MACHINE_FRAME = registerBlock(Machines, "creative_machine_frame", MACHINE_FRAME)
+    val STAR_DUST_BLOCK = block("star_dust_block").blockOptions(SAND).register()
+    val BASIC_MACHINE_FRAME = block("basic_machine_frame").blockOptions(MACHINE_FRAME).register()
+    val ADVANCED_MACHINE_FRAME = block("advanced_machine_frame").blockOptions(MACHINE_FRAME).register()
+    val ELITE_MACHINE_FRAME = block("elite_machine_frame").blockOptions(MACHINE_FRAME).register()
+    val ULTIMATE_MACHINE_FRAME = block("ultimate_machine_frame").blockOptions(MACHINE_FRAME).register()
+    val CREATIVE_MACHINE_FRAME = block("creative_machine_frame").blockOptions(MACHINE_FRAME).register()
     
-    // Tree Miniatures
-    val OAK_TREE_MINIATURE = registerItem(Machines, "oak_tree_miniature")
-    val SPRUCE_TREE_MINIATURE = registerItem(Machines, "spruce_tree_miniature")
-    val BIRCH_TREE_MINIATURE = registerItem(Machines, "birch_tree_miniature")
-    val JUNGLE_TREE_MINIATURE = registerItem(Machines, "jungle_tree_miniature")
-    val ACACIA_TREE_MINIATURE = registerItem(Machines, "acacia_tree_miniature")
-    val DARK_OAK_TREE_MINIATURE = registerItem(Machines, "dark_oak_tree_miniature")
-    val MANGROVE_TREE_MINIATURE = registerItem(Machines, "mangrove_tree_miniature")
-    val CRIMSON_TREE_MINIATURE = registerItem(Machines, "crimson_tree_miniature")
-    val WARPED_TREE_MINIATURE = registerItem(Machines, "warped_tree_miniature")
-    val GIANT_RED_MUSHROOM_MINIATURE = registerItem(Machines, "giant_red_mushroom_miniature")
-    val GIANT_BROWN_MUSHROOM_MINIATURE = registerItem(Machines, "giant_brown_mushroom_miniature")
-    
-    // Water levels
-    val COBBLESTONE_GENERATOR_WATER_LEVELS = registerItem(Machines, "cobblestone_generator_water_levels")
-    val COBBLESTONE_GENERATOR_LAVA_LEVELS = registerItem(Machines, "cobblestone_generator_lava_levels")
-    
-    fun init() = Unit
+    // Ores
+    val STAR_SHARDS_ORE = block("star_shards_ore").blockOptions(STONE_ORE).behaviors(StarShardsOre).register()
+    val DEEPSLATE_STAR_SHARDS_ORE = block("deepslate_star_shards_ore").blockOptions(DEEPSLATE_ORE).behaviors(StarShardsOre).register()
     
 }

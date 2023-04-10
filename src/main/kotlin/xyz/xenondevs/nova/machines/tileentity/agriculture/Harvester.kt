@@ -1,43 +1,40 @@
 package xyz.xenondevs.nova.machines.tileentity.agriculture
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement.VISlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
-import de.studiocode.invui.virtualinventory.VirtualInventory
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.Material
 import org.bukkit.Tag
 import org.bukkit.block.Block
-import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
+import org.bukkit.entity.Player
+import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.inventory.VirtualInventory
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.nova.api.NovaEventFactory
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.item.tool.ToolCategory
+import xyz.xenondevs.nova.item.tool.VanillaToolCategories
 import xyz.xenondevs.nova.machines.registry.Blocks.HARVESTER
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
+import xyz.xenondevs.nova.ui.addIngredient
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.addAll
-import xyz.xenondevs.nova.util.callEvent
 import xyz.xenondevs.nova.util.dropItemsNaturally
-import xyz.xenondevs.nova.util.isFull
 import xyz.xenondevs.nova.util.item.DamageableUtils
 import xyz.xenondevs.nova.util.item.PlantUtils
 import xyz.xenondevs.nova.util.item.isLeaveLike
@@ -45,6 +42,8 @@ import xyz.xenondevs.nova.world.block.context.BlockBreakContext
 import xyz.xenondevs.nova.world.pos
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.util.*
 
 private val MAX_ENERGY = configReloadable { NovaConfig[HARVESTER].getLong("capacity") }
@@ -61,14 +60,13 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     private val shearInventory = getInventory("shears", 1, ::handleShearInventoryUpdate)
     private val axeInventory = getInventory("axe", 1, ::handleAxeInventoryUpdate)
     private val hoeInventory = getInventory("hoe", 1, ::handleHoeInventoryUpdate)
-    override val gui = lazy(::HarvesterGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_BREAK, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
         inventory to NetworkConnectionType.EXTRACT,
-        shearInventory to NetworkConnectionType.BUFFER, axeInventory to NetworkConnectionType.BUFFER, hoeInventory to NetworkConnectionType.BUFFER
-    ) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT) }
+        shearInventory to NetworkConnectionType.INSERT, axeInventory to NetworkConnectionType.INSERT, hoeInventory to NetworkConnectionType.INSERT
+    ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     
     private var maxIdleTime = 0
     private var maxRange = 0
@@ -76,7 +74,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         set(value) {
             field = value
             updateRegion()
-            if (gui.isInitialized()) gui.value.updateRangeItems()
+            menuContainer.forEachMenu(HarvesterMenu::updateRangeItems)
         }
     private lateinit var harvestRegion: Region
     
@@ -92,10 +90,10 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     override fun reload() {
         super.reload()
         
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
         if (range > maxRange) range = maxRange
     }
     
@@ -119,7 +117,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 if (timePassed++ >= maxIdleTime) {
                     timePassed = 0
                     
-                    if (!GlobalValues.DROP_EXCESS_ON_GROUND && inventory.isFull()) return
+                    if (!GlobalValues.DROP_EXCESS_ON_GROUND && inventory.isFull) return
                     if (queuedBlocks.isEmpty()) loadBlocks()
                     harvestNextBlock()
                 }
@@ -158,7 +156,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                         else -> null
                     }
                     
-                    val tool = toolInventory?.getItemStack(0)
+                    val tool = toolInventory?.getItem(0)
                     if (!ProtectionManager.canBreak(this, tool, block.location).get()) {
                         // skip block if it is protected
                         tryAgain = true
@@ -167,8 +165,8 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                     
                     // get drops
                     val ctx = BlockBreakContext(block.pos, this, location, null, tool)
-                    var drops = PlantUtils.getHarvestDrops(ctx)!!.toMutableList()
-                    drops = TileEntityBreakBlockEvent(this, block, drops).also(::callEvent).drops
+                    val drops = PlantUtils.getHarvestDrops(ctx)!!.toMutableList()
+                    NovaEventFactory.callTileEntityBlockBreakEvent(this, block, drops)
                     
                     // check that the drops will fit in the inventory or can be dropped on the ground
                     if (!GlobalValues.DROP_EXCESS_ON_GROUND && !inventory.canHold(drops)) {
@@ -183,7 +181,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                             continue
                         }
                         
-                        toolInventory.setItemStack(SELF_UPDATE_REASON, 0, DamageableUtils.damageItem(tool))
+                        toolInventory.setItem(SELF_UPDATE_REASON, 0, DamageableUtils.damageItem(tool))
                     }
                     
                     // harvest the plant
@@ -203,20 +201,20 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         } while (tryAgain)
     }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = event.updateReason != SELF_UPDATE_REASON && event.isAdd
     }
     
-    private fun handleShearInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.newItemStack != null && event.newItemStack.type != Material.SHEARS
+    private fun handleShearInventoryUpdate(event: ItemPreUpdateEvent) {
+        event.isCancelled = event.newItem != null && event.newItem.type != Material.SHEARS
     }
     
-    private fun handleAxeInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.newItemStack != null && ToolCategory.ofItem(event.newItemStack) != ToolCategory.AXE
+    private fun handleAxeInventoryUpdate(event: ItemPreUpdateEvent) {
+        event.isCancelled = event.newItem != null && ToolCategory.ofItem(event.newItem) != VanillaToolCategories.AXE
     }
     
-    private fun handleHoeInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.newItemStack != null && ToolCategory.ofItem(event.newItemStack) != ToolCategory.HOE
+    private fun handleHoeInventoryUpdate(event: ItemPreUpdateEvent) {
+        event.isCancelled = event.newItem != null && ToolCategory.ofItem(event.newItem) != VanillaToolCategories.HOE
     }
     
     override fun handleRemoved(unload: Boolean) {
@@ -224,9 +222,10 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         VisualRegion.removeRegion(uuid)
     }
     
-    inner class HarvesterGUI : TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class HarvesterMenu(player: Player) : IndividualTileEntityMenu(player) {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@Harvester,
             listOf(
                 itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output",
@@ -239,7 +238,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| c v u s a h e |",
@@ -248,11 +247,11 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 "| i i i i i i e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
-            .addIngredient('c', OpenSideConfigItem(sideConfigGUI))
-            .addIngredient('v', VisualizeRegionItem(uuid) { harvestRegion })
-            .addIngredient('s', VISlotElement(shearInventory, 0, GUIMaterials.SHEARS_PLACEHOLDER.clientsideProvider))
-            .addIngredient('a', VISlotElement(axeInventory, 0, GUIMaterials.AXE_PLACEHOLDER.clientsideProvider))
-            .addIngredient('h', VISlotElement(hoeInventory, 0, GUIMaterials.HOE_PLACEHOLDER.clientsideProvider))
+            .addIngredient('c', OpenSideConfigItem(sideConfigGui))
+            .addIngredient('v', VisualizeRegionItem(player, uuid) { harvestRegion })
+            .addIngredient('s', shearInventory, GuiMaterials.SHEARS_PLACEHOLDER)
+            .addIngredient('a', axeInventory, GuiMaterials.AXE_PLACEHOLDER)
+            .addIngredient('h', hoeInventory, GuiMaterials.HOE_PLACEHOLDER)
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))

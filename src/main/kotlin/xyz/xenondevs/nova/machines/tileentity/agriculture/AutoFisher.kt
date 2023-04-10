@@ -1,11 +1,5 @@
 package xyz.xenondevs.nova.machines.tileentity.agriculture
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement.VISlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.builder.ItemBuilder
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import net.md_5.bungee.api.chat.TranslatableComponent
 import net.minecraft.world.entity.projectile.FishingHook
 import net.minecraft.world.level.storage.loot.BuiltInLootTables
@@ -15,33 +9,38 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.Vec3
 import org.bukkit.Material
+import org.bukkit.craftbukkit.v1_19_R3.util.RandomSourceWrapper
 import org.bukkit.enchantments.Enchantment
+import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
+import xyz.xenondevs.nova.item.DefaultGuiItems
 import xyz.xenondevs.nova.machines.registry.Blocks.AUTO_FISHER
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
-import xyz.xenondevs.nova.material.CoreGUIMaterial
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
+import xyz.xenondevs.nova.ui.addIngredient
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.EntityUtils
+import xyz.xenondevs.nova.util.MINECRAFT_SERVER
 import xyz.xenondevs.nova.util.bukkitMirror
-import xyz.xenondevs.nova.util.hasEmptySlot
 import xyz.xenondevs.nova.util.item.DamageableUtils
-import xyz.xenondevs.nova.util.minecraftServer
 import xyz.xenondevs.nova.util.nmsCopy
 import xyz.xenondevs.nova.util.serverLevel
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.util.*
 
 private val MAX_ENERGY = configReloadable { NovaConfig[AUTO_FISHER].getLong("capacity") }
@@ -52,14 +51,13 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     
     private val inventory = getInventory("inventory", 12, ::handleInventoryUpdate)
     private val fishingRodInventory = getInventory("fishingRod", 1, ::handleFishingRodInventoryUpdate)
-    override val gui = lazy(::AutoFisherGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.BOTTOM) }
     override val itemHolder = NovaItemHolder(
         this,
         inventory to NetworkConnectionType.EXTRACT,
-        fishingRodInventory to NetworkConnectionType.BUFFER
-    ) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM) }
+        fishingRodInventory to NetworkConnectionType.INSERT
+    ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.BOTTOM) }
     
     private var timePassed = 0
     private var maxIdleTime = 0
@@ -68,7 +66,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     private val level = world.serverLevel
     private val position = Vec3(centerLocation.x, location.y - 0.5, centerLocation.z)
     private val itemDropLocation = location.clone().add(0.0, 1.0, 0.0)
-    private val fakePlayer = EntityUtils.createFakePlayer(location, ownerUUID ?: UUID.randomUUID(), "AutoFisher")
+    private val fakePlayer = EntityUtils.createFakePlayer(location)
     
     init {
         reload()
@@ -76,7 +74,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     
     override fun reload() {
         super.reload()
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
     }
     
@@ -92,14 +90,14 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
                 fish()
             }
             
-            if (gui.isInitialized()) gui.value.idleBar.percentage = timePassed.toDouble() / maxIdleTime.toDouble()
+            menuContainer.forEachMenu<AutoFisherMenu> { it.idleBar.percentage = timePassed.toDouble() / maxIdleTime.toDouble() }
         }
     }
     
     private fun fish() {
         // Bukkit's LootTable API isn't applicable in this use case
         
-        val rodItem = fishingRodInventory.getItemStack(0)
+        val rodItem = fishingRodInventory.getItem(0)!!
         val luck = rodItem.enchantments[Enchantment.LUCK] ?: 0
         
         // the fake fishing hook is required for the "in_open_water" check as the
@@ -113,8 +111,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
             .withRandom(level.random)
             .withLuck(luck.toFloat())
         
-        val lootTable: LootTable = minecraftServer.lootTables.get(BuiltInLootTables.FISHING)
-        
+        val lootTable: LootTable = MINECRAFT_SERVER.lootTables.get(BuiltInLootTables.FISHING)
         val list = lootTable.getRandomItems(contextBuilder.create(LootContextParamSets.FISHING))
         
         list.stream()
@@ -132,21 +129,22 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     }
     
     private fun useRod() {
-        val itemStack = fishingRodInventory.getItemStack(0)!!
-        fishingRodInventory.setItemStack(SELF_UPDATE_REASON, 0, DamageableUtils.damageItem(itemStack))
+        val itemStack = fishingRodInventory.getItem(0)!!
+        fishingRodInventory.setItem(SELF_UPDATE_REASON, 0, DamageableUtils.damageItem(itemStack))
     }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = event.updateReason != SELF_UPDATE_REASON && event.isAdd
     }
     
-    private fun handleFishingRodInventoryUpdate(event: ItemUpdateEvent) {
-        event.isCancelled = event.isAdd && event.newItemStack.type != Material.FISHING_ROD
+    private fun handleFishingRodInventoryUpdate(event: ItemPreUpdateEvent) {
+        event.isCancelled = event.isAdd && event.newItem.type != Material.FISHING_ROD
     }
     
-    inner class AutoFisherGUI : TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class AutoFisherMenu : GlobalTileEntityMenu() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@AutoFisher,
             listOf(
                 itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default",
@@ -156,12 +154,12 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         )
         
         val idleBar = object : VerticalBar(height = 3) {
-            override val barMaterial = CoreGUIMaterial.BAR_GREEN
+            override val barItem = DefaultGuiItems.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
                 itemBuilder.setDisplayName(TranslatableComponent("menu.machines.auto_fisher.idle", maxIdleTime - timePassed))
         }
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s u # # f p e |",
@@ -169,8 +167,8 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
                 "| i i i i # p e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
-            .addIngredient('f', VISlotElement(fishingRodInventory, 0, GUIMaterials.FISHING_ROD_PLACEHOLDER.clientsideProvider))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
+            .addIngredient('f', fishingRodInventory, GuiMaterials.FISHING_ROD_PLACEHOLDER)
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .addIngredient('p', idleBar)

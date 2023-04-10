@@ -1,11 +1,6 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.ItemProvider
-import de.studiocode.invui.item.impl.BaseItem
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
+import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.entity.EquipmentSlot
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -13,34 +8,40 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.impl.AbstractItem
+import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
+import xyz.xenondevs.nova.item.NovaItem
 import xyz.xenondevs.nova.machines.gui.LeftRightFluidProgressItem
-import xyz.xenondevs.nova.machines.registry.Blocks
 import xyz.xenondevs.nova.machines.registry.Blocks.COBBLESTONE_GENERATOR
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
-import xyz.xenondevs.nova.material.ItemNovaMaterial
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
+import xyz.xenondevs.nova.machines.registry.Models
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.container.FluidContainer
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.axis
-import xyz.xenondevs.nova.util.particleBuilder
+import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
-import xyz.xenondevs.particle.ParticleEffect
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.getFluidContainer
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -56,8 +57,7 @@ private val MB_PER_TICK by configReloadable { NovaConfig[COBBLESTONE_GENERATOR].
 
 class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::CobblestoneGeneratorGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.FLUID)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.FLUID)
     
     private val inventory = getInventory("inventory", 3, ::handleInventoryUpdate)
     private val waterTank = getFluidContainer("water", setOf(FluidType.WATER), WATER_CAPACITY, 0, ::updateWaterLevel, upgradeHolder)
@@ -76,7 +76,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private val waterLevel = FakeArmorStand(centerLocation) { _, data -> data.isInvisible = true; data.isMarker = true }
     private val lavaLevel = FakeArmorStand(centerLocation) { _, data -> data.isInvisible = true; data.isMarker = true }
     
-    private val particleEffect = particleBuilder(ParticleEffect.SMOKE_LARGE) {
+    private val particleEffect = particle(ParticleTypes.LARGE_SMOKE) {
         location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
         offset(getFace(BlockSide.RIGHT).axis, 0.15f)
         amount(5)
@@ -91,13 +91,13 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     
     override fun reload() {
         super.reload()
-        mbPerTick = (MB_PER_TICK * upgradeHolder.getValue(UpgradeType.SPEED)).roundToLong()
+        mbPerTick = (MB_PER_TICK * upgradeHolder.getValue(UpgradeTypes.SPEED)).roundToLong()
     }
     
     private fun updateWaterLevel() {
         val item = if (!waterTank.isEmpty()) {
             val state = getFluidState(waterTank)
-            Blocks.COBBLESTONE_GENERATOR_WATER_LEVELS.clientsideProviders[state].get()
+            Models.COBBLESTONE_GENERATOR_WATER_LEVELS.clientsideProviders[state].get()
         } else null
         waterLevel.setEquipment(EquipmentSlot.HEAD, item, true)
     }
@@ -105,7 +105,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private fun updateLavaLevel() {
         val item = if (!lavaTank.isEmpty()) {
             val state = getFluidState(lavaTank)
-            Blocks.COBBLESTONE_GENERATOR_LAVA_LEVELS.clientsideProviders[state].get()
+            Models.COBBLESTONE_GENERATOR_LAVA_LEVELS.clientsideProviders[state].get()
         } else null
         lavaLevel.setEquipment(EquipmentSlot.HEAD, item, true)
     }
@@ -136,14 +136,14 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
                 currentMode = mode
                 
                 playSoundEffect(Sound.BLOCK_LAVA_EXTINGUISH, 0.1f, Random.nextDouble(0.5, 1.95).toFloat())
-                particleEffect.display(getViewers())
+                particleEffect.sendTo(getViewers())
             }
             
-            if (gui.isInitialized()) gui.value.progressItem.percentage = mbUsed / 1000.0
+            menuContainer.forEachMenu<CobblestoneGeneratorMenu> { it.progressItem.percentage = mbUsed / 1000.0 }
         }
     }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = !event.isRemove && event.updateReason != SELF_UPDATE_REASON
     }
     
@@ -158,9 +158,10 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
         storeData("mode", mode)
     }
     
-    inner class CobblestoneGeneratorGUI : TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class CobblestoneGeneratorMenu : GlobalTileEntityMenu() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@CobblestoneGenerator,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output"),
             listOf(waterTank to "container.nova.water_tank", lavaTank to "container.nova.lava_tank"),
@@ -169,14 +170,14 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
         
         val progressItem = LeftRightFluidProgressItem()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| w l # i # s e |",
                 "| w l > i # u e |",
                 "| w l # i # m e |",
                 "3 - - - - - - - 4")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('m', ChangeModeItem())
             .addIngredient('i', inventory)
@@ -186,7 +187,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
             .addIngredient('e', EnergyBar(3, energyHolder))
             .build()
         
-        private inner class ChangeModeItem : BaseItem() {
+        private inner class ChangeModeItem : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider =
                 mode.uiItem.clientsideProvider
@@ -204,10 +205,10 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
         
     }
     
-    enum class Mode(val takeWater: Boolean, val takeLava: Boolean, val product: ItemStack, val uiItem: ItemNovaMaterial) {
-        COBBLESTONE(false, false, ItemStack(Material.COBBLESTONE), GUIMaterials.COBBLESTONE_MODE_BTN),
-        STONE(true, false, ItemStack(Material.STONE), GUIMaterials.STONE_MODE_BTN),
-        OBSIDIAN(false, true, ItemStack(Material.OBSIDIAN), GUIMaterials.OBSIDIAN_MODE_BTN)
+    enum class Mode(val takeWater: Boolean, val takeLava: Boolean, val product: ItemStack, val uiItem: NovaItem) {
+        COBBLESTONE(false, false, ItemStack(Material.COBBLESTONE), GuiMaterials.COBBLESTONE_MODE_BTN),
+        STONE(true, false, ItemStack(Material.STONE), GuiMaterials.STONE_MODE_BTN),
+        OBSIDIAN(false, true, ItemStack(Material.OBSIDIAN), GuiMaterials.OBSIDIAN_MODE_BTN)
     }
     
 }

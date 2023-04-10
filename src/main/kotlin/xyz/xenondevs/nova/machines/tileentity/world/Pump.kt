@@ -1,35 +1,32 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
-import de.studiocode.invui.item.impl.BaseItem
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
+import xyz.xenondevs.commons.collections.rotateRight
+import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
 import xyz.xenondevs.nova.machines.registry.Blocks.PUMP
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.TileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.tileentity.network.fluid.holder.NovaFluidHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
@@ -40,10 +37,12 @@ import xyz.xenondevs.nova.util.VERTICAL_FACES
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.isSourceFluid
 import xyz.xenondevs.nova.util.item.playPlaceSoundEffect
-import xyz.xenondevs.nova.util.rotateRight
 import xyz.xenondevs.nova.util.sourceFluidType
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.getFluidContainer
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.util.*
 
 private val ENERGY_CAPACITY = configReloadable { NovaConfig[PUMP].getLong("energy_capacity") }
@@ -58,12 +57,11 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[PUMP].getInt("range.d
 
 class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::PumpGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE, UpgradeType.FLUID)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE, UpgradeTypes.FLUID)
     
     private val fluidTank = getFluidContainer("tank", hashSetOf(FluidType.WATER, FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
     
-    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, null, upgradeHolder = upgradeHolder) { createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.TOP) }
+    override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, upgradeHolder = upgradeHolder) { createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.TOP) }
     override val fluidHolder = NovaFluidHolder(this, fluidTank to NetworkConnectionType.EXTRACT) { createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.TOP) }
     
     private var maxIdleTime = 0
@@ -76,7 +74,7 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
         set(value) {
             field = value
             updateRegion()
-            if (gui.isInitialized()) gui.value.updateRangeItems()
+            menuContainer.forEachMenu(PumpMenu::updateRangeItems)
         }
     private lateinit var region: Region
     
@@ -91,10 +89,10 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
     override fun reload() {
         super.reload()
         
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (idleTime > maxIdleTime) idleTime = maxIdleTime
         
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
         if (maxRange < range) range = maxRange
     }
     
@@ -216,9 +214,10 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
         storeData("mode", mode)
     }
     
-    inner class PumpGUI : TileEntity.TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class PumpMenu(player: Player) : IndividualTileEntityMenu(player) {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@Pump,
             fluidContainerNames = listOf(fluidTank to "container.nova.fluid_tank"),
             openPrevious = ::openWindow
@@ -226,16 +225,16 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s p # f # e M |",
                 "| u n # f # e # |",
                 "| v m # f # e # |",
                 "3 - - - - - - - 4")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
-            .addIngredient('v', VisualizeRegionItem(uuid) { region })
+            .addIngredient('v', VisualizeRegionItem(player, uuid) { region })
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))
             .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
@@ -246,10 +245,10 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
         
         fun updateRangeItems() = rangeItems.forEach(Item::notifyWindows)
         
-        private inner class PumpModeItem : BaseItem() {
+        private inner class PumpModeItem : AbstractItem() {
             
             override fun getItemProvider() =
-                (if (mode == PumpMode.PUMP) GUIMaterials.PUMP_MODE_BTN else GUIMaterials.PUMP_REPLACE_MODE_BTN).clientsideProvider
+                (if (mode == PumpMode.PUMP) GuiMaterials.PUMP_MODE_BTN else GuiMaterials.PUMP_REPLACE_MODE_BTN).clientsideProvider
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) {
                 mode = if (mode == PumpMode.PUMP) PumpMode.REPLACE else PumpMode.PUMP

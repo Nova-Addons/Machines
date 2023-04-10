@@ -2,15 +2,15 @@ import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "xyz.xenondevs"
-version = "0.3.2"
+version = "0.4-RC"
 
 val mojangMapped = System.getProperty("mojang-mapped") != null
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("jvm") version "1.7.22"
+    kotlin("jvm") version "1.8.20"
     id("xyz.xenondevs.specialsource-gradle-plugin") version "1.0.0"
-    id("xyz.xenondevs.string-remapper-gradle-plugin") version "1.0.0"
+    id("xyz.xenondevs.string-remapper-gradle-plugin") version "1.0"
     id("xyz.xenondevs.nova.nova-gradle-plugin") version libs.versions.nova
 }
 
@@ -24,6 +24,7 @@ repositories {
 dependencies {
     implementation(libs.nova)
     implementation(variantOf(libs.spigot) { classifier("remapped-mojang") })
+    implementation("xyz.xenondevs:simple-upgrades:1.0-SNAPSHOT")
 }
 
 addon {
@@ -32,6 +33,7 @@ addon {
     version.set(project.version.toString())
     novaVersion.set(libs.versions.nova)
     main.set("xyz.xenondevs.nova.machines.Machines")
+    depend.add("simple_upgrades")
     authors.set(listOf("StudioCode", "ByteZ", "Javahase"))
     spigotResourceId.set(102712)
 }
@@ -67,5 +69,6 @@ tasks {
         
         from(File(File(project.buildDir, "libs"), "${project.name}-${project.version}.jar"))
         into(System.getProperty("outDir")?.let(::File) ?: project.buildDir)
+        rename { it.replace(project.name, addon.get().addonName.get()) }
     }
 }

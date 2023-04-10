@@ -1,47 +1,46 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
-import de.studiocode.invui.virtualinventory.event.PlayerUpdateReason
 import net.minecraft.world.SimpleContainer
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.item.crafting.SmeltingRecipe
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.commons.provider.mutable.map
+import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.inventory.event.PlayerUpdateReason
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
-import xyz.xenondevs.nova.data.provider.map
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.ProgressArrowItem
 import xyz.xenondevs.nova.machines.registry.Blocks.ELECTRIC_FURNACE
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
-import xyz.xenondevs.nova.util.bukkitStack
+import xyz.xenondevs.nova.util.MINECRAFT_SERVER
+import xyz.xenondevs.nova.util.NMSUtils.REGISTRY_ACCESS
+import xyz.xenondevs.nova.util.bukkitCopy
 import xyz.xenondevs.nova.util.intValue
-import xyz.xenondevs.nova.util.minecraftServer
 import xyz.xenondevs.nova.util.namespacedKey
-import xyz.xenondevs.nova.util.nmsStack
+import xyz.xenondevs.nova.util.nmsCopy
 import xyz.xenondevs.nova.util.resourceLocation
 import xyz.xenondevs.nova.util.serverLevel
 import xyz.xenondevs.nova.util.spawnExpOrb
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 
 private fun getRecipe(input: ItemStack, world: World): SmeltingRecipe? {
-    return minecraftServer.recipeManager.getAllRecipesFor(RecipeType.SMELTING)
-        .firstOrNull { it.matches(SimpleContainer(input.nmsStack), world.serverLevel) }
+    return MINECRAFT_SERVER.recipeManager.getAllRecipesFor(RecipeType.SMELTING)
+        .firstOrNull { it.matches(SimpleContainer(input.nmsCopy), world.serverLevel) }
 }
 
 private val MAX_ENERGY = configReloadable { NovaConfig[ELECTRIC_FURNACE].getLong("capacity") }
@@ -50,21 +49,19 @@ private val COOK_SPEED by configReloadable { NovaConfig[ELECTRIC_FURNACE].getInt
 
 class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { ElectricFurnaceGUI() }
-    
     private val inputInventory = getInventory("input", 1, ::handleInputInventoryUpdate)
     private val outputInventory = getInventory("output", 1, ::handleOutputInventoryUpdate)
     
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
-        inputInventory to NetworkConnectionType.BUFFER,
+        inputInventory to NetworkConnectionType.INSERT,
         outputInventory to NetworkConnectionType.EXTRACT
-    ) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT) }
+    ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     
     private var currentRecipe: SmeltingRecipe? by storedValue<NamespacedKey>("currentRecipe").map(
-        { minecraftServer.recipeManager.byKey(it.resourceLocation).orElse(null) as? SmeltingRecipe },
+        { MINECRAFT_SERVER.recipeManager.byKey(it.resourceLocation).orElse(null) as? SmeltingRecipe },
         { it.id.namespacedKey }
     )
     private var timeCooked: Int by storedValue("timeCooked") { 0 }
@@ -86,28 +83,28 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     
     override fun reload() {
         super.reload()
-        cookSpeed = (COOK_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        cookSpeed = (COOK_SPEED * upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
     }
     
-    private fun handleInputInventoryUpdate(event: ItemUpdateEvent) {
-        if (event.newItemStack != null) {
-            val itemStack = event.newItemStack
+    private fun handleInputInventoryUpdate(event: ItemPreUpdateEvent) {
+        if (event.newItem != null) {
+            val itemStack = event.newItem
             if (getRecipe(itemStack, world) == null) event.isCancelled = true
         }
     }
     
-    private fun handleOutputInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleOutputInventoryUpdate(event: ItemPreUpdateEvent) {
         val updateReason = event.updateReason
         if (updateReason == SELF_UPDATE_REASON) return
         
         if (event.isRemove) {
             if (updateReason is PlayerUpdateReason) {
                 val player = updateReason.player
-                if (event.newItemStack == null) { // took all items
+                if (event.newItem == null) { // took all items
                     experience -= pos.block.spawnExpOrb(experience.toInt(), player.location)
                 } else {
                     val amount = event.removedAmount
-                    val experiencePerItem = experience / event.previousItemStack.amount
+                    val experiencePerItem = experience / event.previousItem.amount
                     val experience = amount * experiencePerItem
                     
                     this.experience -= pos.block.spawnExpOrb(experience.toInt(), player.location)
@@ -121,10 +118,10 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     override fun handleTick() {
         if (energyHolder.energy >= energyHolder.energyConsumption) {
             if (currentRecipe == null) {
-                val item = inputInventory.getItemStack(0)
+                val item = inputInventory.getItem(0)
                 if (item != null) {
                     val recipe = getRecipe(item, world)
-                    if (recipe != null && outputInventory.canHold(recipe.resultItem.bukkitStack)) {
+                    if (recipe != null && outputInventory.canHold(recipe.getResultItem(REGISTRY_ACCESS).bukkitCopy)) {
                         currentRecipe = recipe
                         inputInventory.addItemAmount(null, 0, -1)
                         
@@ -139,22 +136,23 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 timeCooked += cookSpeed
                 
                 if (timeCooked >= currentRecipe.cookingTime) {
-                    outputInventory.addItem(SELF_UPDATE_REASON, currentRecipe.resultItem.bukkitStack)
+                    outputInventory.addItem(SELF_UPDATE_REASON, currentRecipe.getResultItem(REGISTRY_ACCESS).bukkitCopy)
                     experience += currentRecipe.experience
                     timeCooked = 0
                     this.currentRecipe = null
                 }
                 
-                if (gui.isInitialized()) gui.value.updateProgress()
+                menuContainer.forEachMenu(ElectricFurnaceMenu::updateProgress)
             }
         } else active = false
     }
     
-    inner class ElectricFurnaceGUI : TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class ElectricFurnaceMenu : GlobalTileEntityMenu() {
         
         private val progressItem = ProgressArrowItem()
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@ElectricFurnace,
             listOf(
                 itemHolder.getNetworkedInventory(inputInventory) to "inventory.nova.input",
@@ -163,17 +161,17 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s u # # # # e |",
                 "| i # > # o # e |",
                 "| # # # # # # e |",
                 "3 - - - - - - - 4")
-            .addIngredient('i', SlotElement.VISlotElement(inputInventory, 0))
-            .addIngredient('o', SlotElement.VISlotElement(outputInventory, 0))
+            .addIngredient('i', inputInventory)
+            .addIngredient('o', outputInventory)
             .addIngredient('>', progressItem)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .build()

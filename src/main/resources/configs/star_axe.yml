@@ -1,4 +1,4 @@
-tool_level: minecraft:iron
+tool_tier: minecraft:iron
 tool_category: minecraft:axe
 break_speed: 20
 attack_damage: 9

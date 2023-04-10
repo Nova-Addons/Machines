@@ -1,32 +1,31 @@
 package xyz.xenondevs.nova.machines.tileentity.energy
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.item.behavior.Chargeable
 import xyz.xenondevs.nova.machines.registry.Blocks.WIRELESS_CHARGER
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
-import xyz.xenondevs.nova.util.item.novaMaterial
+import xyz.xenondevs.nova.util.item.novaItem
 import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
-import de.studiocode.invui.item.Item as UIItem
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
+import xyz.xenondevs.invui.item.Item as UIItem
 
 private val MAX_ENERGY = configReloadable { NovaConfig[WIRELESS_CHARGER].getLong("capacity") }
 private val CHARGE_SPEED = configReloadable { NovaConfig[WIRELESS_CHARGER].getLong("charge_speed") }
@@ -36,8 +35,7 @@ private val DEFAULT_RANGE by configReloadable { NovaConfig[WIRELESS_CHARGER].get
 
 class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy(::WirelessChargerGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.ENERGY, UpgradeType.RANGE)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, CHARGE_SPEED, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     
     private var maxRange = 0
@@ -45,7 +43,7 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         set(value) {
             field = value
             updateRegion()
-            if (gui.isInitialized()) gui.value.updateRangeItems()
+            menuContainer.forEachMenu(WirelessChargerMenu::updateRangeItems)
         }
     
     private lateinit var region: Region
@@ -57,7 +55,7 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     
     override fun reload() {
         super.reload()
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeType.RANGE)
+        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
         if (maxRange < range) range = maxRange
     }
     
@@ -96,7 +94,7 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     }
     
     private fun chargeItemStack(alreadyTransferred: Long, itemStack: ItemStack?): Long {
-        val chargeable = itemStack?.novaMaterial?.novaItem?.getBehavior(Chargeable::class)
+        val chargeable = itemStack?.novaItem?.getBehavior(Chargeable::class)
         
         if (chargeable != null) {
             val maxEnergy = chargeable.options.maxEnergy
@@ -117,24 +115,25 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         VisualRegion.removeRegion(uuid)
     }
     
-    inner class WirelessChargerGUI : TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class WirelessChargerMenu(player: Player) : IndividualTileEntityMenu(player) {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@WirelessCharger,
             ::openWindow
         )
         
         private val rangeItems = ArrayList<UIItem>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # e # # p |",
                 "| v # # e # # n |",
                 "| u # # e # # m |",
                 "3 - - - - - - - 4")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
-            .addIngredient('v', VisualizeRegionItem(uuid) { region })
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
+            .addIngredient('v', VisualizeRegionItem(player, uuid) { region })
             .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
             .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))

@@ -1,28 +1,27 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
+import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.registry.Blocks.CHUNK_LOADER
 import xyz.xenondevs.nova.tileentity.ChunkLoadManager
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.DisplayNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.util.getSurroundingChunks
 import xyz.xenondevs.nova.world.pos
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 
 private val MAX_ENERGY = configReloadable { NovaConfig[CHUNK_LOADER].getLong("capacity") }
 private val ENERGY_PER_CHUNK by configReloadable { NovaConfig[CHUNK_LOADER].getLong("energy_per_chunk") }
@@ -30,10 +29,8 @@ private val MAX_RANGE by configReloadable { NovaConfig[CHUNK_LOADER].getInt("max
 
 class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { ChunkLoaderGUI() }
-    
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.ENERGY, UpgradeType.EFFICIENCY)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, null, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.ENERGY, UpgradeTypes.EFFICIENCY)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, upgradeHolder = upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     
     private var range = retrieveData("range") { 0 }
     private var chunks = chunk.getSurroundingChunks(range, true)
@@ -47,7 +44,7 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     
     override fun reload() {
         super.reload()
-        energyPerTick = (ENERGY_PER_CHUNK * chunks.size / upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toInt()
+        energyPerTick = (ENERGY_PER_CHUNK * chunks.size / upgradeHolder.getValue(UpgradeTypes.EFFICIENCY)).toInt()
     }
     
     override fun saveData() {
@@ -88,21 +85,22 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
         if (!unload) setChunksForceLoaded(false)
     }
     
-    inner class ChunkLoaderGUI : TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class ChunkLoaderMenu : GlobalTileEntityMenu() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@ChunkLoader,
             ::openWindow
         )
         
         private val rangeItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - 2 e",
                 "| u # m n p # | e",
                 "3 - - - - - - 4 e")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('p', AddNumberItem({ 0..MAX_RANGE }, { range }, ::setRange).also(rangeItems::add))
             .addIngredient('m', RemoveNumberItem({ 0..MAX_RANGE }, { range }, ::setRange).also(rangeItems::add))
             .addIngredient('n', DisplayNumberItem { range + 1 }.also(rangeItems::add))

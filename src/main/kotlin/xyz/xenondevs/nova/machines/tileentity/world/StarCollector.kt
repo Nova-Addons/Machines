@@ -1,44 +1,45 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.builder.ItemBuilder
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
-import net.md_5.bungee.api.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.entity.EquipmentSlot
 import org.bukkit.Bukkit
 import org.bukkit.util.Vector
+import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.item.builder.ItemBuilder
+import xyz.xenondevs.invui.item.builder.setDisplayName
+import xyz.xenondevs.nmsutils.particle.color
+import xyz.xenondevs.nmsutils.particle.dustTransition
+import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
-import xyz.xenondevs.nova.data.resources.model.data.ArmorStandBlockModelData
+import xyz.xenondevs.nova.data.resources.model.data.DisplayEntityBlockModelData
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
+import xyz.xenondevs.nova.item.DefaultGuiItems
 import xyz.xenondevs.nova.machines.registry.Blocks.STAR_COLLECTOR
 import xyz.xenondevs.nova.machines.registry.Items
-import xyz.xenondevs.nova.material.CoreGUIMaterial
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.Vector
 import xyz.xenondevs.nova.util.calculateYaw
 import xyz.xenondevs.nova.util.center
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.dropItem
-import xyz.xenondevs.nova.util.isFull
-import xyz.xenondevs.nova.util.particle
-import xyz.xenondevs.nova.util.particleBuilder
+import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
-import xyz.xenondevs.particle.ParticleEffect
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.awt.Color
 
 private val MAX_ENERGY = configReloadable { NovaConfig[STAR_COLLECTOR].getLong("capacity") }
@@ -52,8 +53,7 @@ private const val STAR_PARTICLE_DISTANCE_PER_TICK = 0.75
 class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     private val inventory = getInventory("inventory", 1, ::handleInventoryUpdate)
-    override val gui: Lazy<StarCollectorGUI> = lazy(::StarCollectorGUI)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) {
         createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.BOTTOM)
     }
@@ -71,13 +71,13 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     private val rod = FakeArmorStand(location.clone().center().apply { y -= 1 }, true) { ast, data ->
         data.isMarker = true
         data.isInvisible = true
-        ast.setEquipment(EquipmentSlot.HEAD, (material.block as ArmorStandBlockModelData)[1].get(), false)
+        ast.setEquipment(EquipmentSlot.HEAD, (block.model as DisplayEntityBlockModelData)[1].get(), false)
     }
     
-    private val particleTask = createParticleTask(listOf(
-        particle(ParticleEffect.DUST_COLOR_TRANSITION) {
+    private val particleTask = createPacketTask(listOf(
+        particle(ParticleTypes.DUST_COLOR_TRANSITION) {
             location(location.clone().center().apply { y += 0.2 })
-            dustFade(Color(132, 0, 245), Color(196, 128, 217), 1f)
+            dustTransition(Color(132, 0, 245), Color(196, 128, 217), 1f)
             offset(0.25, 0.1, 0.25)
             amount(3)
         }
@@ -90,8 +90,8 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     override fun reload() {
         super.reload()
         
-        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
-        maxCollectionTime = (COLLECTION_TIME / upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
+        maxCollectionTime = (COLLECTION_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
     }
     
     override fun handleTick() {
@@ -101,10 +101,10 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
     
     private fun handleNightTick() {
         if (timeSpentCollecting != -1) {
-            if (!GlobalValues.DROP_EXCESS_ON_GROUND && inventory.isFull()) return
+            if (!GlobalValues.DROP_EXCESS_ON_GROUND && inventory.isFull) return
             if (energyHolder.energy >= energyHolder.specialEnergyConsumption) {
                 energyHolder.energy -= energyHolder.specialEnergyConsumption
-                handleCollectionTick()
+                handleCollectionTick() 
             }
         } else if (energyHolder.energy >= energyHolder.energyConsumption) {
             energyHolder.energy -= energyHolder.energyConsumption
@@ -123,20 +123,19 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             if (GlobalValues.DROP_EXCESS_ON_GROUND && leftOver != 0) location.dropItem(item)
             
             particleTask.stop()
-            rod.setEquipment(EquipmentSlot.HEAD, (material.block as ArmorStandBlockModelData)[1].get(), true)
+            rod.setEquipment(EquipmentSlot.HEAD, (block.model as DisplayEntityBlockModelData)[1].get(), true)
         } else {
             val percentageCollected = (maxCollectionTime - timeSpentCollecting) / maxCollectionTime.toDouble()
             val particleDistance = percentageCollected * (STAR_PARTICLE_DISTANCE_PER_TICK * maxCollectionTime)
             val particleLocation = rodLocation.clone().add(particleVector.clone().multiply(particleDistance))
             
-            particleBuilder(ParticleEffect.REDSTONE) {
+            particle(ParticleTypes.DUST) {
                 location(particleLocation)
                 color(Color(255, 255, 255))
-            }.display(getViewers())
+            }.sendTo(getViewers())
         }
         
-        if (gui.isInitialized())
-            gui.value.collectionBar.percentage = timeSpentCollecting / maxCollectionTime.toDouble()
+        menuContainer.forEachMenu<StarCollectorMenu> { it.collectionBar.percentage = timeSpentCollecting / maxCollectionTime.toDouble() }
     }
     
     private fun handleIdleTick() {
@@ -146,14 +145,13 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
             
             particleTask.start()
             
-            rod.setEquipment(EquipmentSlot.HEAD, (material.block as ArmorStandBlockModelData)[2].get(), true)
+            rod.setEquipment(EquipmentSlot.HEAD, (block.model as DisplayEntityBlockModelData)[2].get(), true)
             
             rodLocation.yaw = rod.location.yaw
             particleVector = Vector(rod.location.yaw, -65F)
         } else rod.teleport { this.yaw += 2F }
         
-        if (gui.isInitialized())
-            gui.value.idleBar.percentage = timeSpentIdle / maxIdleTime.toDouble()
+        menuContainer.forEachMenu<StarCollectorMenu> { it.idleBar.percentage = timeSpentIdle / maxIdleTime.toDouble() }
     }
     
     private fun handleDayTick() {
@@ -174,7 +172,7 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         }
     }
     
-    private fun handleInventoryUpdate(event: ItemUpdateEvent) {
+    private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = event.updateReason != SELF_UPDATE_REASON && !event.isRemove
     }
     
@@ -183,37 +181,38 @@ class StarCollector(blockState: NovaTileEntityState) : NetworkedTileEntity(block
         rod.remove()
     }
     
-    inner class StarCollectorGUI : TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class StarCollectorMenu : GlobalTileEntityMenu() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@StarCollector,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.output"),
             ::openWindow
         )
         
         val collectionBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGUIMaterial.BAR_GREEN
+            override val barItem = DefaultGuiItems.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder): ItemBuilder {
                 if (timeSpentCollecting != -1)
-                    itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.star_collector.collection"))
+                    itemBuilder.setDisplayName(Component.translatable( "menu.machines.star_collector.collection", NamedTextColor.GRAY))
                 return itemBuilder
             }
         }
         
         val idleBar = object : VerticalBar(3) {
-            override val barMaterial = CoreGUIMaterial.BAR_GREEN
+            override val barItem = DefaultGuiItems.BAR_GREEN
             override fun modifyItemBuilder(itemBuilder: ItemBuilder) =
-                itemBuilder.setDisplayName(localized(ChatColor.GRAY, "menu.machines.star_collector.idle"))
+                itemBuilder.setDisplayName(Component.translatable("menu.machines.star_collector.idle", NamedTextColor.GRAY))
         }
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s # # # c p e |",
                 "| u # i # c p e |",
                 "| # # # # c p e |",
                 "3 - - - - - - - 4")
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('i', inventory)
             .addIngredient('c', collectionBar)

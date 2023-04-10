@@ -1,18 +1,15 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.SlotElement.VISlotElement
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
-import de.studiocode.invui.item.ItemProvider
-import de.studiocode.invui.item.impl.BaseItem
-import de.studiocode.invui.virtualinventory.event.ItemUpdateEvent
 import org.bukkit.NamespacedKey
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
+import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
+import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.ConversionNovaRecipe
@@ -21,19 +18,20 @@ import xyz.xenondevs.nova.data.recipe.RecipeType
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.PressProgressItem
 import xyz.xenondevs.nova.machines.registry.Blocks.MECHANICAL_PRESS
-import xyz.xenondevs.nova.machines.registry.GUIMaterials
+import xyz.xenondevs.nova.machines.registry.GuiMaterials
 import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide.FRONT
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import kotlin.math.max
 
 private val MAX_ENERGY = configReloadable { NovaConfig[MECHANICAL_PRESS].getLong("capacity") }
@@ -47,18 +45,16 @@ private enum class PressType(val recipeType: RecipeType<out ConversionNovaRecipe
 
 class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { MechanicalPressGUI() }
-    
     private val inputInv = getInventory("input", 1, ::handleInputUpdate)
     private val outputInv = getInventory("output", 1, ::handleOutputUpdate)
     
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY)
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
     override val itemHolder = NovaItemHolder(
         this,
-        inputInv to NetworkConnectionType.BUFFER,
+        inputInv to NetworkConnectionType.INSERT,
         outputInv to NetworkConnectionType.EXTRACT
-    ) { createSideConfig(NetworkConnectionType.INSERT, FRONT) }
+    ) { createSideConfig(NetworkConnectionType.BUFFER, FRONT) }
     
     private var type: PressType = retrieveData("pressType") { PressType.PLATE }
     private var timeLeft: Int = retrieveData("pressTime") { 0 }
@@ -74,7 +70,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     
     override fun reload() {
         super.reload()
-        pressSpeed = (PRESS_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)).toInt()
+        pressSpeed = (PRESS_SPEED * upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
     }
     
     override fun handleTick() {
@@ -85,17 +81,17 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 energyHolder.energy -= energyHolder.energyConsumption
                 
                 if (timeLeft == 0) {
-                    outputInv.putItemStack(SELF_UPDATE_REASON, 0, currentRecipe!!.result)
+                    outputInv.putItem(SELF_UPDATE_REASON, 0, currentRecipe!!.result)
                     currentRecipe = null
                 }
                 
-                if (gui.isInitialized()) gui.value.updateProgress()
+                menuContainer.forEachMenu(MechanicalPressMenu::updateProgress)
             }
         }
     }
     
     private fun takeItem() {
-        val inputItem = inputInv.getItemStack(0)
+        val inputItem = inputInv.getItem(0)
         if (inputItem != null) {
             val recipe = RecipeManager.getConversionRecipeFor(type.recipeType, inputItem)
             if (recipe != null && outputInv.canHold(recipe.result)) {
@@ -106,16 +102,16 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         }
     }
     
-    private fun handleInputUpdate(event: ItemUpdateEvent) {
+    private fun handleInputUpdate(event: ItemPreUpdateEvent) {
         if (event.updateReason != SELF_UPDATE_REASON
-            && event.newItemStack != null
-            && RecipeManager.getConversionRecipeFor(type.recipeType, event.newItemStack) == null) {
+            && event.newItem != null
+            && RecipeManager.getConversionRecipeFor(type.recipeType, event.newItem) == null) {
             
             event.isCancelled = true
         }
     }
     
-    private fun handleOutputUpdate(event: ItemUpdateEvent) {
+    private fun handleOutputUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = !event.isRemove && event.updateReason != SELF_UPDATE_REASON
     }
     
@@ -127,12 +123,13 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     }
     
     
-    inner class MechanicalPressGUI : TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class MechanicalPressMenu : GlobalTileEntityMenu() {
         
         private val pressProgress = PressProgressItem()
         private val pressTypeItems = ArrayList<PressTypeItem>()
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@MechanicalPress,
             listOf(
                 itemHolder.getNetworkedInventory(inputInv) to "inventory.nova.input",
@@ -141,17 +138,17 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             ::openWindow
         )
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| p g # i # # e |",
                 "| # # # , # # e |",
                 "| s u # o # # e |",
                 "3 - - - - - - - 4")
-            .addIngredient('i', VISlotElement(inputInv, 0))
-            .addIngredient('o', VISlotElement(outputInv, 0))
+            .addIngredient('i', inputInv)
+            .addIngredient('o', outputInv)
             .addIngredient(',', pressProgress)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('p', PressTypeItem(PressType.PLATE).apply(pressTypeItems::add))
             .addIngredient('g', PressTypeItem(PressType.GEAR).apply(pressTypeItems::add))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
@@ -167,15 +164,15 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             pressProgress.percentage = if (timeLeft == 0) 0.0 else (recipeTime - timeLeft).toDouble() / recipeTime.toDouble()
         }
         
-        private inner class PressTypeItem(private val type: PressType) : BaseItem() {
+        private inner class PressTypeItem(private val type: PressType) : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 return if (type == PressType.PLATE) {
-                    if (this@MechanicalPress.type == PressType.PLATE) GUIMaterials.PLATE_BTN_OFF.createItemBuilder()
-                    else GUIMaterials.PLATE_BTN_ON.clientsideProvider
+                    if (this@MechanicalPress.type == PressType.PLATE) GuiMaterials.PLATE_BTN_OFF.createItemBuilder()
+                    else GuiMaterials.PLATE_BTN_ON.clientsideProvider
                 } else {
-                    if (this@MechanicalPress.type == PressType.GEAR) GUIMaterials.GEAR_BTN_OFF.createItemBuilder()
-                    else GUIMaterials.GEAR_BTN_ON.clientsideProvider
+                    if (this@MechanicalPress.type == PressType.GEAR) GuiMaterials.GEAR_BTN_OFF.createItemBuilder()
+                    else GuiMaterials.GEAR_BTN_ON.clientsideProvider
                 }
             }
             

@@ -1,13 +1,9 @@
 package xyz.xenondevs.nova.machines.tileentity.world
 
-import de.studiocode.invui.gui.GUI
-import de.studiocode.invui.gui.builder.GUIBuilder
-import de.studiocode.invui.gui.builder.guitype.GUIType
-import de.studiocode.invui.item.Item
-import de.studiocode.invui.item.ItemProvider
-import de.studiocode.invui.item.impl.BaseItem
-import net.md_5.bungee.api.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.md_5.bungee.api.chat.TranslatableComponent
+import net.minecraft.core.particles.ParticleTypes
 import org.bukkit.Axis
 import org.bukkit.Location
 import org.bukkit.OfflinePlayer
@@ -17,39 +13,40 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
-import xyz.xenondevs.nova.api.event.tileentity.TileEntityBreakBlockEvent
+import org.joml.Vector3f
+import xyz.xenondevs.invui.gui.Gui
+import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.builder.addLoreLines
+import xyz.xenondevs.invui.item.impl.AbstractItem
+import xyz.xenondevs.nmsutils.particle.block
+import xyz.xenondevs.nmsutils.particle.particle
+import xyz.xenondevs.nova.api.NovaEventFactory
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.integration.protection.ProtectionManager
+import xyz.xenondevs.nova.item.DefaultGuiItems
 import xyz.xenondevs.nova.machines.registry.Blocks.QUARRY
 import xyz.xenondevs.nova.machines.registry.Items
-import xyz.xenondevs.nova.material.CoreGUIMaterial
-import xyz.xenondevs.nova.tileentity.Model
-import xyz.xenondevs.nova.tileentity.MultiModel
 import xyz.xenondevs.nova.tileentity.NetworkedTileEntity
-import xyz.xenondevs.nova.tileentity.TileEntityManager
+import xyz.xenondevs.nova.tileentity.menu.TileEntityMenuClass
 import xyz.xenondevs.nova.tileentity.network.NetworkConnectionType
-import xyz.xenondevs.nova.tileentity.network.energy.holder.ConsumerEnergyHolder
 import xyz.xenondevs.nova.tileentity.network.item.holder.NovaItemHolder
 import xyz.xenondevs.nova.tileentity.upgrade.Upgradable
-import xyz.xenondevs.nova.tileentity.upgrade.UpgradeType
 import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
-import xyz.xenondevs.nova.ui.config.side.SideConfigGUI
+import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.ui.item.AddNumberItem
 import xyz.xenondevs.nova.ui.item.RemoveNumberItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.LocationUtils
 import xyz.xenondevs.nova.util.blockLocation
 import xyz.xenondevs.nova.util.breakTexture
-import xyz.xenondevs.nova.util.callEvent
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.concurrent.CombinedBooleanFuture
-import xyz.xenondevs.nova.util.data.addLoreLines
-import xyz.xenondevs.nova.util.data.localized
 import xyz.xenondevs.nova.util.getAllDrops
 import xyz.xenondevs.nova.util.getFullCuboid
 import xyz.xenondevs.nova.util.getNextBlockBelow
@@ -57,24 +54,26 @@ import xyz.xenondevs.nova.util.getRectangle
 import xyz.xenondevs.nova.util.getStraightLine
 import xyz.xenondevs.nova.util.hardness
 import xyz.xenondevs.nova.util.item.ToolUtils
-import xyz.xenondevs.nova.util.particleBuilder
 import xyz.xenondevs.nova.util.positionEquals
 import xyz.xenondevs.nova.util.remove
+import xyz.xenondevs.nova.util.sendTo
 import xyz.xenondevs.nova.util.serverTick
 import xyz.xenondevs.nova.util.setBreakStage
 import xyz.xenondevs.nova.world.block.BlockManager
 import xyz.xenondevs.nova.world.block.context.BlockBreakContext
+import xyz.xenondevs.nova.world.model.Model
+import xyz.xenondevs.nova.world.model.MovableMultiModel
+import xyz.xenondevs.nova.world.model.MultiModel
 import xyz.xenondevs.nova.world.pos
-import xyz.xenondevs.particle.ParticleEffect
+import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
+import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import java.util.concurrent.CompletableFuture
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
-private val SCAFFOLDING_STACKS = Items.SCAFFOLDING.let { mat ->
-    (1..mat.item.dataArray.lastIndex).map { mat.clientsideProviders[it].get() }
-}
+private val SCAFFOLDING_STACKS = Items.SCAFFOLDING.let { item -> (1..item.model.dataArray.lastIndex).map { item.clientsideProviders[it].get() } }
 private val FULL_HORIZONTAL = SCAFFOLDING_STACKS[0]
 private val FULL_VERTICAL = SCAFFOLDING_STACKS[1]
 private val CORNER_DOWN = SCAFFOLDING_STACKS[2]
@@ -101,10 +100,9 @@ private val ENERGY_PER_SQUARE_BLOCK by configReloadable { NovaConfig[QUARRY].get
 
 class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
-    override val gui = lazy { QuarryGUI() }
     private val inventory = getInventory("quarryInventory", 9)
-    override val upgradeHolder = getUpgradeHolder(UpgradeType.SPEED, UpgradeType.EFFICIENCY, UpgradeType.ENERGY, UpgradeType.RANGE)
-    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, null, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
+    override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
+    override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, upgradeHolder = upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
     override val itemHolder = NovaItemHolder(this, inventory to NetworkConnectionType.EXTRACT) { createSideConfig(NetworkConnectionType.EXTRACT, BlockSide.FRONT, BlockSide.RIGHT, BlockSide.BACK) }
     
     private val entityId = uuid.hashCode()
@@ -115,11 +113,11 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     private var energyPerTick by Delegates.notNull<Int>()
     
-    private val solidScaffolding = createMultiModel()
-    private val armX = createMultiModel()
-    private val armZ = createMultiModel()
-    private val armY = createMultiModel()
-    private val drill = createMultiModel()
+    private val solidScaffolding = MovableMultiModel()
+    private val armX = MovableMultiModel()
+    private val armZ = MovableMultiModel()
+    private val armY = MovableMultiModel()
+    private val drill = MovableMultiModel()
     
     private var maxSize = 0
     private var drillSpeedMultiplier = 0.0
@@ -169,7 +167,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     override fun handleInitialized(first: Boolean) {
         super.handleInitialized(first)
-    
+        
         updateBounds(first)
         pointerLocation = retrieveDataOrNull("pointerLocation") ?: Location(world, minX + 1.5, y - 2.0, minZ + 1.5)
         lastPointerLocation = retrieveDataOrNull("lastPointerLocation") ?: Location(world, 0.0, 0.0, 0.0)
@@ -181,9 +179,18 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         
         updateEnergyPerTick()
         
-        maxSize = MAX_SIZE + upgradeHolder.getValue(UpgradeType.RANGE)
-        drillSpeedMultiplier = DRILL_SPEED_MULTIPLIER * upgradeHolder.getValue(UpgradeType.SPEED)
-        moveSpeed = MOVE_SPEED * upgradeHolder.getValue(UpgradeType.SPEED)
+        maxSize = MAX_SIZE + upgradeHolder.getValue(UpgradeTypes.RANGE)
+        drillSpeedMultiplier = DRILL_SPEED_MULTIPLIER * upgradeHolder.getValue(UpgradeTypes.SPEED)
+        moveSpeed = MOVE_SPEED * upgradeHolder.getValue(UpgradeTypes.SPEED)
+    }
+    
+    override fun handleRemoved(unload: Boolean) {
+        super.handleRemoved(unload)
+        solidScaffolding.close()
+        armX.close()
+        armZ.close()
+        armY.close()
+        drill.close()
     }
     
     private fun updateBounds(checkPermission: Boolean): Boolean {
@@ -197,7 +204,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         
         if (owner == null || (checkPermission && !canBreak(owner!!, location, positions).get())) {
             if (sizeX == MIN_SIZE && sizeZ == MIN_SIZE) {
-                BlockManager.breakBlock(BlockBreakContext(pos, this, location))
+                BlockManager.breakBlockState(BlockBreakContext(pos, this, location))
                 return false
             } else resize(MIN_SIZE, MIN_SIZE)
         }
@@ -216,11 +223,11 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             pointerDestination = null
             pointerLocation = Location(world, minX + 1.5, y - 2.0, minZ + 1.5)
             
-            solidScaffolding.removeAllModels()
-            armX.removeAllModels()
-            armY.removeAllModels()
-            armZ.removeAllModels()
-            drill.removeAllModels()
+            solidScaffolding.clear()
+            armX.clear()
+            armY.clear()
+            armZ.clear()
+            drill.clear()
             
             createScaffolding()
         }
@@ -228,7 +235,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     private fun updateEnergyPerTick() {
         energyPerTick = ((BASE_ENERGY_CONSUMPTION + sizeX * sizeZ * ENERGY_PER_SQUARE_BLOCK)
-            * upgradeHolder.getValue(UpgradeType.SPEED) / upgradeHolder.getValue(UpgradeType.EFFICIENCY)).toInt()
+            * upgradeHolder.getValue(UpgradeTypes.SPEED) / upgradeHolder.getValue(UpgradeTypes.EFFICIENCY)).toInt()
     }
     
     override fun saveData() {
@@ -321,8 +328,8 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         
         if (drillProgress >= 1) { // is done drilling
             val ctx = BlockBreakContext(block.pos, this, location, BlockFace.UP)
-            var drops = block.getAllDrops(ctx).toMutableList()
-            drops = TileEntityBreakBlockEvent(this, block, drops).also(::callEvent).drops
+            val drops = block.getAllDrops(ctx).toMutableList()
+            NovaEventFactory.callTileEntityBlockBreakEvent(this, block, drops)
             
             if (!GlobalValues.DROP_EXCESS_ON_GROUND && !inventory.canHold(drops))
                 return
@@ -350,26 +357,30 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         val pointerLocation = pointerLocation.clone()
         
         if (force || lastPointerLocation.z != pointerLocation.z)
-            armX.useArmorStands { it.teleport { z = pointerLocation.z } }
+            armX.use { it.teleport { z = pointerLocation.z } }
         if (force || lastPointerLocation.x != pointerLocation.x)
-            armZ.useArmorStands { it.teleport { x = pointerLocation.x } }
+            armZ.use { it.teleport { x = pointerLocation.x } }
         if (force || lastPointerLocation.x != pointerLocation.x || lastPointerLocation.z != pointerLocation.z)
-            armY.useArmorStands { it.teleport { x = pointerLocation.x; z = pointerLocation.z } }
+            armY.use { it.teleport { x = pointerLocation.x; z = pointerLocation.z } }
         
         if (force || lastPointerLocation.y != pointerLocation.y) {
             for (y in y - 1 downTo pointerLocation.blockY + 1) {
                 val location = pointerLocation.clone()
-                location.y = y.toDouble()
-                if (!armY.hasModelLocation(location)) armY.addModels(Model(FULL_SLIM_VERTICAL, location))
+                location.y = y.toDouble() + .5
+                if (armY.itemDisplays.none { it.location == location })
+                    armY.add(Model(FULL_SLIM_VERTICAL, location))
             }
-            armY.removeIf { armorStand, _ -> armorStand.location.blockY - 1 < pointerLocation.blockY }
+            armY.removeIf { armorStand -> armorStand.location.blockY - 1 < pointerLocation.blockY }
         }
         
-        drill.useArmorStands {
-            val location = pointerLocation.clone()
-            location.yaw = it.location.yaw.mod(360f)
-            if (drilling) location.yaw += 25f * (2 - drillProgress.toFloat())
-            else location.yaw += 10f
+        drill.use {
+            val location = pointerLocation.clone().apply {
+                y += 1.5
+                yaw = it.location.yaw.mod(360f)
+                yaw += if (drilling)
+                    25f * (2 - drillProgress.toFloat())
+                else 10f
+            }
             it.teleport(location)
         }
         
@@ -394,9 +405,9 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
                     
                     val topLoc = LocationUtils.getTopBlockBetween(world, x, z, maxBreakY, minBreakY)
                     if (topLoc != null
-                        && (topLoc.block.hardness >= 0 || TileEntityManager.getTileEntityAt(topLoc) != null)
-                        && ProtectionManager.canBreak(this, null, topLoc).get()) {
-                        
+                        && topLoc.block.hardness >= 0
+                        && ProtectionManager.canBreak(this, null, topLoc).get()
+                    ) {
                         results += topLoc
                     }
                 }
@@ -433,18 +444,18 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     
     private fun spawnDrillParticles(block: Block) {
         // block cracks
-        particleBuilder(ParticleEffect.BLOCK_CRACK, block.location.center().apply { y += 1 }) {
-            texture(block.breakTexture)
+        particle(ParticleTypes.BLOCK, block.location.center().apply { y += 1 }) {
+            block(block.breakTexture)
             offsetX(0.2f)
             offsetZ(0.2f)
             speed(0.5f)
-        }.display()
+        }.sendTo(getViewers())
         
         // smoke
-        particleBuilder(ParticleEffect.SMOKE_NORMAL, pointerLocation.clone().apply { y -= 0.1 }) {
+        particle(ParticleTypes.SMOKE, pointerLocation.clone().apply { y -= 0.1 }) {
             amount(10)
             speed(0.02f)
-        }.display()
+        }.sendTo(getViewers())
     }
     
     private fun createScaffolding() {
@@ -452,7 +463,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         createScaffoldingCorners()
         createScaffoldingPillars()
         createScaffoldingArms()
-        drill.addModels(Model(DRILL, pointerLocation))
+        drill.add(Model(DRILL, pointerLocation, translation = Vector3f(0f, -1f, 0f))) // translation fixes light issues, as entity is never inside block
         updatePointer(true)
     }
     
@@ -466,7 +477,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
     }
     
     private fun createScaffoldingArms() {
-        val baseLocation = pointerLocation.clone().also { it.y = y.toDouble() }
+        val baseLocation = pointerLocation.clone().also { it.y = y.toDouble() + .5; }
         
         val armXLocations = LocationUtils.getStraightLine(baseLocation, Axis.X, minX..maxX)
         armXLocations.withIndex().forEach { (index, location) ->
@@ -495,7 +506,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             }
         }
         
-        armY.addModels(Model(SLIM_VERTICAL_DOWN, baseLocation.clone()))
+        armY.add(Model(SLIM_VERTICAL_DOWN, baseLocation.clone()))
     }
     
     private fun createScaffoldingPillars() {
@@ -511,37 +522,36 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         }
     }
     
-    
     private fun createScaffoldingCorners() {
         val y = location.y
         
         val corners = getCornerLocations(y)
             .filterNot { it.blockLocation == location }
-            .map { it.center() }
+            .map { it.add(.5, .5, .5) }
         
-        solidScaffolding.addModels(corners.map { Model(CORNER_DOWN, it) })
+        solidScaffolding.addAll(corners.map { Model(CORNER_DOWN, it) })
     }
     
     private fun getCornerLocations(y: Double) =
         listOf(
-            Location(world, minX.toDouble(), y, minZ.toDouble()),
-            Location(world, maxX.toDouble(), y, minZ.toDouble(), 90f, 0f),
-            Location(world, maxX.toDouble(), y, maxZ.toDouble(), 180f, 0f),
-            Location(world, minX.toDouble(), y, maxZ.toDouble(), 270f, 0f)
+            Location(world, maxX.toDouble(), y, maxZ.toDouble(), 0f, 0f),
+            Location(world, minX.toDouble(), y, maxZ.toDouble(), 90f, 0f),
+            Location(world, minX.toDouble(), y, minZ.toDouble(), 180f, 0f),
+            Location(world, maxX.toDouble(), y, minZ.toDouble(), 270f, 0f)
         )
     
     private fun createSmallHorizontalScaffolding(model: MultiModel, location: Location, axis: Axis) {
-        location.yaw += if (axis == Axis.Z) 0f else 90f
-        model.addModels(Model(SMALL_HORIZONTAL, location))
+        location.yaw += if (axis == Axis.Z) 180f else -90f
+        model.add(Model(SMALL_HORIZONTAL, location))
     }
     
     private fun createHorizontalScaffolding(model: MultiModel, location: Location, axis: Axis, center: Boolean = true) {
-        location.yaw = if (axis == Axis.Z) 0f else 90f
-        model.addModels(Model(FULL_HORIZONTAL, if (center) location.center() else location))
+        location.yaw = if (axis == Axis.Z) 180f else -90f
+        model.add(Model(FULL_HORIZONTAL, if (center) location.add(.5, .5, .5) else location))
     }
     
     private fun createVerticalScaffolding(model: MultiModel, location: Location) {
-        model.addModels(Model(FULL_VERTICAL, location.center()))
+        model.add(Model(FULL_VERTICAL, location.add(.5, .5, .5)))
     }
     
     companion object {
@@ -559,7 +569,8 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             return CombinedBooleanFuture(minLoc.getFullCuboid(maxLoc).map { ProtectionManager.canPlace(player, item, it) })
         }
         
-        private fun canBreak(owner: OfflinePlayer, location: Location, positions: IntArray): CompletableFuture<Boolean> {
+        private fun canBreak(owner: OfflinePlayer?, location: Location, positions: IntArray): CompletableFuture<Boolean> {
+            if (owner == null) return CompletableFuture.completedFuture(true)
             val minLoc = Location(location.world, positions[0].toDouble(), location.y, positions[1].toDouble())
             val maxLoc = Location(location.world, positions[2].toDouble(), location.y, positions[3].toDouble())
             return CombinedBooleanFuture(minLoc.getFullCuboid(maxLoc).map { ProtectionManager.canBreak(owner, null, it) })
@@ -582,9 +593,10 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         
     }
     
-    inner class QuarryGUI : TileEntityGUI() {
+    @TileEntityMenuClass
+    inner class QuarryMenu : GlobalTileEntityMenu() {
         
-        private val sideConfigGUI = SideConfigGUI(
+        private val sideConfigGui = SideConfigMenu(
             this@Quarry,
             listOf(itemHolder.getNetworkedInventory(inventory) to "inventory.nova.default"),
             ::openWindow
@@ -593,7 +605,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
         private val sizeItems = ArrayList<Item>()
         private val depthItems = ArrayList<Item>()
         
-        override val gui: GUI = GUIBuilder(GUIType.NORMAL)
+        override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
                 "| s u # # # # e |",
@@ -602,7 +614,7 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
                 "| M N P i i i e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
-            .addIngredient('s', OpenSideConfigItem(sideConfigGUI))
+            .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('m', RemoveNumberItem({ MIN_SIZE..maxSize }, { sizeX }, ::setSize).also(sizeItems::add))
             .addIngredient('n', SizeDisplayItem { sizeX }.also(sizeItems::add))
             .addIngredient('p', AddNumberItem({ MIN_SIZE..maxSize }, { sizeX }, ::setSize).also(sizeItems::add))
@@ -624,26 +636,26 @@ class Quarry(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState),
             depthItems.forEach(Item::notifyWindows)
         }
         
-        private inner class SizeDisplayItem(private val getNumber: () -> Int) : BaseItem() {
+        private inner class SizeDisplayItem(private val getNumber: () -> Int) : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 val number = getNumber()
-                return CoreGUIMaterial.NUMBER.item.createItemBuilder(getNumber())
+                return DefaultGuiItems.NUMBER.model.createItemBuilder(getNumber())
                     .setDisplayName(TranslatableComponent("menu.machines.quarry.size", number, number))
-                    .addLoreLines(localized(ChatColor.GRAY, "menu.machines.quarry.size_tip"))
+                    .addLoreLines(Component.translatable("menu.machines.quarry.size_tip", NamedTextColor.GRAY))
             }
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) = Unit
             
         }
         
-        private inner class DepthDisplayItem(private val getNumber: () -> Int) : BaseItem() {
+        private inner class DepthDisplayItem(private val getNumber: () -> Int) : AbstractItem() {
             
             override fun getItemProvider(): ItemProvider {
                 val number = getNumber()
-                return CoreGUIMaterial.NUMBER.item.createItemBuilder(getNumber())
+                return DefaultGuiItems.NUMBER.model.createItemBuilder(getNumber())
                     .setDisplayName(TranslatableComponent("menu.machines.quarry.depth", number))
-                    .addLoreLines(localized(ChatColor.GRAY, "menu.machines.quarry.depth_tip"))
+                    .addLoreLines(Component.translatable("menu.machines.quarry.depth_tip", NamedTextColor.GRAY))
             }
             
             override fun handleClick(clickType: ClickType, player: Player, event: InventoryClickEvent) = Unit
