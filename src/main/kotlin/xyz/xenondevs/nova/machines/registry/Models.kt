@@ -1,8 +1,10 @@
 package xyz.xenondevs.nova.machines.registry
 
 import xyz.xenondevs.nova.addon.registry.ItemRegistry
+import xyz.xenondevs.nova.initialize.Init
 import xyz.xenondevs.nova.machines.Machines
 
+@Init
 object Models : ItemRegistry by Machines.registry {
     
     // Tree Miniatures
