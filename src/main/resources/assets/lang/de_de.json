@@ -214,5 +214,14 @@
   "menu.machines.crystallizer.idle": "Kristallisiere...",
   "advancement.machines.crystallizer.title": "Kristallisierung",
   "advancement.machines.crystallizer.description": "Stelle einen Kristallisator her",
-  "advancement.machines.all_star_tools.title": "Sternwerkzeuge"
+  "advancement.machines.all_star_tools.title": "Sternwerkzeuge",
+  "block.machines.star_shards_ore": "Sternensplittererz",
+  "menu.machines.items.category.equipment": "Ausrüstung",
+  "subtitles.machines.item.armor.equip_star": "Sternenrüstung klimpert",
+  "block.machines.deepslate_star_shards_ore": "Tiefenschiefer-Sternensplittererz",
+  "item.machines.star_helmet": "Sternenhelm",
+  "item.machines.star_chestplate": "Sternenharnisch",
+  "item.machines.star_leggings": "Sternenbeinschutz",
+  "item.machines.star_boots": "Sternenstiefel",
+  "menu.machines.items.category.resources": "Ressourcen"
 }
