@@ -141,7 +141,7 @@ class TreeFactory(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
     }
     
     private fun handleInputInventoryUpdate(event: ItemPreUpdateEvent) {
-        if (event.newItem != null && event.newItem.type !in PLANTS.keys) {
+        if (event.newItem != null && event.newItem!!.type !in PLANTS.keys) {
             event.isCancelled = true
         } else {
             plantType = event.newItem?.type

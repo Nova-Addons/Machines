@@ -3,14 +3,12 @@ package xyz.xenondevs.nova.machines.tileentity.agriculture
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
-import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -30,17 +28,11 @@ import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.addIngredient
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
-import xyz.xenondevs.nova.ui.item.AddNumberItem
-import xyz.xenondevs.nova.ui.item.DisplayNumberItem
-import xyz.xenondevs.nova.ui.item.RemoveNumberItem
-import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
-import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.item.DamageableUtils
 import xyz.xenondevs.nova.util.item.PlantUtils
 import xyz.xenondevs.nova.util.item.isTillable
 import xyz.xenondevs.nova.world.region.Region
-import xyz.xenondevs.nova.world.region.VisualRegion
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 
@@ -48,8 +40,8 @@ private val MAX_ENERGY = configReloadable { NovaConfig[PLANTER].getLong("capacit
 private val ENERGY_PER_TICK = configReloadable { NovaConfig[PLANTER].getLong("energy_per_tick") }
 private val ENERGY_PER_PLANT = configReloadable { NovaConfig[PLANTER].getLong("energy_per_plant") }
 private val IDLE_TIME by configReloadable { NovaConfig[PLANTER].getInt("idle_time") }
-private val MIN_RANGE by configReloadable { NovaConfig[PLANTER].getInt("range.min") }
-private val MAX_RANGE by configReloadable { NovaConfig[PLANTER].getInt("range.max") }
+private val MIN_RANGE = configReloadable { NovaConfig[PLANTER].getInt("range.min") }
+private val MAX_RANGE = configReloadable { NovaConfig[PLANTER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[PLANTER].getInt("range.default") }
 
 class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
@@ -68,21 +60,14 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     private var maxIdleTime = 0
     private var timePassed = 0
     
-    private var maxRange = 0
-    private var range = retrieveData("range") { DEFAULT_RANGE }
-        set(value) {
-            field = value
-            updateRegion()
-    
-            menuContainer.forEachMenu(PlanterMenu::updateRangeItems)
-        }
-    
-    private lateinit var plantRegion: Region
     private lateinit var soilRegion: Region
+    private val plantRegion = getUpgradableRegion(UpgradeTypes.RANGE, MIN_RANGE, MAX_RANGE, DEFAULT_RANGE) {
+        soilRegion = getBlockFrontRegion(it, it, 1, -1)
+        getBlockFrontRegion(it, it, 1, 0)
+    }
     
     init {
         reload()
-        updateRegion()
     }
     
     override fun reload() {
@@ -90,16 +75,6 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
-        
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
-        if (maxRange < range) range = maxRange
-    }
-    
-    private fun updateRegion() {
-        plantRegion = getBlockFrontRegion(range, range, 1, 0)
-        soilRegion = Region(plantRegion.min.clone().advance(BlockFace.DOWN), plantRegion.max.clone().advance(BlockFace.DOWN))
-        
-        VisualRegion.updateRegion(uuid, plantRegion)
     }
     
     override fun handleTick() {
@@ -196,7 +171,7 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     }
     
     private fun handleSeedUpdate(event: ItemPreUpdateEvent) {
-        if (!event.isRemove && !PlantUtils.isSeed(event.newItem))
+        if (!event.isRemove && !PlantUtils.isSeed(event.newItem!!))
             event.isCancelled = true
     }
     
@@ -207,15 +182,9 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
         hoesInventory.setItem(null, 0, DamageableUtils.damageItem(hoesInventory.getItem(0)!!))
     }
     
-    override fun handleRemoved(unload: Boolean) {
-        super.handleRemoved(unload)
-        VisualRegion.removeRegion(uuid)
-    }
-    
     override fun saveData() {
         super.saveData()
         storeData("autoTill", autoTill)
-        storeData("range", range)
     }
     
     @TileEntityMenuClass
@@ -230,8 +199,6 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
             ::openWindow
         )
         
-        private val rangeItems = ArrayList<Item>()
-        
         override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
@@ -241,17 +208,15 @@ class Planter(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
                 "3 - - - - - - - 4")
             .addIngredient('i', inputInventory)
             .addIngredient('h', hoesInventory, GuiMaterials.HOE_PLACEHOLDER)
-            .addIngredient('v', VisualizeRegionItem(player, uuid) { plantRegion })
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('f', AutoTillingItem())
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
-            .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))
+            .addIngredient('v', plantRegion.createVisualizeRegionItem(player))
+            .addIngredient('p', plantRegion.increaseSizeItem)
+            .addIngredient('m', plantRegion.decreaseSizeItem)
+            .addIngredient('n', plantRegion.displaySizeItem)
             .addIngredient('e', EnergyBar(3, energyHolder))
             .build()
-        
-        fun updateRangeItems() = rangeItems.forEach(Item::notifyWindows)
         
         private inner class AutoTillingItem : AbstractItem() {
             

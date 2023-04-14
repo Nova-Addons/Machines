@@ -7,7 +7,6 @@ import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.VirtualInventory
 import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
-import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.nova.api.NovaEventFactory
 import xyz.xenondevs.nova.data.config.GlobalValues
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -28,10 +27,6 @@ import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.addIngredient
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
-import xyz.xenondevs.nova.ui.item.AddNumberItem
-import xyz.xenondevs.nova.ui.item.DisplayNumberItem
-import xyz.xenondevs.nova.ui.item.RemoveNumberItem
-import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.addAll
 import xyz.xenondevs.nova.util.dropItemsNaturally
@@ -40,7 +35,6 @@ import xyz.xenondevs.nova.util.item.PlantUtils
 import xyz.xenondevs.nova.util.item.isLeaveLike
 import xyz.xenondevs.nova.world.block.context.BlockBreakContext
 import xyz.xenondevs.nova.world.pos
-import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
@@ -50,8 +44,8 @@ private val MAX_ENERGY = configReloadable { NovaConfig[HARVESTER].getLong("capac
 private val ENERGY_PER_TICK = configReloadable { NovaConfig[HARVESTER].getLong("energy_per_tick") }
 private val ENERGY_PER_BREAK = configReloadable { NovaConfig[HARVESTER].getLong("energy_per_break") }
 private val IDLE_TIME by configReloadable { NovaConfig[HARVESTER].getInt("idle_time") }
-private val MIN_RANGE by configReloadable { NovaConfig[HARVESTER].getInt("range.min") }
-private val MAX_RANGE by configReloadable { NovaConfig[HARVESTER].getInt("range.max") }
+private val MIN_RANGE = configReloadable { NovaConfig[HARVESTER].getInt("range.min") }
+private val MAX_RANGE = configReloadable { NovaConfig[HARVESTER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[HARVESTER].getInt("range.default") }
 
 class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
@@ -69,14 +63,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     
     private var maxIdleTime = 0
-    private var maxRange = 0
-    private var range = retrieveData("range") { DEFAULT_RANGE }
-        set(value) {
-            field = value
-            updateRegion()
-            menuContainer.forEachMenu(HarvesterMenu::updateRangeItems)
-        }
-    private lateinit var harvestRegion: Region
+    private val region = getUpgradableRegion(UpgradeTypes.RANGE, MIN_RANGE, MAX_RANGE, DEFAULT_RANGE) { getBlockFrontRegion(it, it, it * 2, 0) }
     
     private val queuedBlocks = LinkedList<Pair<Block, Material>>()
     private var timePassed = 0
@@ -84,7 +71,6 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     
     init {
         reload()
-        updateRegion()
     }
     
     override fun reload() {
@@ -92,19 +78,6 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
-        
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
-        if (range > maxRange) range = maxRange
-    }
-    
-    private fun updateRegion() {
-        harvestRegion = getBlockFrontRegion(range, range, range * 2, 0)
-        VisualRegion.updateRegion(uuid, harvestRegion)
-    }
-    
-    override fun saveData() {
-        super.saveData()
-        storeData("range", range)
     }
     
     override fun handleTick() {
@@ -129,7 +102,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         if (loadCooldown <= 0) {
             loadCooldown = 100
             
-            queuedBlocks += harvestRegion
+            queuedBlocks += region
                 .blocks
                 .filter(PlantUtils::isHarvestable)
                 .sortedWith(HarvestPriorityComparator)
@@ -206,7 +179,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     }
     
     private fun handleShearInventoryUpdate(event: ItemPreUpdateEvent) {
-        event.isCancelled = event.newItem != null && event.newItem.type != Material.SHEARS
+        event.isCancelled = event.newItem != null && event.newItem?.type != Material.SHEARS
     }
     
     private fun handleAxeInventoryUpdate(event: ItemPreUpdateEvent) {
@@ -236,8 +209,6 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
             ::openWindow
         )
         
-        private val rangeItems = ArrayList<Item>()
-        
         override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
@@ -248,18 +219,16 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 "3 - - - - - - - 4")
             .addIngredient('i', inventory)
             .addIngredient('c', OpenSideConfigItem(sideConfigGui))
-            .addIngredient('v', VisualizeRegionItem(player, uuid) { harvestRegion })
             .addIngredient('s', shearInventory, GuiMaterials.SHEARS_PLACEHOLDER)
             .addIngredient('a', axeInventory, GuiMaterials.AXE_PLACEHOLDER)
             .addIngredient('h', hoeInventory, GuiMaterials.HOE_PLACEHOLDER)
-            .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))
+            .addIngredient('v', region.createVisualizeRegionItem(player))
+            .addIngredient('p', region.increaseSizeItem)
+            .addIngredient('m', region.decreaseSizeItem)
+            .addIngredient('n', region.displaySizeItem)
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(4, energyHolder))
             .build()
-        
-        fun updateRangeItems() = rangeItems.forEach(Item::notifyWindows)
         
     }
     

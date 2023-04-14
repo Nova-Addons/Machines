@@ -16,21 +16,15 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
-import xyz.xenondevs.nova.ui.item.AddNumberItem
-import xyz.xenondevs.nova.ui.item.DisplayNumberItem
-import xyz.xenondevs.nova.ui.item.RemoveNumberItem
-import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.item.novaItem
-import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
-import xyz.xenondevs.invui.item.Item as UIItem
 
 private val MAX_ENERGY = configReloadable { NovaConfig[WIRELESS_CHARGER].getLong("capacity") }
 private val CHARGE_SPEED = configReloadable { NovaConfig[WIRELESS_CHARGER].getLong("charge_speed") }
-private val MIN_RANGE by configReloadable { NovaConfig[WIRELESS_CHARGER].getInt("range.min") }
-private val MAX_RANGE by configReloadable { NovaConfig[WIRELESS_CHARGER].getInt("range.max") }
+private val MIN_RANGE = configReloadable { NovaConfig[WIRELESS_CHARGER].getInt("range.min") }
+private val MAX_RANGE = configReloadable { NovaConfig[WIRELESS_CHARGER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[WIRELESS_CHARGER].getInt("range.default") }
 
 class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
@@ -38,36 +32,7 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, CHARGE_SPEED, null, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     
-    private var maxRange = 0
-    private var range = retrieveData("range") { DEFAULT_RANGE }
-        set(value) {
-            field = value
-            updateRegion()
-            menuContainer.forEachMenu(WirelessChargerMenu::updateRangeItems)
-        }
-    
-    private lateinit var region: Region
-    
-    init {
-        reload()
-        updateRegion()
-    }
-    
-    override fun reload() {
-        super.reload()
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
-        if (maxRange < range) range = maxRange
-    }
-    
-    private fun updateRegion() {
-        region = getSurroundingRegion(range)
-        VisualRegion.updateRegion(uuid, region)
-    }
-    
-    override fun saveData() {
-        super.saveData()
-        storeData("range", range)
-    }
+    private val region = getUpgradableRegion(UpgradeTypes.RANGE, MIN_RANGE, MAX_RANGE, DEFAULT_RANGE, ::getSurroundingRegion)
     
     private var players: List<Player> = emptyList()
     private var findPlayersCooldown = 0
@@ -123,8 +88,6 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             ::openWindow
         )
         
-        private val rangeItems = ArrayList<UIItem>()
-        
         override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
@@ -133,15 +96,13 @@ class WirelessCharger(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                 "| u # # e # # m |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
-            .addIngredient('v', VisualizeRegionItem(player, uuid) { region })
-            .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))
+            .addIngredient('v', region.createVisualizeRegionItem(player))
+            .addIngredient('p', region.increaseSizeItem)
+            .addIngredient('m', region.decreaseSizeItem)
+            .addIngredient('n', region.displaySizeItem)
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .build()
-        
-        fun updateRangeItems() = rangeItems.forEach(UIItem::notifyWindows)
         
     }
     

@@ -34,7 +34,7 @@ class Charger(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState)
     private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         if (event.isAdd || event.isSwap) {
             // cancel adding non-chargeable or fully charged items
-            val newStack = event.newItem
+            val newStack = event.newItem!!
             val chargeable = newStack.novaItem?.getBehavior(Chargeable::class)
             event.isCancelled = chargeable == null || chargeable.getEnergy(newStack) >= chargeable.options.maxEnergy
         } else if (event.updateReason == NetworkedVirtualInventory.UPDATE_REASON) {

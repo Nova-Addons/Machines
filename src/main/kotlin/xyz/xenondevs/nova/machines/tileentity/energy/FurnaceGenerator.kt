@@ -116,7 +116,7 @@ class FurnaceGenerator(blockState: NovaTileEntityState) : NetworkedTileEntity(bl
     
     private fun handleInventoryUpdate(event: ItemPreUpdateEvent) {
         if (event.updateReason != null) { // not done by the tileEntity itself
-            if (event.newItem != null && event.newItem.isFuel) {
+            if (event.newItem != null && event.newItem!!.isFuel) {
                 // illegal item
                 event.isCancelled = true
             }

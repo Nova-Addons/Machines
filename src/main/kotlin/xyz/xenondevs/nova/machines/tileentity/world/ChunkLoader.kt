@@ -2,6 +2,7 @@ package xyz.xenondevs.nova.machines.tileentity.world
 
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.item.Item
+import xyz.xenondevs.invui.item.notifyWindows
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -101,16 +102,16 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
                 "| u # m n p # | e",
                 "3 - - - - - - 4 e")
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
-            .addIngredient('p', AddNumberItem({ 0..MAX_RANGE }, { range }, ::setRange).also(rangeItems::add))
-            .addIngredient('m', RemoveNumberItem({ 0..MAX_RANGE }, { range }, ::setRange).also(rangeItems::add))
-            .addIngredient('n', DisplayNumberItem { range + 1 }.also(rangeItems::add))
+            .addIngredient('p', AddNumberItem({ 0..MAX_RANGE }, { range }, ::setRange, "menu.nova.region.size.increase").also(rangeItems::add))
+            .addIngredient('m', RemoveNumberItem({ 0..MAX_RANGE }, { range }, ::setRange, "menu.nova.region.size.decrease").also(rangeItems::add))
+            .addIngredient('n', DisplayNumberItem ({ range + 1 }, "menu.nova.region.size").also(rangeItems::add))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
             .build()
         
         private fun setRange(range: Int) {
             this@ChunkLoader.setRange(range)
-            rangeItems.forEach(Item::notifyWindows)
+            rangeItems.notifyWindows()
         }
         
     }

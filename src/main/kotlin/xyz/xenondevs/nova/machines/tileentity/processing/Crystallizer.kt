@@ -103,7 +103,7 @@ class Crystallizer(
             return
         }
         
-        val recipe = RecipeManager.getConversionRecipeFor(RecipeTypes.CRYSTALLIZER, event.newItem)
+        val recipe = RecipeManager.getConversionRecipeFor(RecipeTypes.CRYSTALLIZER, event.newItem!!)
         if (recipe == null && event.updateReason != SELF_UPDATE_REASON) {
             event.isCancelled = true
         } else {

@@ -5,7 +5,6 @@ import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Mob
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.builder.ItemBuilder
 import xyz.xenondevs.invui.item.builder.setDisplayName
 import xyz.xenondevs.nova.data.config.NovaConfig
@@ -23,13 +22,7 @@ import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.VerticalBar
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
-import xyz.xenondevs.nova.ui.item.AddNumberItem
-import xyz.xenondevs.nova.ui.item.DisplayNumberItem
-import xyz.xenondevs.nova.ui.item.RemoveNumberItem
-import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.EntityUtils
-import xyz.xenondevs.nova.world.region.Region
-import xyz.xenondevs.nova.world.region.VisualRegion
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
 import kotlin.math.min
@@ -40,8 +33,8 @@ private val ENERGY_PER_DAMAGE = configReloadable { NovaConfig[MOB_KILLER].getLon
 private val IDLE_TIME by configReloadable { NovaConfig[MOB_KILLER].getInt("idle_time") }
 private val KILL_LIMIT by configReloadable { NovaConfig[MOB_KILLER].getInt("kill_limit") }
 private val DAMAGE by configReloadable { NovaConfig[MOB_KILLER].getDouble("damage") }
-private val MIN_RANGE by configReloadable { NovaConfig[MOB_KILLER].getInt("range.min") }
-private val MAX_RANGE by configReloadable { NovaConfig[MOB_KILLER].getInt("range.max") }
+private val MIN_RANGE = configReloadable { NovaConfig[MOB_KILLER].getInt("range.min") }
+private val MAX_RANGE = configReloadable { NovaConfig[MOB_KILLER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[MOB_KILLER].getInt("range.default") }
 
 class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
@@ -49,21 +42,13 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE)
     override val energyHolder = ConsumerEnergyHolder(this, MAX_ENERGY, ENERGY_PER_TICK, ENERGY_PER_DAMAGE, upgradeHolder) { createSideConfig(NetworkConnectionType.INSERT) }
     private val fakePlayer = EntityUtils.createFakePlayer(location).bukkitEntity
+    private val region = getUpgradableRegion(UpgradeTypes.RANGE, MIN_RANGE, MAX_RANGE, DEFAULT_RANGE) { getBlockFrontRegion(it, it, 4, -1) }
     
     private var timePassed = 0
     private var maxIdleTime = 0
-    private var maxRange = 0
-    private var range = retrieveData("range") { DEFAULT_RANGE }
-        set(value) {
-            field = value
-            updateRegion()
-            menuContainer.forEachMenu(MobKillerMenu::updateRangeItems)
-        }
-    private lateinit var region: Region
     
     init {
         reload()
-        updateRegion()
     }
     
     override fun reload() {
@@ -71,19 +56,6 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
-        
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
-        if (range > maxRange) range = maxRange
-    }
-    
-    override fun saveData() {
-        super.saveData()
-        storeData("range", range)
-    }
-    
-    private fun updateRegion() {
-        region = getBlockFrontRegion(range, range, 4, -1)
-        VisualRegion.updateRegion(uuid, region)
     }
     
     override fun handleTick() {
@@ -110,11 +82,6 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
         menuContainer.forEachMenu<MobKillerMenu> { it.idleBar.percentage = timePassed / maxIdleTime.toDouble() }
     }
     
-    override fun handleRemoved(unload: Boolean) {
-        super.handleRemoved(unload)
-        VisualRegion.removeRegion(uuid)
-    }
-    
     @TileEntityMenuClass
     inner class MobKillerMenu(player: Player) : IndividualTileEntityMenu(player) {
         
@@ -122,8 +89,6 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
             this@MobKiller,
             ::openWindow
         )
-        
-        private val rangeItems = ArrayList<Item>()
         
         val idleBar = object : VerticalBar(3) {
             override val barItem = DefaultGuiItems.BAR_GREEN
@@ -143,16 +108,14 @@ class MobKiller(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 "| u # i # e # m |",
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
-            .addIngredient('r', VisualizeRegionItem(player, uuid) { region })
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
-            .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))
+            .addIngredient('r', region.createVisualizeRegionItem(player))
+            .addIngredient('p', region.increaseSizeItem)
+            .addIngredient('m', region.decreaseSizeItem)
+            .addIngredient('n', region.displaySizeItem)
             .addIngredient('e', EnergyBar(3, energyHolder))
             .addIngredient('i', idleBar)
             .build()
-        
-        fun updateRangeItems() = rangeItems.forEach(Item::notifyWindows)
         
     }
     

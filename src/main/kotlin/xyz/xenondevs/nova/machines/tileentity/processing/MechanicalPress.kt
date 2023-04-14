@@ -105,7 +105,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     private fun handleInputUpdate(event: ItemPreUpdateEvent) {
         if (event.updateReason != SELF_UPDATE_REASON
             && event.newItem != null
-            && RecipeManager.getConversionRecipeFor(type.recipeType, event.newItem) == null) {
+            && RecipeManager.getConversionRecipeFor(type.recipeType, event.newItem!!) == null) {
             
             event.isCancelled = true
         }
@@ -168,10 +168,10 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
             
             override fun getItemProvider(): ItemProvider {
                 return if (type == PressType.PLATE) {
-                    if (this@MechanicalPress.type == PressType.PLATE) GuiMaterials.PLATE_BTN_OFF.createItemBuilder()
+                    if (this@MechanicalPress.type == PressType.PLATE) GuiMaterials.PLATE_BTN_OFF.clientsideProvider
                     else GuiMaterials.PLATE_BTN_ON.clientsideProvider
                 } else {
-                    if (this@MechanicalPress.type == PressType.GEAR) GuiMaterials.GEAR_BTN_OFF.createItemBuilder()
+                    if (this@MechanicalPress.type == PressType.GEAR) GuiMaterials.GEAR_BTN_OFF.clientsideProvider
                     else GuiMaterials.GEAR_BTN_ON.clientsideProvider
                 }
             }

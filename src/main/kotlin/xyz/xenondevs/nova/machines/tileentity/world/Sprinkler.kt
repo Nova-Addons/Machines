@@ -9,7 +9,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPhysicsEvent
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -25,10 +24,6 @@ import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
-import xyz.xenondevs.nova.ui.item.AddNumberItem
-import xyz.xenondevs.nova.ui.item.DisplayNumberItem
-import xyz.xenondevs.nova.ui.item.RemoveNumberItem
-import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.center
 import xyz.xenondevs.nova.util.registerEvents
@@ -42,8 +37,8 @@ import kotlin.math.roundToLong
 
 private val WATER_CAPACITY = configReloadable { NovaConfig[SPRINKLER].getLong("water_capacity") }
 private val WATER_PER_MOISTURE_LEVEL by configReloadable { NovaConfig[SPRINKLER].getLong("water_per_moisture_level") }
-private val MIN_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("range.min") }
-private val MAX_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("range.max") }
+private val MIN_RANGE = configReloadable { NovaConfig[SPRINKLER].getInt("range.min") }
+private val MAX_RANGE = configReloadable { NovaConfig[SPRINKLER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[SPRINKLER].getInt("range.default") }
 
 class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
@@ -55,18 +50,16 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     private var maxRange = 0
     private var waterPerMoistureLevel = 0L
     
-    lateinit var region: Region
-    private var range = retrieveData("range") { DEFAULT_RANGE }
-        set(value) {
-            field = value
-            updateRegion()
-            menuContainer.forEachMenu(SprinklerMenu::updateRangeItems)
-        }
+    private val region = getUpgradableRegion(UpgradeTypes.RANGE, MIN_RANGE, MAX_RANGE, DEFAULT_RANGE) {
+        val d = it + 0.5
+        Region(
+            location.center().add(-d, -1.0, -d),
+            location.center().add(d, 0.0, d)
+        )
+    }
     
     init {
         reload()
-        updateRegion()
-        
         sprinklers += this
     }
     
@@ -78,23 +71,7 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
     
     override fun reload() {
         super.reload()
-        
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
         waterPerMoistureLevel = (WATER_PER_MOISTURE_LEVEL / upgradeHolder.getValue(UpgradeTypes.EFFICIENCY)).roundToLong()
-    }
-    
-    private fun updateRegion() {
-        val d = range + 0.5
-        region = Region(
-            location.clone().center().add(-d, -1.0, -d),
-            location.clone().center().add(d, 0.0, d)
-        )
-        VisualRegion.updateRegion(uuid, region)
-    }
-    
-    override fun saveData() {
-        super.saveData()
-        storeData("range", range)
     }
     
     @TileEntityMenuClass
@@ -106,8 +83,6 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
             openPrevious = ::openWindow
         )
         
-        private val rangeItems = ArrayList<Item>()
-        
         override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
@@ -117,16 +92,12 @@ class Sprinkler(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
-            .addIngredient('v', VisualizeRegionItem(player, uuid) { region })
-            .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('d', DisplayNumberItem { range }.also(rangeItems::add))
+            .addIngredient('v', region.createVisualizeRegionItem(player))
+            .addIngredient('p', region.increaseSizeItem)
+            .addIngredient('m', region.decreaseSizeItem)
+            .addIngredient('d', region.displaySizeItem)
             .addIngredient('f', FluidBar(3, fluidHolder, tank))
             .build()
-        
-        fun updateRangeItems() {
-            rangeItems.forEach(Item::notifyWindows)
-        }
         
     }
     

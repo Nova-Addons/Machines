@@ -87,8 +87,8 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     }
     
     private fun handleInputInventoryUpdate(event: ItemPreUpdateEvent) {
-        if (event.newItem != null) {
-            val itemStack = event.newItem
+        val itemStack = event.newItem
+        if (itemStack != null) {
             if (getRecipe(itemStack, world) == null) event.isCancelled = true
         }
     }
@@ -104,7 +104,7 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
                     experience -= pos.block.spawnExpOrb(experience.toInt(), player.location)
                 } else {
                     val amount = event.removedAmount
-                    val experiencePerItem = experience / event.previousItem.amount
+                    val experiencePerItem = experience / event.previousItem!!.amount
                     val experience = amount * experiencePerItem
                     
                     this.experience -= pos.block.spawnExpOrb(experience.toInt(), player.location)

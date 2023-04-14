@@ -7,7 +7,6 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
-import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -22,14 +21,9 @@ import xyz.xenondevs.nova.ui.EnergyBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
-import xyz.xenondevs.nova.ui.item.AddNumberItem
-import xyz.xenondevs.nova.ui.item.DisplayNumberItem
-import xyz.xenondevs.nova.ui.item.RemoveNumberItem
-import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.item.PlantUtils
 import xyz.xenondevs.nova.util.item.isFullyAged
-import xyz.xenondevs.nova.world.region.Region
 import xyz.xenondevs.nova.world.region.VisualRegion
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
@@ -38,8 +32,8 @@ private val MAX_ENERGY = configReloadable { NovaConfig[FERTILIZER].getLong("capa
 private val ENERGY_PER_TICK = configReloadable { NovaConfig[FERTILIZER].getLong("energy_per_tick") }
 private val ENERGY_PER_FERTILIZE = configReloadable { NovaConfig[FERTILIZER].getLong("energy_per_fertilize") }
 private val IDLE_TIME by configReloadable { NovaConfig[FERTILIZER].getInt("idle_time") }
-private val MIN_RANGE by configReloadable { NovaConfig[FERTILIZER].getInt("range.min") }
-private val MAX_RANGE by configReloadable { NovaConfig[FERTILIZER].getInt("range.max") }
+private val MIN_RANGE = configReloadable { NovaConfig[FERTILIZER].getInt("range.min") }
+private val MAX_RANGE = configReloadable { NovaConfig[FERTILIZER].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[FERTILIZER].getInt("range.default") }
 
 class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
@@ -51,37 +45,16 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     
     private var maxIdleTime = 0
     private var timePassed = 0
-    private var maxRange = 0
-    private var range = retrieveData("range") { DEFAULT_RANGE }
-        set(value) {
-            field = value
-            updateRegion()
-            menuContainer.forEachMenu(FertilizerMenu::updateRangeItems)
-        }
-    private lateinit var fertilizeRegion: Region
+    private val region = getUpgradableRegion(UpgradeTypes.RANGE, MIN_RANGE, MAX_RANGE, DEFAULT_RANGE) { getBlockFrontRegion(it, it, 1, 0) }
     
     init {
         reload()
-        updateRegion()
     }
     
     override fun reload() {
         super.reload()
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (timePassed > maxIdleTime) timePassed = maxIdleTime
-        
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
-        if (range > maxRange) range = maxRange
-    }
-    
-    private fun updateRegion() {
-        fertilizeRegion = getBlockFrontRegion(range, range, 1, 0)
-        VisualRegion.updateRegion(uuid, fertilizeRegion)
-    }
-    
-    override fun saveData() {
-        super.saveData()
-        storeData("range", range)
     }
     
     override fun handleTick() {
@@ -110,14 +83,14 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     }
     
     private fun getNextPlant(): Block? =
-        fertilizeRegion.blocks
+        region.blocks
             .firstOrNull {
                 (it.blockData is Ageable && !it.isFullyAged())
                     && ProtectionManager.canUseBlock(this, ItemStack(Material.BONE_MEAL), it.location).get()
             }
     
     private fun handleFertilizerUpdate(event: ItemPreUpdateEvent) {
-        if ((event.isAdd || event.isSwap) && event.newItem.type != Material.BONE_MEAL)
+        if ((event.isAdd || event.isSwap) && event.newItem?.type != Material.BONE_MEAL)
             event.isCancelled = true
     }
     
@@ -135,8 +108,6 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
             ::openWindow
         )
         
-        private val rangeItems = ArrayList<Item>()
-        
         override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
@@ -145,16 +116,14 @@ class Fertilizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
                 "| u m i i i i e |",
                 "3 - - - - - - - 4")
             .addIngredient('i', fertilizerInventory)
-            .addIngredient('v', VisualizeRegionItem(player, uuid) { fertilizeRegion })
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
-            .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))
             .addIngredient('e', EnergyBar(3, energyHolder))
+            .addIngredient('v', region.createVisualizeRegionItem(player))
+            .addIngredient('p', region.increaseSizeItem)
+            .addIngredient('m', region.decreaseSizeItem)
+            .addIngredient('n', region.displaySizeItem)
             .build()
-        
-        fun updateRangeItems() = rangeItems.forEach(Item::notifyWindows)
         
     }
     

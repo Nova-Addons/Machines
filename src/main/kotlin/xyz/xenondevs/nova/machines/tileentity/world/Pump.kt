@@ -8,7 +8,6 @@ import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import xyz.xenondevs.commons.collections.rotateRight
 import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
@@ -27,10 +26,6 @@ import xyz.xenondevs.nova.ui.FluidBar
 import xyz.xenondevs.nova.ui.OpenUpgradesItem
 import xyz.xenondevs.nova.ui.config.side.OpenSideConfigItem
 import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
-import xyz.xenondevs.nova.ui.item.AddNumberItem
-import xyz.xenondevs.nova.ui.item.DisplayNumberItem
-import xyz.xenondevs.nova.ui.item.RemoveNumberItem
-import xyz.xenondevs.nova.ui.item.VisualizeRegionItem
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.HORIZONTAL_FACES
 import xyz.xenondevs.nova.util.VERTICAL_FACES
@@ -51,39 +46,35 @@ private val FLUID_CAPACITY = configReloadable { NovaConfig[PUMP].getLong("fluid_
 private val REPLACEMENT_BLOCK by configReloadable { Material.valueOf(NovaConfig[PUMP].getString("replacement_block")!!) }
 private val IDLE_TIME by configReloadable { NovaConfig[PUMP].getLong("idle_time") }
 
-private val MIN_RANGE by configReloadable { NovaConfig[PUMP].getInt("range.min") }
-private val MAX_RANGE by configReloadable { NovaConfig[PUMP].getInt("range.max") }
+private val MIN_RANGE = configReloadable { NovaConfig[PUMP].getInt("range.min") }
+private val MAX_RANGE = configReloadable { NovaConfig[PUMP].getInt("range.max") }
 private val DEFAULT_RANGE by configReloadable { NovaConfig[PUMP].getInt("range.default") }
 
 class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), Upgradable {
     
     override val upgradeHolder = getUpgradeHolder(UpgradeTypes.SPEED, UpgradeTypes.EFFICIENCY, UpgradeTypes.ENERGY, UpgradeTypes.RANGE, UpgradeTypes.FLUID)
-    
     private val fluidTank = getFluidContainer("tank", hashSetOf(FluidType.WATER, FluidType.LAVA), FLUID_CAPACITY, upgradeHolder = upgradeHolder)
-    
     override val energyHolder = ConsumerEnergyHolder(this, ENERGY_CAPACITY, ENERGY_PER_TICK, upgradeHolder = upgradeHolder) { createExclusiveSideConfig(NetworkConnectionType.INSERT, BlockSide.TOP) }
     override val fluidHolder = NovaFluidHolder(this, fluidTank to NetworkConnectionType.EXTRACT) { createExclusiveSideConfig(NetworkConnectionType.EXTRACT, BlockSide.TOP) }
     
+    private var mode = retrieveData("mode") { PumpMode.REPLACE }
+    private val region = getUpgradableRegion(UpgradeTypes.RANGE, MIN_RANGE, MAX_RANGE, DEFAULT_RANGE) {
+        idleTime = maxIdleTime // resets idle time for the case that the pump has already finished
+        
+        val range = it.toDouble()
+        val min = location.clone().subtract(range - 1, range, range - 1)
+        val max = location.clone().add(range, 0.0, range)
+        Region(min, max)
+    }
+    
     private var maxIdleTime = 0
     private var idleTime = 0
-    
-    private var mode = retrieveData("mode") { PumpMode.REPLACE }
-    
-    private var maxRange = 0
-    private var range = retrieveData("range") { DEFAULT_RANGE }
-        set(value) {
-            field = value
-            updateRegion()
-            menuContainer.forEachMenu(PumpMenu::updateRangeItems)
-        }
-    private lateinit var region: Region
     
     private var lastBlock: Block? = null
     private var sortedFaces = LinkedList(HORIZONTAL_FACES)
     
     init {
         reload()
-        updateRegion()
     }
     
     override fun reload() {
@@ -91,18 +82,6 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
         
         maxIdleTime = (IDLE_TIME / upgradeHolder.getValue(UpgradeTypes.SPEED)).toInt()
         if (idleTime > maxIdleTime) idleTime = maxIdleTime
-        
-        maxRange = MAX_RANGE + upgradeHolder.getValue(UpgradeTypes.RANGE)
-        if (maxRange < range) range = maxRange
-    }
-    
-    private fun updateRegion() {
-        val rangeDouble = range.toDouble()
-        val min = location.clone().subtract(rangeDouble - 1, rangeDouble, rangeDouble - 1)
-        val max = location.clone().add(rangeDouble, 0.0, rangeDouble)
-        region = Region(min, max)
-        VisualRegion.updateRegion(uuid, region)
-        idleTime = maxIdleTime
     }
     
     override fun handleTick() {
@@ -168,7 +147,7 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
     }
     
     private fun searchBlock(): Pair<Block?, FluidType?> {
-        repeat(range) { r ->
+        repeat(region.size) { r ->
             if (r == 0) {
                 val block = location.clone().advance(BlockFace.DOWN).block
                 val fluidType = block.sourceFluidType ?: return@repeat
@@ -210,7 +189,6 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
     
     override fun saveData() {
         super.saveData()
-        storeData("range", range)
         storeData("mode", mode)
     }
     
@@ -223,8 +201,6 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
             openPrevious = ::openWindow
         )
         
-        private val rangeItems = ArrayList<Item>()
-        
         override val gui = Gui.normal()
             .setStructure(
                 "1 - - - - - - - 2",
@@ -234,16 +210,14 @@ class Pump(blockState: NovaTileEntityState) : NetworkedTileEntity(blockState), U
                 "3 - - - - - - - 4")
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
-            .addIngredient('v', VisualizeRegionItem(player, uuid) { region })
-            .addIngredient('p', AddNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
-            .addIngredient('n', DisplayNumberItem { range }.also(rangeItems::add))
-            .addIngredient('m', RemoveNumberItem({ MIN_RANGE..maxRange }, { range }, { range = it }).also(rangeItems::add))
+            .addIngredient('v', region.createVisualizeRegionItem(player))
+            .addIngredient('p', region.increaseSizeItem)
+            .addIngredient('n', region.displaySizeItem)
+            .addIngredient('m', region.decreaseSizeItem)
             .addIngredient('M', PumpModeItem())
             .addIngredient('e', EnergyBar(3, energyHolder))
             .addIngredient('f', FluidBar(3, fluidHolder, fluidTank))
             .build()
-        
-        fun updateRangeItems() = rangeItems.forEach(Item::notifyWindows)
         
         private inner class PumpModeItem : AbstractItem() {
             

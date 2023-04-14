@@ -107,7 +107,7 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     }
     
     private fun handleInputUpdate(event: ItemPreUpdateEvent) {
-        event.isCancelled = event.newItem != null && RecipeManager.getConversionRecipeFor(RecipeTypes.PULVERIZER, event.newItem) == null
+        event.isCancelled = event.newItem != null && RecipeManager.getConversionRecipeFor(RecipeTypes.PULVERIZER, event.newItem!!) == null
     }
     
     private fun handleOutputUpdate(event: ItemPreUpdateEvent) {

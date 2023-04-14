@@ -9,7 +9,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.Vec3
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_19_R3.util.RandomSourceWrapper
 import org.bukkit.enchantments.Enchantment
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
@@ -41,7 +40,6 @@ import xyz.xenondevs.nova.util.nmsCopy
 import xyz.xenondevs.nova.util.serverLevel
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
-import java.util.*
 
 private val MAX_ENERGY = configReloadable { NovaConfig[AUTO_FISHER].getLong("capacity") }
 private val ENERGY_PER_TICK = configReloadable { NovaConfig[AUTO_FISHER].getLong("energy_per_tick") }
@@ -138,7 +136,7 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     }
     
     private fun handleFishingRodInventoryUpdate(event: ItemPreUpdateEvent) {
-        event.isCancelled = event.isAdd && event.newItem.type != Material.FISHING_ROD
+        event.isCancelled = event.isAdd && event.newItem?.type != Material.FISHING_ROD
     }
     
     @TileEntityMenuClass

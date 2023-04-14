@@ -87,7 +87,7 @@ class FluidInfuser(blockState: NovaTileEntityState) : NetworkedTileEntity(blockS
     }
     
     private fun handleInputInventoryUpdate(event: ItemPreUpdateEvent) {
-        event.isCancelled = !event.isRemove && RecipeManager.getConversionRecipeFor(RecipeTypes.FLUID_INFUSER, event.newItem) == null
+        event.isCancelled = !event.isRemove && RecipeManager.getConversionRecipeFor(RecipeTypes.FLUID_INFUSER, event.newItem!!) == null
         if (!event.isAdd) reset()
     }
     
