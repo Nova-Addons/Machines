@@ -1,7 +1,8 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
 import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.util.Brightness
+import net.minecraft.world.item.ItemDisplayContext
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -37,8 +38,9 @@ import xyz.xenondevs.nova.ui.config.side.SideConfigMenu
 import xyz.xenondevs.nova.util.BlockSide
 import xyz.xenondevs.nova.util.advance
 import xyz.xenondevs.nova.util.axis
+import xyz.xenondevs.nova.util.nmsCopy
 import xyz.xenondevs.nova.util.sendTo
-import xyz.xenondevs.nova.world.fakeentity.impl.FakeArmorStand
+import xyz.xenondevs.nova.world.fakeentity.impl.FakeItemDisplay
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.getFluidContainer
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
@@ -73,8 +75,8 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private var currentMode = mode
     private var mbUsed = 0L
     
-    private val waterLevel = FakeArmorStand(centerLocation) { _, data -> data.isInvisible = true; data.isMarker = true }
-    private val lavaLevel = FakeArmorStand(centerLocation) { _, data -> data.isInvisible = true; data.isMarker = true }
+    private val waterLevel = FakeItemDisplay(centerLocation) { _, data -> data.itemDisplay = ItemDisplayContext.HEAD }
+    private val lavaLevel = FakeItemDisplay(centerLocation) { _, data -> data.itemDisplay = ItemDisplayContext.HEAD; data.brightness = Brightness.FULL_BRIGHT }
     
     private val particleEffect = particle(ParticleTypes.LARGE_SMOKE) {
         location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
@@ -99,7 +101,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
             val state = getFluidState(waterTank)
             Models.COBBLESTONE_GENERATOR_WATER_LEVELS.clientsideProviders[state].get()
         } else null
-        waterLevel.setEquipment(EquipmentSlot.HEAD, item, true)
+        waterLevel.updateEntityData(true) { itemStack = item.nmsCopy }
     }
     
     private fun updateLavaLevel() {
@@ -107,7 +109,7 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
             val state = getFluidState(lavaTank)
             Models.COBBLESTONE_GENERATOR_LAVA_LEVELS.clientsideProviders[state].get()
         } else null
-        lavaLevel.setEquipment(EquipmentSlot.HEAD, item, true)
+        lavaLevel.updateEntityData(true) { itemStack = item.nmsCopy }
     }
     
     private fun getFluidState(container: FluidContainer) =
