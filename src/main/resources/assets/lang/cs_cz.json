@@ -214,5 +214,14 @@
   "advancement.machines.crystallizer.title": "Krystalizace",
   "advancement.machines.crystallizer.description": "Vyrob Kristalizátor",
   "advancement.machines.all_star_tools.title": "Hvězdné Nástroje",
-  "advancement.machines.all_star_tools.description": "Vytvoř všechny nástroje z hvězd"
+  "advancement.machines.all_star_tools.description": "Vytvoř všechny nástroje z hvězd",
+  "block.machines.star_shards_ore": "Ruda Úlomků Hvězdy",
+  "item.machines.star_helmet": "Hvězdná Helma",
+  "menu.machines.items.category.resources": "Suroviny",
+  "block.machines.deepslate_star_shards_ore": "Hlubinná Ruda Úlomků Hvězdy",
+  "item.machines.star_boots": "Hvězdné Boty",
+  "item.machines.star_chestplate": "Hvězdné Brnění",
+  "item.machines.star_leggings": "Hvězdné Kalhoty",
+  "menu.machines.items.category.equipment": "Vybavení",
+  "subtitles.machines.item.armor.equip_star": "Hvězdné brnění cinká"
 }
