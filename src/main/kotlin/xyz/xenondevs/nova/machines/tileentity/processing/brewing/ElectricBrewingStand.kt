@@ -155,7 +155,7 @@ class ElectricBrewingStand(blockState: NovaTileEntityState) : NetworkedTileEntit
             potionEffects.forEach { effect ->
                 effect.recipe.inputs.forEach { choice ->
                     require(choice is RecipeChoice.ExactChoice && choice.choices.size == 1)
-                    val itemStack = choice.choices[0] // There should only ever be one
+                    val itemStack = choice.itemStack
                     val firstSimilar = requiredItems.firstOrNull { it.isSimilar(itemStack) }
                     
                     if (firstSimilar != null) firstSimilar.amount++
