@@ -70,7 +70,7 @@ class PotionConfiguratorWindow(
             "x x x x x x x x .",
             "x x x x x x x x .",
             "x x x x x x x x d")
-        .addIngredient('<', BackItem { p -> updatePotionData(type, this.effects.keys.filter { it.type != null }, colorPickerWindow.color); openPrevious(p) })
+        .addIngredient('<', BackItem(openPrevious))
         .addIngredient('c', OpenColorPickerWindowItem(colorPickerWindow))
         .addIngredient('t', potionTypeItem)
         .build()
@@ -108,10 +108,11 @@ class PotionConfiguratorWindow(
     }
     
     fun openConfigurator(player: Player) {
-        Window.single {
-            it.setViewer(player)
-            it.setTitle(GuiTextures.CONFIGURE_POTION.getTitle("menu.machines.electric_brewing_stand.configure_potion"))
-            it.setGui(gui)
+        Window.single { w ->
+            w.setViewer(player)
+            w.setTitle(GuiTextures.CONFIGURE_POTION.getTitle("menu.machines.electric_brewing_stand.configure_potion"))
+            w.setGui(gui)
+            w.addCloseHandler { updatePotionData(type, this.effects.keys.filter { it.type != null }, colorPickerWindow.color) }
         }.open()
     }
     
