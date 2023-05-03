@@ -139,7 +139,6 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                     // get drops
                     val ctx = BlockBreakContext(block.pos, this, location, null, tool)
                     val drops = PlantUtils.getHarvestDrops(ctx)!!.toMutableList()
-                    NovaEventFactory.callTileEntityBlockBreakEvent(this, block, drops)
                     
                     // check that the drops will fit in the inventory or can be dropped on the ground
                     if (!GlobalValues.DROP_EXCESS_ON_GROUND && !inventory.canHold(drops)) {
@@ -159,6 +158,7 @@ class Harvester(blockState: NovaTileEntityState) : NetworkedTileEntity(blockStat
                     
                     // harvest the plant
                     PlantUtils.harvest(ctx, true)
+                    NovaEventFactory.callTileEntityBlockBreakEvent(this, block, drops)
                     
                     // add the drops to the inventory or drop them in the world if they don't fit
                     if (inventory.canHold(drops))
