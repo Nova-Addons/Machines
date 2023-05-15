@@ -214,5 +214,14 @@
   "advancement.machines.crystallizer.title": "結晶",
   "advancement.machines.crystallizer.description": "製作一個結晶器",
   "advancement.machines.all_star_tools.title": "星之工具",
-  "advancement.machines.all_star_tools.description": "製作全部五種星之工具"
+  "advancement.machines.all_star_tools.description": "製作全部五種星之工具",
+  "menu.machines.items.category.resources": "資源",
+  "subtitles.machines.item.armor.equip_star": "星之盔甲發出了響亮的撞擊聲",
+  "block.machines.star_shards_ore": "星塵礦",
+  "block.machines.deepslate_star_shards_ore": "深板岩星塵礦",
+  "item.machines.star_helmet": "星之頭盔",
+  "item.machines.star_chestplate": "星之胸甲",
+  "item.machines.star_leggings": "星之護腿",
+  "item.machines.star_boots": "星之靴",
+  "menu.machines.items.category.equipment": "裝備"
 }
