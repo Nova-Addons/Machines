@@ -102,8 +102,8 @@ class ChunkLoader(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSt
                 "| u # m n p # | e",
                 "3 - - - - - - 4 e")
             .addIngredient('s', OpenSideConfigItem(sideConfigGui))
-            .addIngredient('p', AddNumberItem({ 0..MAX_RANGE }, { range }, ::setRange, "menu.nova.region.size.increase").also(rangeItems::add))
-            .addIngredient('m', RemoveNumberItem({ 0..MAX_RANGE }, { range }, ::setRange, "menu.nova.region.size.decrease").also(rangeItems::add))
+            .addIngredient('p', AddNumberItem({ 0..MAX_RANGE }, { range }, ::setRange, "menu.nova.region.increase").also(rangeItems::add))
+            .addIngredient('m', RemoveNumberItem({ 0..MAX_RANGE }, { range }, ::setRange, "menu.nova.region.decrease").also(rangeItems::add))
             .addIngredient('n', DisplayNumberItem ({ range + 1 }, "menu.nova.region.size").also(rangeItems::add))
             .addIngredient('u', OpenUpgradesItem(upgradeHolder))
             .addIngredient('e', EnergyBar(3, energyHolder))
