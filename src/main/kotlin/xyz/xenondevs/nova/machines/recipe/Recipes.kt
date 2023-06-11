@@ -1,6 +1,6 @@
 package xyz.xenondevs.nova.machines.recipe
 
-import org.bukkit.NamespacedKey
+import net.minecraft.resources.ResourceLocation
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
 import org.bukkit.potion.PotionEffectType
@@ -11,41 +11,41 @@ import xyz.xenondevs.nova.machines.registry.RecipeTypes
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 
 class PulverizerRecipe(
-    key: NamespacedKey,
+    id: ResourceLocation,
     input: RecipeChoice,
     result: ItemStack,
     time: Int,
-) : ConversionNovaRecipe(key, input, result, time) {
+) : ConversionNovaRecipe(id, input, result, time) {
     override val type = RecipeTypes.PULVERIZER
 }
 
 class PlatePressRecipe(
-    key: NamespacedKey,
+    id: ResourceLocation,
     input: RecipeChoice,
     result: ItemStack,
     time: Int
-) : ConversionNovaRecipe(key, input, result, time) {
+) : ConversionNovaRecipe(id, input, result, time) {
     override val type = RecipeTypes.PLATE_PRESS
 }
 
 class GearPressRecipe(
-    key: NamespacedKey,
+    id: ResourceLocation,
     input: RecipeChoice,
     result: ItemStack,
     time: Int
-) : ConversionNovaRecipe(key, input, result, time) {
+) : ConversionNovaRecipe(id, input, result, time) {
     override val type = RecipeTypes.GEAR_PRESS
 }
 
 class FluidInfuserRecipe(
-    override val key: NamespacedKey,
+    override val id: ResourceLocation,
     val mode: InfuserMode,
     val fluidType: FluidType,
     val fluidAmount: Long,
     input: RecipeChoice,
     result: ItemStack,
     time: Int
-) : ConversionNovaRecipe(key, input, result, time) {
+) : ConversionNovaRecipe(id, input, result, time) {
     override val type = RecipeTypes.FLUID_INFUSER
     
     enum class InfuserMode {
@@ -56,7 +56,7 @@ class FluidInfuserRecipe(
 }
 
 class ElectricBrewingStandRecipe(
-    override val key: NamespacedKey,
+    override val id: ResourceLocation,
     override val inputs: List<RecipeChoice>,
     val result: PotionEffectType,
     val defaultTime: Int,
@@ -69,10 +69,10 @@ class ElectricBrewingStandRecipe(
 }
 
 class CrystallizerRecipe(
-    key: NamespacedKey,
+    id: ResourceLocation,
     input: RecipeChoice,
     result: ItemStack,
     time: Int
-): ConversionNovaRecipe(key, input, result, time) {
+): ConversionNovaRecipe(id, input, result, time) {
     override val type = RecipeTypes.CRYSTALLIZER
 }

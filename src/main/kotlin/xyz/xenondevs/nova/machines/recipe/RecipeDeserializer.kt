@@ -1,6 +1,7 @@
 package xyz.xenondevs.nova.machines.recipe
 
 import com.google.gson.JsonObject
+import net.minecraft.resources.ResourceLocation
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
@@ -13,7 +14,7 @@ import xyz.xenondevs.commons.gson.getString
 import xyz.xenondevs.nova.data.serialization.json.getDeserialized
 import xyz.xenondevs.nova.data.serialization.json.serializer.ConversionRecipeDeserializer
 import xyz.xenondevs.nova.data.serialization.json.serializer.RecipeDeserializer
-import xyz.xenondevs.nova.data.serialization.json.serializer.RecipeDeserializer.Companion.getRecipeKey
+import xyz.xenondevs.nova.data.serialization.json.serializer.RecipeDeserializer.Companion.getRecipeId
 import xyz.xenondevs.nova.data.serialization.json.serializer.RecipeDeserializer.Companion.parseRecipeChoice
 import xyz.xenondevs.nova.tileentity.network.fluid.FluidType
 import xyz.xenondevs.nova.util.data.getInputStacks
@@ -21,18 +22,18 @@ import xyz.xenondevs.nova.util.item.ItemUtils
 import java.io.File
 
 object PulverizerRecipeDeserializer : ConversionRecipeDeserializer<PulverizerRecipe>() {
-    override fun createRecipe(json: JsonObject, key: NamespacedKey, input: RecipeChoice, result: ItemStack, time: Int) =
-        PulverizerRecipe(key, input, result, time)
+    override fun createRecipe(json: JsonObject, id: ResourceLocation, input: RecipeChoice, result: ItemStack, time: Int) =
+        PulverizerRecipe(id, input, result, time)
 }
 
 object PlatePressRecipeDeserializer : ConversionRecipeDeserializer<PlatePressRecipe>() {
-    override fun createRecipe(json: JsonObject, key: NamespacedKey, input: RecipeChoice, result: ItemStack, time: Int) =
-        PlatePressRecipe(key, input, result, time)
+    override fun createRecipe(json: JsonObject, id: ResourceLocation, input: RecipeChoice, result: ItemStack, time: Int) =
+        PlatePressRecipe(id, input, result, time)
 }
 
 object GearPressRecipeDeserializer : ConversionRecipeDeserializer<GearPressRecipe>() {
-    override fun createRecipe(json: JsonObject, key: NamespacedKey, input: RecipeChoice, result: ItemStack, time: Int) =
-        GearPressRecipe(key, input, result, time)
+    override fun createRecipe(json: JsonObject, id: ResourceLocation, input: RecipeChoice, result: ItemStack, time: Int) =
+        GearPressRecipe(id, input, result, time)
 }
 
 object FluidInfuserRecipeDeserializer : RecipeDeserializer<FluidInfuserRecipe> {
@@ -45,7 +46,7 @@ object FluidInfuserRecipeDeserializer : RecipeDeserializer<FluidInfuserRecipe> {
         val time = json.getInt("time")
         val result = ItemUtils.getItemBuilder(json.getString("result")).get()
         
-        return FluidInfuserRecipe(getRecipeKey(file), mode, fluidType, fluidAmount, input, result, time)
+        return FluidInfuserRecipe(getRecipeId(file), mode, fluidType, fluidAmount, input, result, time)
     }
     
 }
@@ -67,7 +68,7 @@ object ElectricBrewingStandRecipeDeserializer : RecipeDeserializer<ElectricBrewi
         val maxAmplifierLevel = json.getIntOrNull("max_amplifier_level") ?: 0
         
         return ElectricBrewingStandRecipe(
-            getRecipeKey(file),
+            getRecipeId(file),
             inputs, result,
             defaultTime,
             redstoneMultiplier, glowstoneMultiplier,
@@ -79,8 +80,8 @@ object ElectricBrewingStandRecipeDeserializer : RecipeDeserializer<ElectricBrewi
 
 object CrystallizerRecipeDeserializer : ConversionRecipeDeserializer<CrystallizerRecipe>() {
     
-    override fun createRecipe(json: JsonObject, key: NamespacedKey, input: RecipeChoice, result: ItemStack, time: Int): CrystallizerRecipe {
-        return CrystallizerRecipe(key, input, result, time)
+    override fun createRecipe(json: JsonObject, id: ResourceLocation, input: RecipeChoice, result: ItemStack, time: Int): CrystallizerRecipe {
+        return CrystallizerRecipe(id, input, result, time)
     }
     
 }

@@ -117,7 +117,7 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     override fun saveData() {
         super.saveData()
         storeData("pulverizerTime", timeLeft)
-        storeData("currentRecipe", currentRecipe?.key)
+        storeData("currentRecipe", currentRecipe?.id)
     }
     
     @TileEntityMenuClass

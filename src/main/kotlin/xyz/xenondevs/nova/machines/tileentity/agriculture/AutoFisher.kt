@@ -3,8 +3,7 @@ package xyz.xenondevs.nova.machines.tileentity.agriculture
 import net.md_5.bungee.api.chat.TranslatableComponent
 import net.minecraft.world.entity.projectile.FishingHook
 import net.minecraft.world.level.storage.loot.BuiltInLootTables
-import net.minecraft.world.level.storage.loot.LootContext
-import net.minecraft.world.level.storage.loot.LootTable
+import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.Vec3
@@ -40,6 +39,7 @@ import xyz.xenondevs.nova.util.nmsCopy
 import xyz.xenondevs.nova.util.serverLevel
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
 import xyz.xenondevs.simpleupgrades.registry.UpgradeTypes
+import net.minecraft.world.item.ItemStack as MojangStack
 
 private val MAX_ENERGY = configReloadable { NovaConfig[AUTO_FISHER].getLong("capacity") }
 private val ENERGY_PER_TICK = configReloadable { NovaConfig[AUTO_FISHER].getLong("energy_per_tick") }
@@ -102,18 +102,15 @@ class AutoFisher(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         // fishing location affects the loot table
         val fakeFishingHook = FishingHook(fakePlayer, level, luck, 0)
         
-        val contextBuilder = LootContext.Builder(level)
+        val params = LootParams.Builder(level)
             .withParameter(LootContextParams.ORIGIN, position)
             .withParameter(LootContextParams.TOOL, rodItem.nmsCopy)
             .withParameter(LootContextParams.THIS_ENTITY, fakeFishingHook)
-            .withRandom(level.random)
             .withLuck(luck.toFloat())
+            .create(LootContextParamSets.FISHING)
         
-        val lootTable: LootTable = MINECRAFT_SERVER.lootTables.get(BuiltInLootTables.FISHING)
-        val list = lootTable.getRandomItems(contextBuilder.create(LootContextParamSets.FISHING))
-        
-        list.stream()
-            .map { it.bukkitMirror }
+        MINECRAFT_SERVER.lootData.getLootTable(BuiltInLootTables.FISHING).getRandomItems(params).asSequence()
+            .map(MojangStack::bukkitMirror)
             .forEach {
                 val leftover = inventory.addItem(SELF_UPDATE_REASON, it)
                 if (GlobalValues.DROP_EXCESS_ON_GROUND && leftover != 0) {

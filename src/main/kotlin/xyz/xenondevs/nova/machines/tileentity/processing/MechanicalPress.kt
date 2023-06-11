@@ -119,7 +119,7 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         super.saveData()
         storeData("pressType", type)
         storeData("pressTime", timeLeft)
-        storeData("currentRecipe", currentRecipe?.key)
+        storeData("currentRecipe", currentRecipe?.id)
     }
     
     
