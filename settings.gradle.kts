@@ -3,7 +3,7 @@ rootProject.name = "machines"
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            version("nova", "0.14-SNAPSHOT")
+            version("nova", "0.14-alpha.1")
             version("spigot", "1.20-R0.1-SNAPSHOT")
             version("kotlin", "1.8.20")
             
