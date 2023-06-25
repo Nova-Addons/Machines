@@ -75,8 +75,8 @@ class CobblestoneGenerator(blockState: NovaTileEntityState) : NetworkedTileEntit
     private var currentMode = mode
     private var mbUsed = 0L
     
-    private val waterLevel = FakeItemDisplay(centerLocation) { _, data -> data.itemDisplay = ItemDisplayContext.HEAD }
-    private val lavaLevel = FakeItemDisplay(centerLocation) { _, data -> data.itemDisplay = ItemDisplayContext.HEAD; data.brightness = Brightness.FULL_BRIGHT }
+    private val waterLevel = FakeItemDisplay(location.add(.5, .5, .5)) { _, data -> data.itemDisplay = ItemDisplayContext.HEAD }
+    private val lavaLevel = FakeItemDisplay(location.add(.5, .5, .5)) { _, data -> data.itemDisplay = ItemDisplayContext.HEAD; data.brightness = Brightness.FULL_BRIGHT }
     
     private val particleEffect = particle(ParticleTypes.LARGE_SMOKE) {
         location(centerLocation.advance(getFace(BlockSide.FRONT), 0.6).apply { y += 0.6 })
