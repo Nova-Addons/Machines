@@ -1,12 +1,14 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
 import net.minecraft.core.particles.ParticleTypes
-import org.bukkit.NamespacedKey
+import net.minecraft.resources.ResourceLocation
+import xyz.xenondevs.commons.provider.mutable.map
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.nmsutils.particle.particle
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
+import xyz.xenondevs.nova.data.recipe.NovaRecipe
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
 import xyz.xenondevs.nova.machines.gui.ProgressArrowItem
@@ -46,11 +48,13 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
         outputInv to NetworkConnectionType.EXTRACT
     ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     
-    private var timeLeft = retrieveData("pulverizerTime") { 0 }
+    private var timeLeft by storedValue("pulverizerTime") { 0 }
     private var pulverizeSpeed = 0
     
-    private var currentRecipe: PulverizerRecipe? =
-        retrieveDataOrNull<NamespacedKey>("currentRecipe")?.let { RecipeManager.getRecipe(RecipeTypes.PULVERIZER, it) }
+    private var currentRecipe: PulverizerRecipe? by storedValue<ResourceLocation>("currentRecipe").map(
+        { RecipeManager.getRecipe(RecipeTypes.PULVERIZER, it) },
+        NovaRecipe::id
+    )
     
     private val particleTask = createPacketTask(listOf(
         particle(ParticleTypes.SMOKE) {
@@ -112,12 +116,6 @@ class Pulverizer(blockState: NovaTileEntityState) : NetworkedTileEntity(blockSta
     
     private fun handleOutputUpdate(event: ItemPreUpdateEvent) {
         event.isCancelled = !event.isRemove && event.updateReason != SELF_UPDATE_REASON
-    }
-    
-    override fun saveData() {
-        super.saveData()
-        storeData("pulverizerTime", timeLeft)
-        storeData("currentRecipe", currentRecipe?.id)
     }
     
     @TileEntityMenuClass

@@ -1,10 +1,11 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
-import org.bukkit.NamespacedKey
+import net.minecraft.resources.ResourceLocation
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
+import xyz.xenondevs.commons.provider.mutable.map
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.inventory.event.ItemPreUpdateEvent
 import xyz.xenondevs.invui.item.Item
@@ -13,6 +14,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem
 import xyz.xenondevs.nova.data.config.NovaConfig
 import xyz.xenondevs.nova.data.config.configReloadable
 import xyz.xenondevs.nova.data.recipe.ConversionNovaRecipe
+import xyz.xenondevs.nova.data.recipe.NovaRecipe
 import xyz.xenondevs.nova.data.recipe.RecipeManager
 import xyz.xenondevs.nova.data.recipe.RecipeType
 import xyz.xenondevs.nova.data.world.block.state.NovaTileEntityState
@@ -56,12 +58,14 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         outputInv to NetworkConnectionType.EXTRACT
     ) { createSideConfig(NetworkConnectionType.BUFFER, FRONT) }
     
-    private var type: PressType = retrieveData("pressType") { PressType.PLATE }
-    private var timeLeft: Int = retrieveData("pressTime") { 0 }
+    private var type by storedValue("pressType") { PressType.PLATE }
+    private var timeLeft by storedValue("pressTime") { 0 }
     private var pressSpeed = 0
     
-    private var currentRecipe: ConversionNovaRecipe? =
-        retrieveDataOrNull<NamespacedKey>("currentRecipe")?.let { RecipeManager.getRecipe(type.recipeType, it) }
+    private var currentRecipe: ConversionNovaRecipe? by storedValue<ResourceLocation>("currentRecipe").map(
+        { RecipeManager.getRecipe(type.recipeType, it) },
+        NovaRecipe::id
+    )
     
     init {
         reload()
@@ -117,8 +121,6 @@ class MechanicalPress(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
     
     override fun saveData() {
         super.saveData()
-        storeData("pressType", type)
-        storeData("pressTime", timeLeft)
         storeData("currentRecipe", currentRecipe?.id)
     }
     

@@ -1,10 +1,9 @@
 package xyz.xenondevs.nova.machines.tileentity.processing
 
-
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.SimpleContainer
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.item.crafting.SmeltingRecipe
-import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.inventory.ItemStack
 import xyz.xenondevs.commons.provider.mutable.map
@@ -30,9 +29,7 @@ import xyz.xenondevs.nova.util.MINECRAFT_SERVER
 import xyz.xenondevs.nova.util.NMSUtils.REGISTRY_ACCESS
 import xyz.xenondevs.nova.util.bukkitCopy
 import xyz.xenondevs.nova.util.intValue
-import xyz.xenondevs.nova.util.namespacedKey
 import xyz.xenondevs.nova.util.nmsCopy
-import xyz.xenondevs.nova.util.resourceLocation
 import xyz.xenondevs.nova.util.serverLevel
 import xyz.xenondevs.nova.util.spawnExpOrb
 import xyz.xenondevs.simpleupgrades.ConsumerEnergyHolder
@@ -60,9 +57,9 @@ class ElectricFurnace(blockState: NovaTileEntityState) : NetworkedTileEntity(blo
         outputInventory to NetworkConnectionType.EXTRACT
     ) { createSideConfig(NetworkConnectionType.BUFFER, BlockSide.FRONT) }
     
-    private var currentRecipe: SmeltingRecipe? by storedValue<NamespacedKey>("currentRecipe").map(
-        { MINECRAFT_SERVER.recipeManager.byKey(it.resourceLocation).orElse(null) as? SmeltingRecipe },
-        { it.id.namespacedKey }
+    private var currentRecipe: SmeltingRecipe? by storedValue<ResourceLocation>("currentRecipe").map(
+        { MINECRAFT_SERVER.recipeManager.byKey(it).orElse(null) as? SmeltingRecipe },
+        SmeltingRecipe::getId
     )
     private var timeCooked: Int by storedValue("timeCooked") { 0 }
     private var experience: Float by storedValue("experience") { 0f }
